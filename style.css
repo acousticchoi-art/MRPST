@@ -1,1 +1,79 @@
-/* Add styles here */
+
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background-color: #003366;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    margin: 0 1rem;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+main {
+    padding: 1rem;
+}
+
+#hero {
+    background: url('https://placehold.co/1200x400') no-repeat center center/cover;
+    color: white;
+    text-align: center;
+    padding: 4rem 1rem;
+}
+
+#hero h2 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+section {
+    padding: 2rem 1rem;
+    border-bottom: 1px solid #ddd;
+}
+
+section:last-of-type {
+    border-bottom: none;
+}
+
+h3 {
+    color: #003366;
+    font-size: 1.5rem;
+}
+
+.btn {
+    display: inline-block;
+    background-color: #003366;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 1rem;
+}
+
+footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #333;
+    color: white;
+}

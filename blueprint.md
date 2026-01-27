@@ -20,45 +20,29 @@ The styling is basic and lacks modern design features. The JavaScript file is em
 ## Redesign Plan
 
 ### Phase 1: Visual and Structural Overhaul
-
-#### HTML Structure
-- Review and improve semantic HTML.
-- Add a container div to wrap the main content for better layout control.
-
-#### CSS Modernization
-- **Color Palette:** Introduce a modern color scheme using CSS variables.
-  - Primary: `#0A2540` (Oxford Blue)
-  - Secondary: `#425466` (Payne's Gray)
-  - Accent: `#007BFF` (A vibrant blue for interactive elements)
-  - Text: `#F0F0F0` (Light gray for text on dark backgrounds)
-  - Background: A subtle noise texture over a dark gradient.
-- **Typography:**
-  - Use a modern, readable font from Google Fonts (e.g., 'Poppins').
-  - Establish a clear type scale for headings and paragraphs.
-- **Layout:**
-  - Use Flexbox and Grid for responsive layouts.
-  - Make the design mobile-first.
-- **Effects & Animations:**
-  - Add a subtle background texture.
-  - Add a "glow" effect to buttons and links on hover.
-  - Implement smooth transitions for hover effects.
-  - Add a subtle box-shadow to cards/sections to create depth.
-
+...
 #### JavaScript Interactivity
 - Implement smooth scrolling for navigation links.
 - Add a simple "fade-in" on scroll animation for sections.
+
+### Phase 1.5: Application Form
+- **Goal:** Add an application form using Formspree.
+- **Steps:**
+  1. Add a new "Apply" section to `index.html`.
+  2. Create a form with fields for Name, Email, and Message.
+  3. Configure the form to submit to a placeholder Formspree URL.
+  4. Style the form to match the website's design.
+  5. **Note:** The user must replace the placeholder Formspree endpoint in `index.html` for the form to work.
 
 ### Phase 2: Advanced Features (Future)
 - Convert repeating UI patterns into Web Components.
 - Add a dynamic news/events section powered by a simple JSON file or Firebase.
 - Explore 3D elements with Three.js for a more immersive experience.
-- Add a contact form with validation.
 
-## Current Task: Phase 1 Implementation
+## Current Task: Phase 1.5 Implementation
 
-- **Goal:** Implement the visual and structural overhaul described in Phase 1.
+- **Goal:** Add an application form using Formspree as described in Phase 1.5.
 - **Steps:**
-  1. Update `index.html` with improved structure and link to Google Fonts.
-  2. Rewrite `style.css` with the new design, including colors, fonts, layout, and effects.
-  3. Update `main.js` to add smooth scrolling and fade-in animations.
-  4. Commit and push the changes to the repository.
+  1. Update `index.html` with the new form section.
+  2. Update `style.css` with form styling.
+  3. Commit and push the changes to the repository.

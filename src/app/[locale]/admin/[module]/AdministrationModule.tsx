@@ -15,6 +15,7 @@ export default function AdministrationModule(){
  const [selectedId,setSelectedId]=useState(""),[fullName,setFullName]=useState(""),[preferredLocale,setPreferredLocale]=useState("en"),[role,setRole]=useState("staff"),[depId,setDepId]=useState("");
  const [newDep,setNewDep]=useState({code:"",name_en:"",name_my:"",name_ko:""}),[depOpen,setDepOpen]=useState(false);
  const [createOpen,setCreateOpen]=useState(false),[newUser,setNewUser]=useState({full_name:"",email:"",password:"",preferred_locale:"en",role:"staff",department_id:""}),[newPassword,setNewPassword]=useState("");
+ const [moduleKey,setModuleKey]=useState("students"),[moduleView,setModuleView]=useState(true),[moduleManage,setModuleManage]=useState(false);
  const selected=users.find(x=>x.user_id===selectedId)||null;
  const load=useCallback(async()=>{
   if(!db){setLoading(false);setError("데이터베이스 연결을 확인해 주세요.");return;}

@@ -184,3 +184,74 @@
   .module-page-content{padding:20px 14px}
   .module-page-content h1{font-size:29px}
 }
+
+
+/* Admin shell layout hardening */
+.admin{grid-template-columns:245px minmax(0,1fr);align-items:stretch;width:100%;max-width:100%;overflow-x:clip}
+.admin-main{min-width:0;width:100%;overflow-x:clip}
+.sidebar{position:sticky;top:0;align-self:start;height:100vh;height:100dvh;min-width:0;overflow-y:auto;overscroll-behavior:contain}
+.content{width:100%;max-width:1500px;margin:0 auto;padding:clamp(18px,2.4vw,36px);min-width:0}
+.topbar{min-width:0;gap:14px;flex-wrap:wrap}
+.admin-user{display:flex;align-items:center;justify-content:flex-end;gap:12px;min-width:0;flex-wrap:wrap;font-size:12px}
+.admin-user>span{overflow-wrap:anywhere}
+.stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+.modules{grid-template-columns:repeat(3,minmax(0,1fr))}
+.stat,.module{min-width:0;overflow-wrap:anywhere}
+.module p{overflow-wrap:anywhere}
+.module-page{width:100%;min-width:0;overflow-x:clip}
+.module-page-top{gap:12px;flex-wrap:wrap}
+.module-page-content{width:min(100%,1200px);max-width:1200px;padding:clamp(24px,4vw,56px) clamp(16px,3vw,36px);min-width:0}
+.module-page-content>*{min-width:0}
+.module-page-content>div{max-width:100%}
+.finance-table-wrap,.student-table-wrap,.settings-table-wrap,.academics-table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.finance-panel,.student-workspace,.settings-workspace,.academics-workspace{min-width:0;max-width:100%}
+.finance-form-grid,.student-form-grid,.settings-form-grid,.academics-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+input,select,textarea,button{max-width:100%}
+@media(max-width:1100px){
+ .admin{grid-template-columns:210px minmax(0,1fr)}
+ .sidebar{padding:20px 12px}
+ .content{padding:22px}
+ .modules{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .stats{gap:10px}
+}
+@media(max-width:800px){
+ .admin{grid-template-columns:180px minmax(0,1fr)}
+ .sidebar{padding:16px 10px}
+ .topbar{height:auto;min-height:64px;padding:14px 18px}
+ .admin-user{justify-content:flex-start}
+ .content{padding:18px}
+ .modules{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:650px){
+ .admin{display:block;min-height:100vh}
+ .sidebar{position:relative;top:auto;height:auto;min-height:0;display:flex;align-items:center;gap:6px;padding:12px 14px;overflow-x:auto;overflow-y:hidden;white-space:nowrap}
+ .sidebar .brand{flex:0 0 auto;margin:0 12px 0 0;gap:8px}
+ .sidebar .brand .mark{width:34px;height:34px;font-size:20px}
+ .sidebar .brand small{font-size:8px}
+ .side-label{display:none}
+ .side-link{display:inline-flex;align-items:center;flex:0 0 auto;margin:0;padding:9px 11px;font-size:12px}
+ .topbar{align-items:flex-start;flex-direction:column;gap:9px;padding:13px 16px}
+ .topbar>strong{font-size:12px}
+ .admin-user{width:100%;justify-content:flex-start;gap:10px;font-size:11px}
+ .content{padding:20px 14px}
+ .admin-heading{font-size:29px;line-height:1.2}
+ .module-heading{gap:10px;flex-wrap:wrap}
+ .modules{grid-template-columns:minmax(0,1fr);gap:10px}
+ .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .stat,.module{padding:15px}
+ .module-page-top{height:auto;min-height:58px;padding:12px 16px}
+ .module-page-content{padding:28px 14px}
+ .module-page-content h1{font-size:30px;line-height:1.2}
+ .finance-form-grid,.student-form-grid,.settings-form-grid,.academics-form-grid{grid-template-columns:minmax(0,1fr)}
+ .finance-form-grid .wide,.student-form-grid .full,.settings-form-grid .full,.academics-form-grid .full{grid-column:auto}
+ .student-layout,.academics-faculty-layout{grid-template-columns:minmax(0,1fr)}
+ .student-roster-list{max-height:260px}
+ .student-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .settings-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:380px){
+ .stats{grid-template-columns:minmax(0,1fr)}
+ .admin-user{align-items:flex-start;flex-direction:column}
+ .student-summary-grid,.settings-stats{grid-template-columns:minmax(0,1fr)}
+}

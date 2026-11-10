@@ -1,6 +1,6 @@
 export type MrpstRole="super_admin"|"administrator"|"finance_officer"|"academic_officer"|"student_officer"|"librarian"|"facility_manager"|"faculty"|"staff";
 export type ModuleKey="finance"|"students"|"academics"|"facilities"|"library"|"meetings"|"administration"|"website";
-export const MODULES:Record<ModuleKey,{title:string;description:string;roles:M[rpstRole][]}> = {
+export const MODULES:Record<ModuleKey,{title:string;description:string;roles:M[]}> = {
  finance:{title:"Financial Management",description:"General finance, special funds, scholarship fund, budgets and approvals.",roles:["super_admin","administrator","finance_officer"]},
  students:{title:"Student Management",description:"Student profiles, academic records and student scholarships.",roles:["super_admin","administrator","student_officer","academic_officer"]},
  academics:{title:"Academic Management",description:"Departments, courses, semesters, class schedules and academic results.",roles:["super_admin","administrator","academic_officer","faculty"]},

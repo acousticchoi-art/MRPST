@@ -2,11 +2,12 @@
 alter table public.academic_timetable_slots
  add column if not exists instructor_id uuid references public.academic_instructors(id) on delete set null;
 create index if not exists academic_timetable_instructor_idx on public.academic_timetable_slots(term_id,instructor_id,day_of_week,start_time);
--- Backfill only unambiguous exact-name matches to avoid assigning the wrong person.
+-- Backfill only unambiguous exact-name matches that are also assigned to that course and term.
 with matches as (
- select s.id,min(i.id::text)::uuid as instructor_id,count(i.id) as match_count
+ select s.id,min(i.id::text)::uuid as instructor_id,count(distinct i.id) as match_count
  from public.academic_timetable_slots s
  join public.academic_instructors i on lower(trim(i.full_name))=lower(trim(s.instructor)) and i.is_active
+ join public.academic_teaching_assignments a on a.term_id=s.term_id and a.course_id=s.course_id and a.instructor_id=i.id
  where s.instructor_id is null and nullif(trim(s.instructor),'') is not null
  group by s.id
 )

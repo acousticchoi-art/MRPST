@@ -49,7 +49,8 @@ drop trigger if exists academic_teaching_assignment_timetable_guard on public.ac
 create trigger academic_teaching_assignment_timetable_guard
  before delete or update of term_id,course_id,instructor_id on public.academic_teaching_assignments
  for each row execute function public.mrpst_guard_timetable_teaching_assignment();
-\n-- Keep linked instructor references when copying a timetable to a term that already has matching teaching assignments.
+
+-- Keep linked instructor references when copying a timetable to a term that already has matching teaching assignments.
 create or replace function public.mrpst_copy_academic_timetable(
  p_source_term_id uuid,
  p_target_term_id uuid,

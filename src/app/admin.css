@@ -310,3 +310,17 @@ input,select,textarea,button{max-width:100%}
 
 /* Admin language controls */
 .admin-language{display:inline-flex;align-items:center;gap:4px;padding:3px;border:1px solid var(--line);border-radius:7px;background:#fff;position:relative;z-index:5}.admin-language a{display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:28px;padding:0 7px;border-radius:5px;color:var(--navy);text-decoration:none;font-size:11px;font-weight:700;cursor:pointer}.admin-language a.selected{background:var(--navy);color:#fff}.module-page-tools{display:flex;align-items:center;gap:14px;position:relative;z-index:5}@media(max-width:650px){.module-page-tools{width:100%;justify-content:space-between}.admin-user{position:relative;z-index:5}.admin-language{flex-shrink:0}}
+
+/* Student lifecycle and responsive academic roster */
+.student-roster-tabs{display:flex;gap:4px;margin:10px 0;padding:3px;background:#f2f5f6;border-radius:7px;overflow-x:auto}
+.student-roster-tabs button{flex:1;white-space:nowrap;padding:8px 7px;font-size:11px}
+.student-roster-tabs button.selected{background:#fff;box-shadow:0 1px 4px #172b3c18}
+.student-profile-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.student-profile-actions button{border:1px solid var(--line);background:#fff;border-radius:6px;padding:8px 10px;color:var(--navy);font-size:11px;cursor:pointer}
+.student-profile-actions button.student-primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.student-profile-actions button:disabled{opacity:.5;cursor:not-allowed}
+.dashboard-overview{grid-template-columns:repeat(3,minmax(0,1fr))}
+.dashboard-overview .stat{display:flex;flex-direction:column;justify-content:space-between;gap:12px;text-decoration:none;color:var(--navy)}
+.dashboard-overview .stat strong{font-size:26px}
+.dashboard-overview .schedule-stat strong{font-size:13px}
+@media(max-width:650px){.dashboard-overview{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-overview .schedule-stat{grid-column:1/-1}.student-profile-actions{justify-content:flex-start}.student-roster-tabs button{font-size:10px;padding:7px 5px}}

@@ -66,6 +66,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   const supabase=await createSupabaseServerClient();
   let userEmail="";
   let roles:MrpstRole[]=[];
+  let moduleOverrides:{module_key:string;can_view:boolean}[]=[];
   let accessDenied=false;
   if(supabase){
     const {data:{user}}=await supabase.auth.getUser();
@@ -78,9 +79,10 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
     ]);
     accessDenied=Boolean(error||!roleRows?.length||profile?.is_active!==true);
     roles=(roleRows??[]).map(row=>row.role as MrpstRole);
+    moduleOverrides=overrides??[];
   }
   if(accessDenied) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>{t.denied}</h1><p className="login-intro">{t.deniedText}</p><Link className="btn secondary" href={`/${locale}`}>{t.back}</Link></section></main>;
-  const visible=Object.entries(MODULES).filter(([key])=>!supabase||canAccessModule(roles,key as keyof typeof MODULES,overrides??[]));
+  const visible=Object.entries(MODULES).filter(([key])=>!supabase||canAccessModule(roles,key as keyof typeof MODULES,moduleOverrides));
   return <div className="admin">
     <aside className="sidebar">
       <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{t.admin}</small></span></Link>

@@ -1,6 +1,6 @@
 export type MrpstRole="super_admin"|"administrator"|"finance_officer"|"academic_officer"|"student_officer"|"librarian"|"facility_manager"|"faculty"|"staff";
 export type ModuleKey="finance"|"students"|"academics"|"facilities"|"library"|"meetings"|"administration"|"website";
-export const MODULES:Record<ModuleKey,{title:string;description:string;roles:MrpstRole[]}> = {
+export const MODULES:Record<ModuleKey,{title:string;description:string;roles:M[rpstRole][]}> = {
  finance:{title:"Financial Management",description:"General finance, special funds, scholarship fund, budgets and approvals.",roles:["super_admin","administrator","finance_officer"]},
  students:{title:"Student Management",description:"Student profiles, academic records and student scholarships.",roles:["super_admin","administrator","student_officer","academic_officer"]},
  academics:{title:"Academic Management",description:"Departments, courses, semesters, class schedules and academic results.",roles:["super_admin","administrator","academic_officer","faculty"]},
@@ -10,6 +10,6 @@ export const MODULES:Record<ModuleKey,{title:string;description:string;roles:Mrp
  administration:{title:"Administration & Settings",description:"User accounts, roles, department assignments and audit history.",roles:["super_admin"]},
  website:{title:"Website CMS",description:"Public website content, institutional history, announcements and contact details.",roles:["super_admin","administrator"]}
 };
-export function canAccessModule(roles:M[],module:ModuleKey){return roles.some(role=>MODULES[module].roles.includes(role));}
+export function canAccessModule(roles:M[rpstRole][],module:ModuleKey){return roles.some(role=>MODULES[module].roles.includes(role));}
 export function getModuleKey(value:string):ModuleKey|null{return Object.prototype.hasOwnProperty.call(MODULES,value)?value as ModuleKey:null;}
-export function roleLabel(role:M){return ({super_admin:"Super Administrator",administrator:"Administrator",finance_officer:"Finance Officer",academic_officer:"Academic Officer",student_officer:"Student Officer",librarian:"Librarian",facility_manager:"Facility Manager",faculty:"Faculty",staff:"Staff"} as const)[role];}
+export function roleLabel(role:M[rpstRole]){return ({super_admin:"Super Administrator",administrator:"Administrator",finance_officer:"Finance Officer",academic_officer:"Academic Officer",student_officer:"Student Officer",librarian:"Librarian",facility_manager:"Facility Manager",faculty:"Faculty",staff:"Staff"} as const)[role];}

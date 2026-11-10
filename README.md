@@ -42,6 +42,7 @@ Never expose a Supabase service-role key in browser code or a `NEXT_PUBLIC_` var
 - Budget planning with approval and budget-versus-actual reporting.
 - Donor registry and multi-currency contribution records linked to journal entries.
 - Student profile management, academic records, scholarship history and student status tracking.
+- Library catalogue, member registry and book checkout/return circulation workflow.
 - Scholarship awards, installment disbursements and posted-payment balance tracking.
 - Admin dashboard requires an authenticated account with an assigned role and an active profile once Supabase is configured.
 
@@ -49,7 +50,7 @@ Never expose a Supabase service-role key in browser code or a `NEXT_PUBLIC_` var
 - Verify the project build and test sign-in against the actual Supabase project.
 - Add department-specific permission checks to every administrative page and database table.
 - Finish finance reports and budget export; validate scholarship workflows against live test records.
-- Extend academic operations, facilities, library, meeting records and website CMS.
+- Extend academic operations, facilities, meeting records and website CMS.
 - Replace all temporary public copy with institutionally approved facts, dates, contacts and photographs.
 
 The work is on `foundation/nextjs-migration`. The original `main` branch has not been replaced.

@@ -255,3 +255,41 @@ input,select,textarea,button{max-width:100%}
  .admin-user{align-items:flex-start;flex-direction:column}
  .student-summary-grid,.settings-stats{grid-template-columns:minmax(0,1fr)}
 }
+
+/* Member management: searchable master-detail workspace */
+.settings-refresh{border:1px solid var(--line);background:#fff;border-radius:6px;padding:8px 11px;color:var(--navy);font-size:11px;cursor:pointer}
+.settings-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 14px}
+.settings-toolbar .settings-search{margin:0;flex:1 1 260px;width:auto}
+.settings-toolbar select{border:1px solid var(--line);border-radius:6px;padding:9px 11px;background:#fff;color:var(--navy);font-size:12px}
+.settings-toolbar>span{font-size:11px;color:var(--muted);white-space:nowrap}
+.settings-member-layout{display:grid;grid-template-columns:minmax(260px,.85fr) minmax(0,1.4fr);gap:14px;align-items:stretch}
+.settings-member-list{border:1px solid var(--line);border-radius:8px;overflow:hidden;max-height:680px;overflow-y:auto}
+.settings-member-item{width:100%;display:flex;align-items:center;gap:10px;padding:12px;border:0;border-bottom:1px solid #edf0f2;background:#fff;text-align:left;cursor:pointer;color:var(--navy)}
+.settings-member-item:last-child{border-bottom:0}
+.settings-member-item:hover,.settings-member-item.selected{background:#f4f7f8}
+.settings-member-item.selected{box-shadow:inset 3px 0 var(--gold)}
+.settings-member-avatar{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:50%;background:#eaf0f3;color:var(--navy);font-weight:700}
+.settings-member-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.settings-member-copy strong{font-size:12px;overflow-wrap:anywhere}
+.settings-member-copy small{font-size:10px;color:var(--muted);overflow-wrap:anywhere}
+.settings-member-detail{min-width:0;border:1px solid var(--line);border-radius:8px;padding:17px;background:#fff}
+.settings-detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+.settings-detail-head h3{font-size:20px;margin:5px 0}
+.settings-detail-head small{font-size:10px;color:var(--muted)}
+.settings-member-detail>.settings-primary{margin-top:10px}
+.settings-detail-section{border-top:1px solid var(--line);margin-top:18px;padding-top:15px}
+.settings-detail-section h4{font-size:13px;margin:0 0 10px;display:flex;align-items:center;gap:7px}
+.settings-detail-section h4 small{font-size:10px;color:var(--muted);font-weight:400}
+.settings-role-row>span{display:flex;flex-direction:column;gap:3px}
+.settings-role-row>span small{font-size:10px;color:var(--muted)}
+.settings-member-empty{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:260px;padding:24px;text-align:center;border:1px dashed #d8e0e5;border-radius:8px;background:#fafcfd}
+.settings-member-empty strong{font-size:14px;color:var(--navy)}
+.settings-member-empty p{font-size:11px;line-height:1.7;color:var(--muted);max-width:280px}
+.settings-danger-zone{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:20px;padding:13px;border:1px solid #eadbd8;border-radius:7px;background:#fffaf9}
+.settings-danger-zone>div{display:flex;flex-direction:column;gap:4px}
+.settings-danger-zone strong{font-size:11px;color:#85453e}
+.settings-danger-zone small{font-size:10px;line-height:1.5;color:var(--muted)}
+.settings-danger-zone button{border:1px solid #d9b8b3;background:#fff;color:#91483f;border-radius:5px;padding:8px 10px;font-size:10px;white-space:nowrap;cursor:pointer}
+.settings-danger-zone button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:900px){.settings-member-layout{grid-template-columns:1fr}.settings-member-list{max-height:330px}.settings-member-detail{min-height:0}}
+@media(max-width:600px){.settings-toolbar{align-items:stretch}.settings-toolbar .settings-search{flex-basis:100%}.settings-toolbar select{flex:1}.settings-toolbar>span{align-self:center}.settings-member-detail{padding:13px}.settings-detail-head{flex-direction:column}.settings-danger-zone{align-items:flex-start;flex-direction:column}.settings-danger-zone button{width:100%}}

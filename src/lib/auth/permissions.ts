@@ -1,4 +1,4 @@
-export type MrpstRole="super_admin"|"administrator"|"finance_officer"|"academic_officer"|"student_officer"|"librarian"|"facility_manager"|"faculty"|"staff";
+export type MrpstRole="super_admin"|"administrator"|"finance_officer"|"academic_officer"|"student_officer"|"librarian"|"facility_manager"|"faculty"|"staff"|"student";
 export type ModuleKey="finance"|"students"|"academics"|"facilities"|"library"|"meetings"|"administration"|"website";
 export const MODULES:Record<ModuleKey,{title:string;description:string;roles:MrpstRole[]}> = {
  finance:{title:"Financial Management",description:"General finance, special funds, scholarship fund, budgets and approvals.",roles:["super_admin","administrator","finance_officer"]},
@@ -12,4 +12,4 @@ export const MODULES:Record<ModuleKey,{title:string;description:string;roles:Mrp
 };
 export function canAccessModule(roles:MrpstRole[],module:ModuleKey,overrides?:{module_key:string;can_view:boolean}[]){const override=overrides?.find(x=>x.module_key===module);if(override)return override.can_view;return roles.some(role=>MODULES[module].roles.includes(role));}
 export function getModuleKey(value:string):ModuleKey|null{return Object.prototype.hasOwnProperty.call(MODULES,value)?value as ModuleKey:null;}
-export function roleLabel(role:MrpstRole){return ({super_admin:"Super Administrator",administrator:"Administrator",finance_officer:"Finance Officer",academic_officer:"Academic Officer",student_officer:"Student Officer",librarian:"Librarian",facility_manager:"Facility Manager",faculty:"Faculty",staff:"Staff"} as const)[role];}
+export function roleLabel(role:MrpstRole){return ({super_admin:"Super Administrator",administrator:"Administrator",finance_officer:"Finance Officer",academic_officer:"Academic Officer",student_officer:"Student Officer",librarian:"Librarian",facility_manager:"Facility Manager",faculty:"Faculty",staff:"Staff",student:"Student"} as const)[role];}

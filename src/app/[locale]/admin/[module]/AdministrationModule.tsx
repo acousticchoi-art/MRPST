@@ -34,7 +34,7 @@ export default function AdministrationModule(){
   setLoading(false);
  },[db]);
  useEffect(()=>{void load();},[load]);
- async function run(fn:()=>Promise<any>,msg:string){
+ async function run(fn:()=>any,msg:string){
   setSaving(true);setError("");setNotice("");
   try{const r=await fn();if(r?.error)throw r.error;setNotice(msg);await load();}
   catch(e:any){setError(e?.message||"처리하지 못했습니다.");}

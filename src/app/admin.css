@@ -165,3 +165,22 @@
 .academics-workload-hours{display:flex;flex-direction:column;align-items:flex-end;gap:3px;white-space:nowrap}
 .academics-workload-hours>b{font-size:12px;color:#8a7041}
 .academics-workload-actual{font-size:10px;color:var(--muted)}
+
+
+/* Module workspace width and responsive overflow fixes */
+.module-page{width:100%;min-width:0;overflow-x:clip}
+.module-page-top{min-height:64px;height:auto;gap:12px;flex-wrap:wrap;padding:12px clamp(16px,3vw,44px)}
+.module-page-content{width:100%;max-width:1480px;margin:0 auto;padding:34px clamp(16px,3vw,40px)}
+.module-page-content>*{min-width:0}
+.module-page-content .student-workspace,
+.module-page-content .finance-workspace,
+.module-page-content .academics-workspace,
+.module-page-content .settings-workspace{width:100%;min-width:0}
+@media(max-width:900px){
+  .module-page-content{padding:26px 20px}
+}
+@media(max-width:650px){
+  .module-page-top{align-items:flex-start;flex-direction:column;justify-content:center;padding:12px 16px;font-size:11px}
+  .module-page-content{padding:20px 14px}
+  .module-page-content h1{font-size:29px}
+}

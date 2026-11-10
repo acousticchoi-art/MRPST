@@ -95,3 +95,20 @@
  .module-page-top{height:auto;min-height:70px;gap:10px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
  .module-page-tools{gap:9px;flex-wrap:wrap;justify-content:flex-end}
 }
+
+
+/* School history timeline */
+.history-timeline{width:min(900px,100%);margin:48px auto 0;display:grid;gap:0}
+.history-item{display:grid;grid-template-columns:170px minmax(0,1fr);gap:28px;position:relative;padding:0 0 34px 24px;border-left:2px solid #dbe4e8;margin-left:170px}
+.history-item:last-child{padding-bottom:0;border-left-color:transparent}
+.history-item:before{content:"";position:absolute;left:-7px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 5px #f6f1e7}
+.history-year{position:absolute;right:calc(100% + 28px);top:0;width:170px;text-align:right;color:var(--navy);font-size:14px;font-weight:750;line-height:1.5}
+.history-copy h3{margin:0 0 8px;color:var(--navy);font-size:17px;line-height:1.5}
+.history-copy p{margin:0;color:var(--muted);font-size:14px;line-height:1.9}
+@media(max-width:650px){
+ .history-timeline{margin-top:34px}
+ .history-item{grid-template-columns:1fr;margin-left:8px;padding:0 0 28px 22px;gap:5px}
+ .history-year{position:static;width:auto;text-align:left;font-size:13px;color:var(--gold)}
+ .history-copy h3{font-size:16px}
+ .history-copy p{font-size:13px;line-height:1.85}
+}

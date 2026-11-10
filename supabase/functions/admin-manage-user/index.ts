@@ -46,7 +46,7 @@ Deno.serve(async (req: Request) => {
         if (!department) return json({ error: "선택한 부서가 없거나 비활성 상태입니다." }, 400);
       }
       const { data: created, error: createError } = await admin.auth.admin.createUser({
-        email, password, email_confirm: true, user_metadata: { full_name: fullName, preferred_locale: preferredLocale },
+        email, password, email_confirm: true, app_metadata: { mrpst_admin_provisioned: true }, user_metadata: { full_name: fullName, preferred_locale: preferredLocale },
       });
       if (createError || !created.user) return json({ error: createError?.message || "계정을 생성하지 못했습니다." }, 400);
       const userId = created.user.id;

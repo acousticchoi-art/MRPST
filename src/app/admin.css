@@ -157,3 +157,7 @@
 .academics-status-inactive{background:#f2f3f5;color:#737d87}
 @media(max-width:900px){.academics-faculty-layout{grid-template-columns:1fr}}
 @media(max-width:560px){.academics-workload-list{grid-template-columns:1fr}}
+
+.academics-workload-hours{display:flex;flex-direction:column;align-items:flex-end;gap:3px;white-space:nowrap}
+.academics-workload-hours>b{font-size:12px;color:#8a7041}
+.academics-workload-actual{font-size:10px;color:var(--muted)}

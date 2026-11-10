@@ -131,16 +131,7 @@ begin
  if paid>=a.base_amount then update public.scholarship_awards set status='completed',updated_at=now() where id=target_award; end if;
 end; $$;
 
-revoke all on function public.mrpst_submit_scholarship_award(uuid) from public;
-revoke all on function public.mrpst_review_scholarship_award(uuid,boolean,text) from public;
-revoke all on function public.mrpst_create_scholarship_award(uuid,uuid,integer,text,text,char,numeric,numeric) from public;
-revoke all on function public.mrpst_create_scholarship_disbursement(uuid,integer,date,char,numeric,numeric,uuid,uuid) from public;
-revoke all on function public.mrpst_refresh_scholarship_status(uuid) from public;
-grant execute on function public.mrpst_submit_scholarship_award(uuid) to authenticated;
-grant execute on function public.mrpst_review_scholarship_award(uuid,boolean,text) to authenticated;
-grant execute on function public.mrpst_create_scholarship_award(uuid,uuid,integer,text,text,char,numeric,numeric) to authenticated;
-grant execute on function public.mrpst_create_scholarship_disbursement(uuid,integer,date,char,numeric,numeric,uuid,uuid) to authenticated;
-grant execute on function public.mrpst_refresh_scholarship_status(uuid) to authenticated;
+-- Function privileges are applied after every RPC has been created.
 
 -- Remaining award balances use only posted disbursements.
 create or replace view public.scholarship_award_balances with (security_invoker=true) as
@@ -191,3 +182,14 @@ begin
  values(new_entry,auth.uid(),'scholarship_disbursement_submitted',jsonb_build_object('award_id',p_award_id,'disbursement_id',new_disbursement,'base_amount',base));
  return new_disbursement;
 end; $$;
+
+revoke all on function public.mrpst_submit_scholarship_award(uuid) from public;
+revoke all on function public.mrpst_review_scholarship_award(uuid,boolean,text) from public;
+revoke all on function public.mrpst_create_scholarship_award(uuid,uuid,integer,text,text,char,numeric,numeric) from public;
+revoke all on function public.mrpst_create_scholarship_disbursement(uuid,integer,date,char,numeric,numeric,uuid,uuid) from public;
+revoke all on function public.mrpst_refresh_scholarship_status(uuid) from public;
+grant execute on function public.mrpst_submit_scholarship_award(uuid) to authenticated;
+grant execute on function public.mrpst_review_scholarship_award(uuid,boolean,text) to authenticated;
+grant execute on function public.mrpst_create_scholarship_award(uuid,uuid,integer,text,text,char,numeric,numeric) to authenticated;
+grant execute on function public.mrpst_create_scholarship_disbursement(uuid,integer,date,char,numeric,numeric,uuid,uuid) to authenticated;
+grant execute on function public.mrpst_refresh_scholarship_status(uuid) to authenticated;

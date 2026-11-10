@@ -83,3 +83,15 @@
  .header{padding-inline:14px}
  .header .brand small{font-size:7px;letter-spacing:.55px}
 }
+
+/* Shared locale preference controls inside administration */
+.admin-language{display:inline-flex;align-items:center;gap:3px;padding:3px;border:1px solid var(--line);border-radius:7px;background:#f8fafb}
+.admin-language a{min-width:29px;text-align:center;padding:5px 6px;border-radius:5px;color:var(--muted);font-size:10px;font-weight:750;letter-spacing:.04em}
+.admin-language a.selected{background:var(--navy);color:#fff}
+.admin-user{gap:12px}
+.module-page-tools{display:flex;align-items:center;gap:18px}
+@media(max-width:650px){
+ .admin-user{flex-wrap:wrap}
+ .module-page-top{height:auto;min-height:70px;gap:10px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
+ .module-page-tools{gap:9px;flex-wrap:wrap;justify-content:flex-end}
+}

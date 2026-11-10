@@ -82,3 +82,8 @@
 .academics-form-hint{font-size:11px;line-height:1.6;color:var(--muted);margin:10px 0}
 @media(max-width:1000px){.academics-week-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:650px){.academics-week-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.academics-filter-row{flex-wrap:wrap}.academics-filter-row select{min-width:0;flex:1}}
+
+.academics-schedule-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.academics-secondary.small{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:6px;padding:8px 11px;font-size:11px;cursor:pointer}
+.academics-secondary:disabled{opacity:.45;cursor:not-allowed}
+.academics-slot-edit{align-self:flex-start;border:0;background:transparent;color:#526b82;font-size:10px;padding:2px 0;cursor:pointer}

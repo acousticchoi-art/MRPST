@@ -41,14 +41,15 @@ Never expose a Supabase service-role key in browser code or a `NEXT_PUBLIC_` var
 - Integrated double-entry finance ledger with fund-based accounting and approval workflow.
 - Budget planning with approval and budget-versus-actual reporting.
 - Donor registry and multi-currency contribution records linked to journal entries.
-- Student registry foundation, scholarship awards, installment disbursements and posted-payment balance tracking.
+- Student profile management, academic records, scholarship history and student status tracking.
+- Scholarship awards, installment disbursements and posted-payment balance tracking.
 - Admin dashboard requires an authenticated account with an assigned role and an active profile once Supabase is configured.
 
 ## Important next steps
 - Verify the project build and test sign-in against the actual Supabase project.
 - Add department-specific permission checks to every administrative page and database table.
 - Finish finance reports and budget export; validate scholarship workflows against live test records.
-- Implement students, academics, facilities, library, meeting records and website CMS.
+- Extend academic operations, facilities, library, meeting records and website CMS.
 - Replace all temporary public copy with institutionally approved facts, dates, contacts and photographs.
 
 The work is on `foundation/nextjs-migration`. The original `main` branch has not been replaced.

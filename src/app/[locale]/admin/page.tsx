@@ -71,25 +71,16 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
     const {data:{user}}=await supabase.auth.getUser();
     if(!user) redirect(`/${locale}/login`);
     userEmail=user.email??"";
-    const [{data:roleRows,error},{data:profile}]=await Promise.all([
+    const [{data:roleRows,error},{data:profile},{data:overrides}]=await Promise.all([
       supabase.from("user_roles").select("role, department_id").eq("user_id",user.id),
-      supabase.from("user_profiles").select("is_active").eq("user_id",user.id).maybeSingle()
+      supabase.from("user_profiles").select("is_active").eq("user_id",user.id).maybeSingle(),
+      supabase.from("user_module_permissions").select("module_key,can_view").eq("user_id",user.id)
     ]);
     accessDenied=Boolean(error||!roleRows?.length||profile?.is_active!==true);
     roles=(roleRows??[]).map(row=>row.role as MrpstRole);
   }
   if(accessDenied) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>{t.denied}</h1><p className="login-intro">{t.deniedText}</p><Link className="btn secondary" href={`/${locale}`}>{t.back}</Link></section></main>;
-  let graduateCount: number | null = null;
-  let currentStudentCount: number | null = null;
-  if(supabase && !accessDenied){
-    const [{count:graduates},{count:currentStudents}]=await Promise.all([
-      supabase.from("students").select("id",{count:"exact",head:true}).eq("student_status","graduated"),
-      supabase.from("students").select("id",{count:"exact",head:true}).in("student_status",["active","leave"])
-    ]);
-    graduateCount=graduates??0;
-    currentStudentCount=currentStudents??0;
-  }
-  const visible=Object.entries(MODULES).filter(([key])=>!supabase||canAccessModule(roles,key as keyof typeof MODULES));
+  const visible=Object.entries(MODULES).filter(([key])=>!supabase||canAccessModule(roles,key as keyof typeof MODULES,overrides??[]));
   return <div className="admin">
     <aside className="sidebar">
       <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{t.admin}</small></span></Link>
@@ -106,8 +97,8 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
       <div className="content"><span className="eyebrow">{t.eyebrow}</span><h1 className="admin-heading">{t.title}</h1><p className="admin-subtitle">{t.subtitle}</p>
         {!isSupabaseConfigured&&<div className="notice">{t.preview}</div>}
         <div className="stats dashboard-overview">
-          <div className="stat"><span>{t.graduateTotal}</span><strong>{graduateCount===null?"—":graduateCount}</strong></div>
-          <div className="stat"><span>{t.currentStudents}</span><strong>{currentStudentCount===null?"—":currentStudentCount}</strong></div>
+          <div className="stat"><span>{t.graduateTotal}</span><strong>—</strong></div>
+          <div className="stat"><span>{t.currentStudents}</span><strong>—</strong></div>
           <Link className="stat schedule-stat" href={`/${locale}/admin/academics`}><span>{t.schedule}</span><strong>{t.open}</strong></Link>
         </div>
         <div className="module-heading"><h2>{t.modules}</h2><span>{visible.length}{lang==="ko"?"개 모듈 사용 가능":lang==="my"?" ကဏ္ဍ အသုံးပြုနိုင်သည်": " available modules"}</span></div>

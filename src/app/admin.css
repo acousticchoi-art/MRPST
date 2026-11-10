@@ -293,3 +293,17 @@ input,select,textarea,button{max-width:100%}
 .settings-danger-zone button:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:900px){.settings-member-layout{grid-template-columns:1fr}.settings-member-list{max-height:330px}.settings-member-detail{min-height:0}}
 @media(max-width:600px){.settings-toolbar{align-items:stretch}.settings-toolbar .settings-search{flex-basis:100%}.settings-toolbar select{flex:1}.settings-toolbar>span{align-self:center}.settings-member-detail{padding:13px}.settings-detail-head{flex-direction:column}.settings-danger-zone{align-items:flex-start;flex-direction:column}.settings-danger-zone button{width:100%}}
+
+
+/* Administrator-managed account creation and password reset */
+.settings-account-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.settings-form-hint{font-size:11px;line-height:1.65;color:var(--muted);margin:6px 0 14px}
+.settings-password-row{display:flex;gap:8px;align-items:center}
+.settings-password-row input{flex:1;min-width:0;border:1px solid var(--line);border-radius:5px;padding:10px 11px;font-size:12px;color:var(--navy);background:#fff}
+.settings-password-row button{white-space:nowrap}
+@media(max-width:600px){
+ .settings-account-actions{width:100%}
+ .settings-account-actions button{flex:1}
+ .settings-password-row{align-items:stretch;flex-direction:column}
+ .settings-password-row button{width:100%}
+}

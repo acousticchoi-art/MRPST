@@ -23,7 +23,7 @@ export default function StudentModule(){
   const [s,r,a]=await Promise.all([
    supabase.from("students").select("id,student_number,full_name,full_name_my,full_name_en,gender,date_of_birth,admission_year,program,cohort,student_status,phone,email,guardian_name,guardian_phone,notes").order("student_number"),
    supabase.from("student_academic_records").select("id,student_id,academic_year,term,course_code,course_name,credits,score,grade,remarks").order("academic_year",{ascending:false}),
-   supabase.from("scholarship_award_balances").select("award_id,student_id,academic_year,scholarship_name,base_amount,paid_amount,remaining_amount,status").order("academic_year",{ascending:false})
+   supabase.rpc("mrpst_student_scholarship_history")
   ]);
   const errors=[s.error,r.error,a.error].filter(Boolean).map(x=>x!.message);
   if(errors.length)setError(errors.join(" · "));
@@ -83,7 +83,7 @@ export default function StudentModule(){
   {recordOpen&&selected&&<div className="student-modal-backdrop"><section className="student-modal"><div className="student-modal-head"><div><span className="eyebrow">ACADEMIC RECORD</span><h3>{editingRecord?"학업 기록 수정":"학업 기록 등록"}</h3></div><button onClick={()=>setRecordOpen(false)}>×</button></div><div className="student-form-grid">
    <label>학년도 *<input type="number" min="2000" max="2200" value={record.academic_year} onChange={e=>setR("academic_year",e.target.value)}/></label><label>학기 *<select value={record.term} onChange={e=>setR("term",e.target.value)}><option>1학기</option><option>2학기</option><option>여름학기</option><option>겨울학기</option><option>집중과정</option></select></label>
    <label>과목 코드<input value={record.course_code} onChange={e=>setR("course_code",e.target.value)}/></label><label>과목명 *<input value={record.course_name} onChange={e=>setR("course_name",e.target.value)}/></label>
-   <label>학점<input type="number" min="0" step="0.5" value={record.credits} onChange={e=>setR("credits",e.target.value)}/></label><label>점수<input type="number" min="0" max="100" step="0.1" value={record.score} onChange={e=>setR("score",e.target.value)}/></label>{input("성적","grade")}{input("비고","remarks")}
+   <label>학점<input type="number" min="0" step="0.5" value={record.credits} onChange={e=>setR("credits",e.target.value)}/></label><label>점수<input type="number" min="0" max="100" step="0.1" value={record.score} onChange={e=>setR("score",e.target.value)}/></label><label>성적<input value={record.grade} onChange={e=>setR("grade",e.target.value)} placeholder="예: A, B+, Pass"/></label><label>비고<input value={record.remarks} onChange={e=>setR("remarks",e.target.value)}/></label>
   </div><div className="student-modal-actions"><button onClick={()=>setRecordOpen(false)}>취소</button><button className="student-primary" disabled={saving||!record.course_name.trim()||!Number(record.academic_year)} onClick={()=>void saveRecord()}>{saving?"저장 중…":"저장"}</button></div></section></div>}
  </div>;
 }

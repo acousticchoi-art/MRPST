@@ -58,3 +58,31 @@ drop trigger if exists students_set_updated_at on public.students;
 create trigger students_set_updated_at before update on public.students for each row execute function public.mrpst_set_updated_at();
 drop trigger if exists student_academic_records_set_updated_at on public.student_academic_records;
 create trigger student_academic_records_set_updated_at before update on public.student_academic_records for each row execute function public.mrpst_set_updated_at();
+
+
+-- A scoped security-definer read path keeps scholarship balances visible to student staff
+-- without granting them access to the underlying finance journal.
+create or replace function public.mrpst_student_scholarship_history()
+returns table(
+ award_id uuid,student_id uuid,academic_year integer,scholarship_name text,
+ base_amount numeric,paid_amount numeric,remaining_amount numeric,status text
+)
+language plpgsql stable security definer set search_path=public as $$
+begin
+ if not public.mrpst_can_view_student_records() then
+  raise exception 'Student record permission required';
+ end if;
+ return query
+ select a.id,a.student_id,a.academic_year,a.scholarship_name,a.base_amount,
+  coalesce(sum(case when j.status='posted' then d.base_amount else 0 end),0)::numeric(18,2),
+  (a.base_amount-coalesce(sum(case when j.status='posted' then d.base_amount else 0 end),0))::numeric(18,2),
+  a.status::text
+ from public.scholarship_awards a
+ left join public.scholarship_disbursements d on d.award_id=a.id
+ left join public.journal_entries j on j.id=d.journal_entry_id
+ group by a.id
+ order by a.academic_year desc,a.created_at desc;
+end;
+$$;
+revoke all on function public.mrpst_student_scholarship_history() from public;
+grant execute on function public.mrpst_student_scholarship_history() to authenticated;

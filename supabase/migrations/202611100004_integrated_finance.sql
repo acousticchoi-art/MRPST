@@ -29,13 +29,13 @@ create policy "Finance read periods" on public.finance_periods for select to aut
 create policy "Finance admin manage periods" on public.finance_periods for all to authenticated using(public.mrpst_is_active_user(auth.uid()) and (public.mrpst_has_role(auth.uid(),'super_admin') or public.mrpst_has_role(auth.uid(),'administrator'))) with check(public.mrpst_is_active_user(auth.uid()) and (public.mrpst_has_role(auth.uid(),'super_admin') or public.mrpst_has_role(auth.uid(),'administrator')));
 create policy "Finance read entries" on public.journal_entries for select to authenticated using(public.mrpst_can_manage_finance());
 create policy "Finance create entries" on public.journal_entries for insert to authenticated with check(public.mrpst_can_manage_finance() and created_by=auth.uid() and status='draft');
-create policy "Finance update entries" on public.journal_entries for update to authenticated using(public.mrpst_can_manage_finance() and status in ('draft','rejected')) with check(public.mrpst_can_manage_finance() and status in ('draft','submitted','rejected'));
+create policy "Finance update entries" on public.journal_entries for update to authenticated using(public.mrpst_can_manage_finance() and status in ('draft','rejected')) with check(public.mrpst_can_manage_finance() and status in ('draft','rejected'));
 create policy "Finance read lines" on public.journal_lines for select to authenticated using(public.mrpst_can_manage_finance());
 create policy "Finance edit lines" on public.journal_lines for all to authenticated using(public.mrpst_can_manage_finance() and exists(select 1 from public.journal_entries e where e.id=entry_id and e.status in ('draft','rejected'))) with check(public.mrpst_can_manage_finance() and exists(select 1 from public.journal_entries e where e.id=entry_id and e.status in ('draft','rejected')));
 create policy "Finance read audit" on public.finance_audit_log for select to authenticated using(public.mrpst_can_manage_finance());
 grant select,insert,update,delete on public.finance_funds,public.finance_accounts,public.finance_periods,public.journal_entries,public.journal_lines to authenticated;
 grant select on public.finance_audit_log to authenticated;
-grant usage,select on all sequences in schema public to authenticated;
+grant usage,select on sequence public.journal_entries_entry_no_seq,public.finance_audit_log_id_seq to authenticated;
 grant execute on function public.mrpst_can_manage_finance() to authenticated;
 grant execute on function public.mrpst_approve_journal(uuid) to authenticated;
 grant execute on function public.mrpst_post_journal(uuid) to authenticated;

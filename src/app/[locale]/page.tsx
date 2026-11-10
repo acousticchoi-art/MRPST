@@ -18,7 +18,6 @@ const copy = {
       ["December 2007","MRPST was established in Mingalardon, Yangon, through the united efforts of Korean missionaries, with an initial board of six members. Its founding vision was to train leaders to share the gospel among unreached communities in Myanmar."],
       ["Foundational commitments","The school set its educational direction on the inspiration of Scripture, the Westminster Confession of Faith and Presbyterian church order, with Reformed theology shaped by the Reformation and Puritan traditions."],
       ["2020","MRPST's ministry development included cooperation with Evangelia University in the United States for further theological training. The school also reported building its library collection to more than 10,000 volumes."],
-      ["2021","An administrative training program was developed to prepare graduates and staff for broader responsibilities in student care and the day-to-day work of the school."],
       ["2022","A three-year Master of Divinity (M.Div.) program taught in English was introduced alongside the four-year theology program taught in Burmese. The curriculum also included practical subjects such as music, instrumental practice, computer skills and English."],
       ["2024","A report by the MRPST Student Affairs Director described graduates serving in approximately 50 churches connected with the Myanmar Reformed Presbyterian Community Church and highlighted ongoing work in theological education, faculty development and church planting."]
     ],
@@ -42,7 +41,6 @@ const copy = {
       ["၂၀၀၇ ဒီဇင်ဘာ","ကိုရီးယားသာသနာပြုဆရာများ၏ ပူးပေါင်းကြိုးပမ်းမှုဖြင့် ရန်ကုန်မြို့ မင်္ဂလာဒုံတွင် MRPST ကို စတင်တည်ထောင်ခဲ့ပြီး အစပိုင်းတွင် အုပ်ချုပ်ရေးဘုတ်အဖွဲ့ဝင် ၆ ဦးဖြင့် စတင်ခဲ့ပါသည်။"],
       ["တည်ထောင်မှုအခြေခံမူများ","သမ္မာကျမ်းစာ၏ လှုံ့ဆော်မှု၊ Westminster ယုံကြည်ခြင်းဝန်ခံချက်နှင့် Presbyterian အသင်းတော်အုပ်ချုပ်မှုစနစ်တို့ကို အခြေခံ၍ ပြုပြင်ပြောင်းလဲရေးနှင့် Puritan ဓမ္မပညာအစဉ်အလာကို သင်ကြားရန် ရည်ရွယ်ခဲ့ပါသည်။"],
       ["၂၀၂၀","အမေရိကန်နိုင်ငံရှိ Evangelia University နှင့် ပူးပေါင်းကာ ဓမ္မပညာဆိုင်ရာ ပိုမိုမြင့်မားသော ပညာရေးကို ဆက်လက်ဖော်ဆောင်ခဲ့ပါသည်။ ထိုကာလတွင် စာကြည့်တိုက်စာအုပ်ပေါင်း ၁၀,၀၀၀ ကျော် စုဆောင်းထားနိုင်ခဲ့ကြောင်း ဖော်ပြထားပါသည်။"],
-      ["၂၀၂၁","ကျောင်းသားစောင့်ရှောက်ရေးနှင့် ကျောင်း၏ နေ့စဉ်လုပ်ငန်းများတွင် တာဝန်ယူနိုင်မည့် အုပ်ချုပ်ရေးဝန်ထမ်းများကို ပြင်ဆင်ရန် အုပ်ချုပ်ရေးဆိုင်ရာ လေ့ကျင့်ရေးအစီအစဉ်ကို စတင်ဖော်ဆောင်ခဲ့ပါသည်။"],
       ["၂၀၂၂","မြန်မာဘာသာဖြင့် သင်ကြားသော ၄ နှစ်တာ ဓမ္မပညာသင်တန်းနှင့်အတူ အင်္ဂလိပ်ဘာသာဖြင့် သင်ကြားသော ၃ နှစ်တာ Master of Divinity (M.Div.) သင်တန်းကို ဖွင့်လှစ်ခဲ့ပါသည်။ ဂီတ၊ တူရိယာလက်တွေ့၊ ကွန်ပျူတာနှင့် အင်္ဂလိပ်စာကဲ့သို့ လက်တွေ့အမှုတော်အတွက် လိုအပ်သော ဘာသာရပ်များကိုလည်း ထည့်သွင်းသင်ကြားခဲ့ပါသည်။"],
       ["၂၀၂၄","MRPST ကျောင်းသားရေးရာတာဝန်ခံ၏ အစီရင်ခံစာတွင် ကျောင်းဆင်းများသည် Myanmar Reformed Presbyterian Community Church နှင့် ဆက်စပ်သော အသင်းတော် ၅၀ ခန့်တွင် အမှုတော်ဆောင်နေကြောင်း ဖော်ပြထားပြီး ဓမ္မပညာသင်ကြားရေး၊ ဆရာအင်အားပြုစုပျိုးထောင်ရေးနှင့် အသင်းတော်တည်ထောင်ရေးလုပ်ငန်းများကို ဆက်လက်အလေးထားကြောင်း ဖော်ပြထားပါသည်။"]
     ],
@@ -66,7 +64,6 @@ const copy = {
       ["2007년 12월","한국 선교사들의 연합으로 양곤 밍글라돈(Mingalardon)에 MRPST가 개교했습니다. 초기에는 6명의 이사와 함께 학교의 기초를 세웠으며, 미얀마의 미전도 공동체에 복음을 전할 지도자를 양성하는 비전을 품었습니다."],
       ["설립 이념과 교육 방향","성경의 유기적 영감설, 웨스트민스터 신앙고백, 장로교 정치체제를 교육의 기초로 삼았습니다. 종교개혁과 청교도 전통에 기초한 개혁주의 신학을 가르치고 설교자와 전도자를 세우는 것을 핵심 방향으로 정했습니다."],
       ["2020년","미국 에반겔리아대학교(Evangelia University)와 협력하여 신학 분야의 심화 교육을 이어갔습니다. 같은 시기 학교는 1만 권 이상의 장서를 확보하며 도서관 기반을 확충했습니다."],
-      ["2021년","학교 운영과 학생 돌봄을 담당할 행정 인력을 양성하기 위해 행정 관련 교육 프로그램을 개발하고 운영하기 시작했습니다."],
       ["2022년","버마어로 진행하는 4년제 신학과 과정과 함께 영어로 진행하는 3년제 목회학 석사(M.Div.) 과정을 개설했습니다. 음악 이론과 악기 실습, 컴퓨터, 영어 등 실제 사역에 필요한 교양 교육도 교육과정에 포함했습니다."],
       ["2024년","MRPST 학생처장이 발표한 사역 보고서는 졸업생들이 미얀마개혁장로교공동체교회(MRPCC) 산하 약 50개 교회에서 사역하고 있다고 소개했습니다. 또한 신학교육과 교수 인력 양성, 교회 개척을 앞으로의 주요 과제로 제시했습니다."]
     ],

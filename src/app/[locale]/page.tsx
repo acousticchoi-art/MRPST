@@ -15,11 +15,11 @@ const copy = {
     contactTitle:"Connect with MRPST",
     historyIntro:"From its founding in Yangon to the development of theological degree programs, MRPST has continued to prepare leaders for the church in Myanmar.",
     milestones:[
-      ["December 2007","MRPST was established in Mingalardon, Yangon, through the united efforts of Korean missionaries, with an initial board of six members. Its founding vision was to train leaders to share the gospel among unreached communities in Myanmar."],
-      ["Foundational commitments","The school set its educational direction on the inspiration of Scripture, the Westminster Confession of Faith and Presbyterian church order, with Reformed theology shaped by the Reformation and Puritan traditions."],
-      ["2020","MRPST's ministry development included cooperation with Evangelia University in the United States for further theological training. The school also reported building its library collection to more than 10,000 volumes."],
-      ["2022","A three-year Master of Divinity (M.Div.) program taught in English was introduced alongside the four-year theology program taught in Burmese. The curriculum also included practical subjects such as music, instrumental practice, computer skills and English."],
-      ["2024","A report by the MRPST Student Affairs Director described graduates serving in approximately 50 churches connected with the Myanmar Reformed Presbyterian Community Church and highlighted ongoing work in theological education, faculty development and church planting."]
+      ["December 2007","MRPST was founded in Mingalardon, Yangon, through the united efforts of Korean missionaries, with an initial board of six members."],
+      ["Foundational vision","The school established its theological foundation on the authority of Scripture, the Westminster Confession of Faith and Presbyterian church order, following the Reformed tradition."],
+      ["2020","MRPST began cooperation with Evangelia University in the United States and expanded its library to more than 10,000 volumes."],
+      ["2022","A three-year Master of Divinity (M.Div.) program taught in English was introduced alongside the four-year theology program taught in Burmese."],
+      ["2024","A report by the MRPST Student Affairs Director noted that graduates were serving in approximately 50 churches connected with the Myanmar Reformed Presbyterian Community Church (MRPCC)."],
     ],
     contactText:"Contact the seminary for program information, admissions and institutional enquiries.",
     addressText:"Official address, phone number and email will be added after confirmation."
@@ -61,11 +61,11 @@ const copy = {
     contactTitle:"MRPST와 연결되세요",
     historyIntro:"양곤에서 시작된 MRPST는 미얀마 교회를 섬길 지도자를 세우기 위해 신학교육과 사역 훈련을 이어가고 있습니다.",
     milestones:[
-      ["2007년 12월","한국 선교사들의 연합으로 양곤 밍글라돈(Mingalardon)에 MRPST가 개교했습니다. 초기에는 6명의 이사와 함께 학교의 기초를 세웠으며, 미얀마의 미전도 공동체에 복음을 전할 지도자를 양성하는 비전을 품었습니다."],
-      ["설립 이념과 교육 방향","성경의 유기적 영감설, 웨스트민스터 신앙고백, 장로교 정치체제를 교육의 기초로 삼았습니다. 종교개혁과 청교도 전통에 기초한 개혁주의 신학을 가르치고 설교자와 전도자를 세우는 것을 핵심 방향으로 정했습니다."],
-      ["2020년","미국 에반겔리아대학교(Evangelia University)와 협력하여 신학 분야의 심화 교육을 이어갔습니다. 같은 시기 학교는 1만 권 이상의 장서를 확보하며 도서관 기반을 확충했습니다."],
-      ["2022년","버마어로 진행하는 4년제 신학과 과정과 함께 영어로 진행하는 3년제 목회학 석사(M.Div.) 과정을 개설했습니다. 음악 이론과 악기 실습, 컴퓨터, 영어 등 실제 사역에 필요한 교양 교육도 교육과정에 포함했습니다."],
-      ["2024년","MRPST 학생처장이 발표한 사역 보고서는 졸업생들이 미얀마개혁장로교공동체교회(MRPCC) 산하 약 50개 교회에서 사역하고 있다고 소개했습니다. 또한 신학교육과 교수 인력 양성, 교회 개척을 앞으로의 주요 과제로 제시했습니다."]
+      ["2007년 12월","한국 선교사들의 연합으로 양곤 밍글라돈(Mingalardon)에 MRPST가 설립되었습니다. 초기 이사회는 6명으로 구성되었습니다."],
+      ["설립 이념과 교육 방향","성경의 권위와 웨스트민스터 신앙고백, 장로교 정치 원리를 교육의 기초로 삼고 종교개혁과 청교도 전통에 뿌리를 둔 개혁주의 신학을 따릅니다."],
+      ["2020년","미국 에반겔리아대학교(Evangelia University)와 협력하고 도서관 장서를 1만 권 이상으로 확충했습니다."],
+      ["2022년","버마어로 진행하는 4년제 신학과 과정과 함께 영어로 진행하는 3년제 목회학 석사(M.Div.) 과정을 개설했습니다."],
+      ["2024년","MRPST 학생처장의 사역 보고서에 따르면 졸업생들은 미얀마개혁장로교공동체교회(MRPCC)와 연결된 약 50개 교회에서 사역하고 있습니다."],
     ],
     contactText:"교육과정, 입학 및 학교 관련 문의는 아래 연락처를 통해 해주시기 바랍니다.",
     addressText:"공식 주소와 전화번호, 이메일은 확인 후 안내할 예정입니다."

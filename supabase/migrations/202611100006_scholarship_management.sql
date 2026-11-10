@@ -120,35 +120,6 @@ begin
  return new_award;
 end; $$;
 
-create or replace function public.mrpst_create_scholarship_disbursement(
- p_award_id uuid,p_installment_no integer,p_paid_date date,p_currency char(3),p_amount numeric,p_exchange_rate numeric,p_cash_account uuid,p_expense_account uuid
-) returns uuid language plpgsql security definer set search_path=public as $$
-declare a public.scholarship_awards%rowtype; new_entry uuid; new_disbursement uuid; base numeric(18,2); paid numeric(18,2);
-begin
- if not public.mrpst_can_manage_finance() then raise exception 'Finance permission required'; end if;
- select * into a from public.scholarship_awards where id=p_award_id for update;
- if not found or a.status not in ('approved','completed') then raise exception 'Scholarship award must be approved'; end if;
- if a.status='completed' then raise exception 'This scholarship award is already completed'; end if;
- if p_installment_no is null or p_installment_no<=0 or p_paid_date is null then raise exception 'Installment number and payment date are required'; end if;
- if p_amount is null or p_amount<=0 or p_exchange_rate is null or p_exchange_rate<=0 then raise exception 'Amount and exchange rate must be positive'; end if;
- if p_currency is null or p_currency !~ '^[A-Z]{3}$' then raise exception 'Invalid currency'; end if;
- if not exists(select 1 from public.finance_accounts where id=p_cash_account and account_type='asset' and is_active) then raise exception 'Select an active cash/bank account'; end if;
- if not exists(select 1 from public.finance_accounts where id=p_expense_account and account_type='expense' and code='5300' and is_active) then raise exception 'Select the active scholarship expense account'; end if;
- if exists(select 1 from public.finance_periods where p_paid_date between starts_on and ends_on and is_closed) then raise exception 'The fiscal period is closed'; end if;
- base:=round(p_amount*p_exchange_rate,2);
- select coalesce(sum(d.base_amount),0) into paid from public.scholarship_disbursements d join public.journal_entries j on j.id=d.journal_entry_id where d.award_id=p_award_id and j.status='posted';
- if paid+base>a.base_amount then raise exception 'Disbursement exceeds the approved scholarship amount'; end if;
- insert into public.journal_entries(entry_date,description,reference_no,fund_id,created_by,status,submitted_by,submitted_at)
- values(p_paid_date,'장학금 지급: '||a.scholarship_name,'SCHOLARSHIP-'||a.award_number::text,a.fund_id,auth.uid(),'submitted',auth.uid(),now()) returning id into new_entry;
- insert into public.journal_lines(entry_id,line_no,account_id,description,debit,credit)
- values(new_entry,1,p_expense_account,'장학금 지급',base,0),(new_entry,2,p_cash_account,'장학금 지급',0,base);
- insert into public.scholarship_disbursements(award_id,installment_no,paid_date,original_currency,original_amount,exchange_rate,journal_entry_id,created_by)
- values(p_award_id,p_installment_no,p_paid_date,p_currency,p_amount,p_exchange_rate,new_entry,auth.uid()) returning id into new_disbursement;
- insert into public.finance_audit_log(entry_id,actor_id,action,details)
- values(new_entry,auth.uid(),'scholarship_disbursement_submitted',jsonb_build_object('award_id',p_award_id,'disbursement_id',new_disbursement,'base_amount',base));
- return new_disbursement;
-end; $$;
-
 create or replace function public.mrpst_refresh_scholarship_status(target_award uuid)
 returns void language plpgsql security definer set search_path=public as $$
 declare a public.scholarship_awards%rowtype; paid numeric(18,2);

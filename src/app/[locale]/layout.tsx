@@ -1,5 +1,6 @@
 import "../globals.css";
 import "../auth.css";
+import "../admin.css";
 import {notFound} from "next/navigation";
 const locales=["en","my","ko"];
 export function generateStaticParams(){return locales.map(locale=>({locale}));}

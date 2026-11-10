@@ -1,7 +1,6 @@
 "use client";
 import {useState,type FormEvent} from "react";
 import Link from "next/link";
-import {useRouter} from "next/navigation";
 import {createBrowserClient} from "@supabase/ssr";
 import {isSupabaseConfigured,supabaseAnonKey,supabaseUrl} from "@/lib/supabase/config";
 export default function SignupForm({locale}:{locale:string}){

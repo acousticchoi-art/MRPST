@@ -1,19 +1,2 @@
-"use client";
-import {useEffect,useState,type FormEvent} from "react";
-import Link from "next/link";
-import {useRouter} from "next/navigation";
-import {createBrowserClient} from "@supabase/ssr";
-import {isSupabaseConfigured,supabaseAnonKey,supabaseUrl} from "@/lib/supabase/config";
-
-export default function ResetPasswordForm({locale}:{locale:string}) {
-  const [password,setPassword]=useState("");
-  const [confirm,setConfirm]=useState("");
-  const [ready,setReady]=useState(false);
-  const [message,setMessage]=useState("");
-  const [error,setError]=useState("");
-  const [busy,setBusy]=useState(false);
-  const router=useRouter();
-  useEffect(()=>{let active=true;(async()=>{try{if(!isSupabaseConfigured)throw new Error("Password recovery is unavailable.");const supabase=createBrowserClient(supabaseUrl,supabaseAnonKey);const url=new URL(window.location.href);const code=url.searchParams.get("code");if(code){const {error}=await supabase.auth.exchangeCodeForSession(code);if(error)throw error;}const {data,error}=await supabase.auth.getSession();if(error)throw error;if(!data.session)throw new Error("This reset link is invalid or has expired. Request a new link.");if(active)setReady(true);}catch(e){if(active)setError(e instanceof Error?e.message:"Unable to verify reset link.");}})();return()=>{active=false;};},[]);
-  async function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();setError("");setMessage("");if(password.length<8){setError("Use at least 8 characters for your new password.");return;}if(password!==confirm){setError("The passwords do not match.");return;}setBusy(true);try{const supabase=createBrowserClient(supabaseUrl,supabaseAnonKey);const {error}=await supabase.auth.updateUser({password});if(error)throw error;setMessage("Your password has been updated. You can now sign in.");setPassword("");setConfirm("");}catch(e){setError(e instanceof Error?e.message:"Unable to update password.");}finally{setBusy(false);}}
-  return <main className="login-wrap"><section className="login-card"><Link href={`/${locale}/login`} className="brand"><span className="mark">M</span><span>MRPST<small>ADMINISTRATION PORTAL</small></span></Link><span className="eyebrow">ACCOUNT RECOVERY</span><h1>Choose a new password</h1>{ready?<form onSubmit={submit} className="login-form"><label>New password<input type="password" autoComplete="new-password" value={password} onChange={e=>setPassword(e.target.value)} minLength={8} required/></label><label>Confirm password<input type="password" autoComplete="new-password" value={confirm} onChange={e=>setConfirm(e.target.value)} minLength={8} required/></label>{error&&<p className="login-error" role="alert">{error}</p>}{message&&<p role="status">{message}</p>}<button className="btn primary login-submit" disabled={busy}>{busy?"Updating…":"Update password"}</button>{message&&<button type="button" className="btn" onClick={()=>router.replace(`/${locale}/login`)}>Go to sign in</button>}</form>:<>{error&&<p className="login-error" role="alert">{error}</p>}{!error&&<p className="login-intro">Verifying your secure reset link…</p>}<p className="login-foot"><Link href={`/${locale}/forgot-password`}>Request a new reset link</Link></p></>}</section></main>;
-}
+import ResetPasswordForm from "./ResetPasswordForm";
+export default async function ResetPasswordPage({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <ResetPasswordForm locale={locale}/>;}

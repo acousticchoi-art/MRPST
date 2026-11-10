@@ -119,3 +119,27 @@
 .academics-syllabus-weeks{border-top:1px solid var(--line);padding-top:10px;margin-top:12px;display:grid;gap:6px}
 .academics-syllabus-weeks span{font-size:11px;color:var(--navy);line-height:1.5}
 @media(max-width:760px){.academics-syllabus-list{grid-template-columns:1fr}}
+
+/* Syllabus sharing actions and dedicated PDF print sheet */
+.academics-syllabus-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.academics-syllabus-print-sheet{display:none}
+@media print{
+ body.print-syllabus *{visibility:hidden!important}
+ body.print-syllabus .academics-syllabus-print-sheet,
+ body.print-syllabus .academics-syllabus-print-sheet *{visibility:visible!important}
+ body.print-syllabus .academics-syllabus-print-sheet{display:block!important;position:absolute;inset:0 auto auto 0;width:100%;padding:0;color:#172b3c;background:#fff;font-family:Arial,"Noto Sans",sans-serif;font-size:11pt}
+ body.print-syllabus .academics-print-sheet{display:none!important}
+ body.print-syllabus .academics-syllabus-print-sheet>header{border-bottom:2px solid #263b4d;padding-bottom:14px;margin-bottom:20px}
+ body.print-syllabus .academics-syllabus-print-sheet>header>p:first-child{font-size:9pt;letter-spacing:1.5px;color:#8b754d;margin:0 0 8px}
+ body.print-syllabus .academics-syllabus-print-sheet h1{font-size:25pt;margin:0 0 10px;color:#172b3c}
+ body.print-syllabus .academics-syllabus-print-sheet h2{font-size:17pt;margin:0 0 7px}
+ body.print-syllabus .academics-syllabus-print-sheet>header>p:last-child{font-size:10pt;color:#596775;margin:0}
+ body.print-syllabus .academics-syllabus-print-sheet>section{margin:18px 0;break-inside:avoid}
+ body.print-syllabus .academics-syllabus-print-sheet>section h3{font-size:12pt;color:#263b4d;border-bottom:1px solid #d9dee2;padding-bottom:6px;margin:0 0 8px}
+ body.print-syllabus .academics-syllabus-print-sheet>section p{font-size:10pt;line-height:1.7;white-space:pre-wrap;margin:0}
+ body.print-syllabus .academics-syllabus-print-sheet table{width:100%;border-collapse:collapse;font-size:9.5pt}
+ body.print-syllabus .academics-syllabus-print-sheet th,body.print-syllabus .academics-syllabus-print-sheet td{border:1px solid #cfd5da;padding:8px;text-align:left;vertical-align:top}
+ body.print-syllabus .academics-syllabus-print-sheet th{background:#f3f4f5}
+ body.print-syllabus .academics-syllabus-print-sheet footer{border-top:1px solid #d9dee2;margin-top:28px;padding-top:9px;font-size:8pt;color:#697785;text-align:center}
+}
+@media(max-width:620px){.academics-syllabus-actions{justify-content:flex-start}.academics-syllabus-actions button{flex:1}}

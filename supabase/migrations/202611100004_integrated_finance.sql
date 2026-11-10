@@ -53,16 +53,16 @@ begin
  if not exists(select 1 from public.finance_funds where id=p_fund_id and is_active) then raise exception 'Select an active fund'; end if;
  if exists(select 1 from public.finance_periods where p_entry_date between starts_on and ends_on and is_closed) then raise exception 'The fiscal period is closed'; end if;
  if jsonb_typeof(p_lines)<>'array' then raise exception 'Journal lines must be an array'; end if;
- select count(*),coalesce(sum((x->>'debit')::numeric),0),coalesce(sum((x->>'credit')::numeric),0)
- into line_count,debit_total,credit_total from jsonb_array_elements(p_lines) x;
+ select count(*),coalesce(sum((value->>'debit')::numeric),0),coalesce(sum((value->>'credit')::numeric),0)
+ into line_count,debit_total,credit_total from jsonb_array_elements(p_lines) as items(value);
  if line_count<2 or debit_total<=0 or debit_total<>credit_total then raise exception 'At least two balanced journal lines are required'; end if;
- if exists(select 1 from jsonb_array_elements(p_lines) x where (coalesce((x->>'debit')::numeric,0)>0 and coalesce((x->>'credit')::numeric,0)>0) or (coalesce((x->>'debit')::numeric,0)=0 and coalesce((x->>'credit')::numeric,0)=0) or coalesce((x->>'debit')::numeric,0)<0 or coalesce((x->>'credit')::numeric,0)<0) then raise exception 'Each line must contain either a positive debit or credit'; end if;
- if exists(select 1 from jsonb_array_elements(p_lines) x left join public.finance_accounts a on a.id=(x->>'account_id')::uuid where a.id is null or not a.is_active) then raise exception 'An account is invalid or inactive'; end if;
+ if exists(select 1 from jsonb_array_elements(p_lines) as items(value) where (coalesce((value->>'debit')::numeric,0)>0 and coalesce((value->>'credit')::numeric,0)>0) or (coalesce((value->>'debit')::numeric,0)=0 and coalesce((value->>'credit')::numeric,0)=0) or coalesce((value->>'debit')::numeric,0)<0 or coalesce((value->>'credit')::numeric,0)<0) then raise exception 'Each line must contain either a positive debit or credit'; end if;
+ if exists(select 1 from jsonb_array_elements(p_lines) as items(value) left join public.finance_accounts a on a.id=(value->>'account_id')::uuid where a.id is null or not a.is_active) then raise exception 'An account is invalid or inactive'; end if;
  insert into public.journal_entries(entry_date,description,reference_no,fund_id,department_id,created_by,status)
  values(p_entry_date,trim(p_description),nullif(trim(p_reference_no),''),p_fund_id,p_department_id,auth.uid(),'draft') returning id into new_id;
  insert into public.journal_lines(entry_id,line_no,account_id,description,debit,credit)
- select new_id,(row_number() over())::integer,(x->>'account_id')::uuid,nullif(x->>'description',''),coalesce((x->>'debit')::numeric,0),coalesce((x->>'credit')::numeric,0)
- from jsonb_array_elements(p_lines) x;
+ select new_id,(row_number() over())::integer,(value->>'account_id')::uuid,nullif(value->>'description',''),coalesce((value->>'debit')::numeric,0),coalesce((value->>'credit')::numeric,0)
+ from jsonb_array_elements(p_lines) as items(value);
  insert into public.finance_audit_log(entry_id,actor_id,action,details) values(new_id,auth.uid(),'created',jsonb_build_object('debit_total',debit_total,'credit_total',credit_total));
  return new_id;
 end; $$;

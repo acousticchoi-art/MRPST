@@ -1,0 +1,5 @@
+import Link from "next/link";
+import {redirect} from "next/navigation";
+import {createSupabaseServerClient} from "@/lib/supabase/server";
+import RegistrationRequests from "./RegistrationRequests";
+export default async function RegistrationPage({params}:{params:Promise<{locale:string}>}){const {locale}=await params;const db=await createSupabaseServerClient();if(!db)redirect(`/${locale}/login`);const {data:{user}}=await db.auth.getUser();if(!user)redirect(`/${locale}/login`);const {data:roles}=await db.from("user_roles").select("role").eq("user_id",user.id);const {data:profile}=await db.from("user_profiles").select("is_active").eq("user_id",user.id).maybeSingle();if(profile?.is_active!==true||!roles?.some(r=>r.role==="super_admin"))redirect(`/${locale}/admin`);return <RegistrationRequests/>;}

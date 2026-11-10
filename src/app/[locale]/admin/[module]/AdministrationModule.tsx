@@ -36,8 +36,8 @@ export default function AdministrationModule(){
  useEffect(()=>{void load();},[load]);
  async function invokeAdmin(body:Record<string,unknown>){if(!db)throw new Error("데이터베이스 연결을 확인해 주세요.");const {data,error}=await db.functions.invoke("admin-manage-user",{body});if(error)throw error;if(data?.error)throw new Error(data.error);return data;}\n async function createAccount(){if(!newUser.full_name.trim()||!newUser.email.trim()||newUser.password.length<8){setError("이름, 이메일, 8자 이상의 비밀번호를 입력해 주세요.");return;}await run(()=>invokeAdmin({action:"create",...newUser,full_name:newUser.full_name.trim(),email:newUser.email.trim()}),"새 계정을 생성했습니다.");setCreateOpen(false);setNewUser({full_name:"",email:"",password:"",preferred_locale:"en",role:"staff",department_id:""});}\n async function run(fn:()=>any,msg:string){
   setSaving(true);setError("");setNotice("");
-  try{const r=await fn();if(r?.error)throw r.error;setNotice(msg);await load();}
-  catch(e:any){setError(e?.message||"처리하지 못했습니다.");}
+  try{const r=await fn();if(r?.error)throw r.error;setNotice(msg);await load();return true;}
+  catch(e:any){setError(e?.message||"처리하지 못했습니다.");return false;}
   finally{setSaving(false);}
  }
  function openUser(p:P){setSelectedId(p.user_id);setFullName(p.full_name||"");setPreferredLocale(p.preferred_locale||"en");setRole("staff");setDepId("");setNewPassword("");setNotice("");setError("");}

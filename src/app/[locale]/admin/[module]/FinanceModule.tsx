@@ -49,7 +49,6 @@ export default function FinanceModule(){
   const [m,b,d,sh,l]=await Promise.all([
    supabase.from("finance_monthly_income_expense").select("*").gte("month",reportFrom).lte("month",reportTo).order("month"),
    supabase.from("finance_fund_account_balances").select("*").order("fund_code").order("account_code"),
-   supabase.from("finance_budget_vs_actual").select("*").order("fiscal_year",{ascending:false}),
    supabase.from("finance_donor_contribution_report").select("*").gte("contribution_date",reportFrom).lte("contribution_date",reportTo).order("contribution_date",{ascending:false}),
    supabase.from("finance_scholarship_disbursement_report").select("*").gte("paid_date",reportFrom).lte("paid_date",reportTo).order("paid_date",{ascending:false}),
    supabase.from("finance_general_ledger").select("*").gte("entry_date",reportFrom).lte("entry_date",reportTo).order("entry_date").order("entry_no").range(0,4999)

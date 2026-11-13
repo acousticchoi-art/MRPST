@@ -3,6 +3,7 @@ import {notFound,redirect} from "next/navigation";
 import {createSupabaseServerClient} from "@/lib/supabase/server";
 import {MODULES,getModuleKey,canAccessModule,type MrpstRole} from "@/lib/auth/permissions";
 import AdminActions from "../AdminActions";
+import AdminMyanmarTranslator from "../AdminMyanmarTranslator";
 import FinanceModule from "./FinanceModule";
 import StudentModule from "./StudentModule";
 import LibraryModule from "./LibraryModule";
@@ -54,7 +55,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
   }
   const visible=Object.entries(MODULES).filter(([moduleKey])=>!supabase||canAccessModule(roles,moduleKey as keyof typeof MODULES,overrides));
   const moduleNames:Record<string,string>={finance:t.finance,students:t.students,academics:t.academics,facilities:t.facilities,library:t.library,meetings:t.meetings,administration:t.administration,website:t.website};
-  return <div className="admin">
+  return <><AdminMyanmarTranslator locale={locale}/><div className="admin">
     <aside className="sidebar">
       <div className="sidebar-nav">
         <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{t.admin}</small></span></Link>
@@ -87,5 +88,5 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
         <Link className="btn secondary" href={`/${locale}/admin`}>{t.back}</Link>
       </div>
     </main>
-  </div>;
+  </div></>;
 }

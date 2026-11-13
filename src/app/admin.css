@@ -648,3 +648,78 @@ input,select,textarea,button{max-width:100%}
   .sidebar-mobile-tools>a,.sidebar-mobile-tools .top-action{font-size:10px;padding:6px 8px}
   .admin-main>.content{padding-top:118px!important}
 }
+
+
+/* Unified fixed blue navigation for every admin module route */
+.admin-global-nav{
+  position:sticky;top:0;z-index:300;
+  width:100%;color:#fff;
+  background:#122f44;
+  box-shadow:0 5px 18px rgba(16,45,66,.18);
+}
+.admin-global-nav-top{
+  min-height:68px;display:flex;align-items:center;justify-content:space-between;
+  gap:20px;padding:9px clamp(16px,4vw,54px);
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+.admin-global-brand{
+  display:flex;align-items:center;gap:11px;flex:0 0 auto;
+  color:#fff;font-size:20px;font-weight:750;letter-spacing:.02em;
+}
+.admin-global-brand small{display:block;margin-top:3px;color:#9eb1bd;font-size:9px;letter-spacing:.13em}
+.admin-global-mark{
+  display:grid;place-items:center;width:42px;height:42px;border-radius:9px;
+  background:#1d425a;color:#fff;font:25px Georgia,serif;
+}
+.admin-global-tools{display:flex;align-items:center;justify-content:flex-end;gap:12px;min-width:0}
+.admin-global-tools .admin-language{
+  border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.08)
+}
+.admin-global-tools .admin-language a{min-width:52px;padding:8px 10px;color:#d8e2e8;font-size:11px}
+.admin-global-tools .admin-language a.selected{background:#fff;color:#173c55}
+.admin-global-home,.admin-global-tools .top-action{
+  display:inline-flex;align-items:center;justify-content:center;min-height:36px;
+  padding:8px 12px;border:1px solid rgba(255,255,255,.25);border-radius:6px;
+  background:transparent;color:#fff;font-size:11px;font-weight:650;white-space:nowrap;
+}
+.admin-global-home:hover,.admin-global-tools .top-action:hover{background:rgba(255,255,255,.12)}
+.admin-global-tools .top-action:disabled{opacity:.55}
+.admin-global-links{
+  display:flex;align-items:center;gap:5px;
+  padding:0 clamp(16px,4vw,54px);
+  min-height:48px;overflow-x:auto;overscroll-behavior-x:contain;
+  scrollbar-width:thin;scrollbar-color:#597284 transparent;
+}
+.admin-global-link{
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+  min-height:36px;padding:8px 13px;border-radius:7px;
+  color:#d9e3e9;font-size:13px;font-weight:550;white-space:nowrap;
+  transition:background .15s,color .15s;
+}
+.admin-global-link:hover{background:rgba(255,255,255,.1);color:#fff}
+.admin-global-link.active{background:#31546a;color:#fff;font-weight:750}
+.module-page-content{width:min(1440px,100%);max-width:1440px;margin:0 auto;padding:42px clamp(16px,4vw,54px) 64px}
+@media(max-width:760px){
+ .admin-global-nav{top:0}
+ .admin-global-nav-top{min-height:60px;padding:8px 12px;gap:8px}
+ .admin-global-brand{font-size:17px;gap:8px}
+ .admin-global-mark{width:36px;height:36px;font-size:22px}
+ .admin-global-brand small{font-size:8px}
+ .admin-global-tools{gap:6px}
+ .admin-global-tools .admin-language{gap:2px;padding:2px}
+ .admin-global-tools .admin-language a{min-width:42px;padding:7px 6px;font-size:10px}
+ .admin-global-home{display:none}
+ .admin-global-tools .top-action{min-height:32px;padding:6px 8px;font-size:10px}
+ .admin-global-links{min-height:43px;padding:0 9px;gap:3px}
+ .admin-global-link{min-height:33px;padding:7px 10px;font-size:11px}
+ .module-page-content{padding:25px 14px 48px}
+}
+@media(max-width:380px){
+ .admin-global-nav-top{padding-inline:8px}
+ .admin-global-brand{font-size:15px}
+ .admin-global-tools{gap:4px}
+ .admin-global-tools .admin-language a{min-width:38px;padding-inline:5px;font-size:9px}
+ .admin-global-tools .top-action{padding-inline:6px;font-size:9px}
+ .admin-global-links{padding-inline:6px}
+ .admin-global-link{padding-inline:8px;font-size:10px}
+}

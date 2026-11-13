@@ -112,3 +112,48 @@
  .history-copy h3{font-size:16px}
  .history-copy p{font-size:13px;line-height:1.85}
 }
+
+
+/* MRPST Design System — Modern Academic Heritage */
+:root{
+  --mrpst-navy:#173C55;
+  --mrpst-navy-deep:#102D42;
+  --mrpst-gold:#B99A61;
+  --mrpst-paper:#F4F6F8;
+  --mrpst-white:#FFFFFF;
+  --mrpst-ink:#26343D;
+  --mrpst-muted:#687782;
+  --mrpst-line:#E5EAEE;
+  --mrpst-radius-sm:8px;
+  --mrpst-radius-md:12px;
+  --mrpst-radius-lg:16px;
+  --mrpst-shadow-sm:0 2px 8px rgba(16,45,66,.05);
+  --mrpst-shadow-md:0 10px 28px rgba(16,45,66,.08);
+  --mrpst-content-width:1440px;
+}
+html{scroll-behavior:smooth}
+body{font-family:Arial,"Noto Sans Myanmar","Noto Sans KR",sans-serif;line-height:1.55}
+button,input,select,textarea{font:inherit}
+:focus-visible{outline:3px solid rgba(185,154,97,.55);outline-offset:2px}
+.stat,.module,.card,.finance-panel,.student-roster,.student-detail,.library-panel,.facility-panel{
+  border-radius:var(--mrpst-radius-md);
+  box-shadow:var(--mrpst-shadow-sm);
+}
+.stat:hover,.module:hover{box-shadow:var(--mrpst-shadow-md)}
+.admin-heading,.module-page-content h1{letter-spacing:-.025em}
+.admin .content{max-width:var(--mrpst-content-width);margin-inline:auto}
+.finance-panel{background:var(--mrpst-white);border:1px solid var(--mrpst-line);padding:22px;margin:18px 0}
+.finance-panel h3,.student-panel h4,.library-panel h3,.facility-panel h3{letter-spacing:-.01em}
+.finance-table{font-variant-numeric:tabular-nums}
+.finance-table th{position:sticky;top:0;z-index:1}
+.finance-table th,.student-table th,.library-table th,.facility-table th{background:#F4F6F8}
+.finance-form,.student-modal,.library-modal,.facility-modal{border-radius:var(--mrpst-radius-lg)}
+.finance-primary,.student-primary,.library-primary,.facility-primary,.meetings-primary,.btn.primary{
+  background:var(--mrpst-navy);border-color:var(--mrpst-navy);border-radius:var(--mrpst-radius-sm)
+}
+.finance-primary:hover,.student-primary:hover,.library-primary:hover,.facility-primary:hover,.meetings-primary:hover,.btn.primary:hover{background:var(--mrpst-navy-deep)}
+@media(max-width:650px){
+ .finance-panel{padding:15px}
+ .finance-table{font-size:12px}
+ .finance-table th,.finance-table td{padding:10px 9px}
+}

@@ -85,10 +85,12 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   const visible=Object.entries(MODULES).filter(([key])=>!supabase||canAccessModule(roles,key as keyof typeof MODULES,moduleOverrides));
   return <div className="admin">
     <aside className="sidebar">
+      <div className="sidebar-nav">
       <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{t.admin}</small></span></Link>
       <div className="side-label">WORKSPACE</div>
       <Link className="side-link active" href={`/${locale}/admin`}>{t.dashboard}</Link>
       {visible.map(([key,item])=><Link className="side-link" href={`/${locale}/admin/${key}`} key={key}>{t[key as keyof typeof t]?.[0]??item.title}</Link>)}
+      </div>
       <div className="sidebar-mobile-tools">
         <span>{userEmail||"Preview mode"}</span>
       </div></header>

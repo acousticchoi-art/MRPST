@@ -4,6 +4,7 @@ import {createSupabaseServerClient} from "@/lib/supabase/server";
 import {isSupabaseConfigured} from "@/lib/supabase/config";
 import {MODULES,canAccessModule,type MrpstRole} from "@/lib/auth/permissions";
 import AdminActions from "./AdminActions";
+import AdminMyanmarTranslator from "./AdminMyanmarTranslator";
 
 const copy = {
   en: {
@@ -83,7 +84,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   }
   if(accessDenied) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>{t.denied}</h1><p className="login-intro">{t.deniedText}</p><Link className="btn secondary" href={`/${locale}`}>{t.back}</Link></section></main>;
   const visible=Object.entries(MODULES).filter(([key])=>!supabase||canAccessModule(roles,key as keyof typeof MODULES,moduleOverrides));
-  return <div className="admin">
+  return <><AdminMyanmarTranslator locale={locale}/><div className="admin">
     <aside className="sidebar">
       <div className="sidebar-nav">
         <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{t.admin}</small></span></Link>
@@ -119,5 +120,5 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
         <div className="modules">{visible.map(([key,item])=>{const words=t[key as keyof typeof t] as readonly string[];return <Link href={`/${locale}/admin/${key}`} className="module" key={key}><strong>{words?.[0]??item.title}</strong><p>{words?.[1]??item.description}</p><span className="module-open">{t.open}</span></Link>})}</div>
       </div>
     </main>
-  </div>;
+  </div></>;
 }

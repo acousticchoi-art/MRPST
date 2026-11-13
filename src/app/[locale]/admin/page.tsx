@@ -86,13 +86,27 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   return <div className="admin">
     <aside className="sidebar">
       <div className="sidebar-nav">
-      <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{t.admin}</small></span></Link>
-      <div className="side-label">WORKSPACE</div>
-      <Link className="side-link active" href={`/${locale}/admin`}>{t.dashboard}</Link>
-      {visible.map(([key,item])=><Link className="side-link" href={`/${locale}/admin/${key}`} key={key}>{t[key as keyof typeof t]?.[0]??item.title}</Link>)}
+        <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{t.admin}</small></span></Link>
+        <div className="side-label">WORKSPACE</div>
+        <Link className="side-link active" href={`/${locale}/admin`}>{t.dashboard}</Link>
+        {visible.map(([key,item])=><Link className="side-link" href={`/${locale}/admin/${key}`} key={key}>{t[key as keyof typeof t]?.[0]??item.title}</Link>)}
       </div>
       <div className="sidebar-mobile-tools">
+        <nav className="admin-language" aria-label="Language">
+          <a className={locale==="my"?"selected":""} href="/my/admin">မြန်မာ</a><a className={locale==="ko"?"selected":""} href="/ko/admin">한국어</a>
+        </nav>
+        <Link href={`/${locale}`}>{t.view}</Link>
+        {supabase&&<AdminActions locale={locale}/>}
+      </div>
+    </aside>
+    <main className="admin-main">
+      <header className="topbar"><strong>{t.admin}</strong><div className="admin-user">
+        <nav className="admin-language" aria-label="Language">
+          <a className={locale==="my"?"selected":""} href="/my/admin">မြန်မာ</a><a className={locale==="ko"?"selected":""} href="/ko/admin">한국어</a>
+        </nav>
         <span>{userEmail||"Preview mode"}</span>
+        <Link href={`/${locale}`}>{t.view}</Link>
+        {supabase&&<AdminActions locale={locale}/>}
       </div></header>
       <div className="content"><span className="eyebrow">{t.eyebrow}</span><h1 className="admin-heading">{t.title}</h1><p className="admin-subtitle">{t.subtitle}</p>
         {!isSupabaseConfigured&&<div className="notice">{t.preview}</div>}

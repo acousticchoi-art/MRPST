@@ -76,20 +76,20 @@ const officialName = "Myanmar Reformed Presbyterian School of Theology";
 
 export default async function Home({params}:{params:Promise<{locale:string}>}) {
   const {locale}=await params;
-  const t=copy[locale as keyof typeof copy]??copy.en;
+  const t=copy[locale as keyof typeof copy]??copy.ko;
   return <>
     <header className="header">
       <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{officialName.toUpperCase()}</small></span></Link>
       <nav className="nav"><a href="#about">{t.about}</a><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><a href="#contact">{t.contact}</a></nav>
-      <div className="header-tools"><div className="langs"><Link href="/en" aria-label="English">EN</Link><Link href="/my" aria-label="Myanmar">MY</Link><Link href="/ko" aria-label="Korean">KO</Link></div><Link className="admin-link" href={`/${locale}/admin`}>Admin</Link></div>
-      <details className="mobile-menu"><summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary><nav className="mobile-nav"><a href="#about">{t.about}</a><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><a href="#contact">{t.contact}</a><Link href={`/${locale}/admin`}>Admin</Link><div className="mobile-langs"><Link href="/en">EN</Link><Link href="/my">MY</Link><Link href="/ko">KO</Link></div></nav></details>
+      <div className="header-tools"><div className="langs"><Link href="/my" aria-label="မြန်မာဘာသာ">မြန်မာ</Link><Link href="/ko" aria-label="한국어">한국어</Link></div><Link className="admin-link" href={`/${locale}/admin`}>{locale==="ko"?"관리자":"အုပ်ချုပ်ရေး"}</Link></div>
+      <details className="mobile-menu"><summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary><nav className="mobile-nav"><a href="#about">{t.about}</a><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><a href="#contact">{t.contact}</a><Link href={`/${locale}/admin`}>Admin</Link><div className="mobile-langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div></nav></details>
     </header>
     <main>
       <section className="hero"><div><span className="eyebrow">{officialName.toUpperCase()}</span><h1>{t.title}</h1><p>{t.intro}</p><div className="actions"><a className="btn primary" href="#academics">{t.academics}</a><a className="btn secondary" href="#about">{t.about}</a></div></div><div className="hero-image"/></section>
-      <section id="about" className="section"><div className="center"><span className="eyebrow">WHO WE ARE</span><h2>{t.aboutTitle}</h2><p>{t.aboutText}</p></div></section>
-      <section id="academics" className="section soft"><div className="center"><span className="eyebrow">ACADEMICS</span><h2>{t.departments}</h2></div><div className="cards"><article className="card"><span className="eyebrow">01 / THEOLOGY</span><h3>{t.theology}</h3><p>{t.theologyText}</p></article><article className="card"><span className="eyebrow">02 / EDUCATION</span><h3>{t.ece}</h3><p>{t.eceText}</p></article></div></section>
-      <section id="history" className="section"><div className="center"><span className="eyebrow">OUR STORY</span><h2>{t.history}</h2><p>{t.historyIntro}</p></div><div className="history-timeline">{t.milestones.map(([year,description],i)=><article className="history-item" key={year}><div className="history-year">{year}</div><div className="history-copy"><h3>{year}</h3><p>{description}</p></div></article>)}</div></section>
-      <section id="contact" className="section soft"><div className="contact"><div><span className="eyebrow">CONTACT</span><h2>{t.contactTitle}</h2><p>{t.contactText}</p></div><p>{t.addressText}</p></div></section>
+      <section id="about" className="section"><div className="center"><span className="eyebrow">{locale==="ko"?"학교 소개":"ကျောင်းအကြောင်း"}</span><h2>{t.aboutTitle}</h2><p>{t.aboutText}</p></div></section>
+      <section id="academics" className="section soft"><div className="center"><span className="eyebrow">{locale==="ko"?"교육과정":"ပညာရေး"}</span><h2>{t.departments}</h2></div><div className="cards"><article className="card"><span className="eyebrow">01 / THEOLOGY</span><h3>{t.theology}</h3><p>{t.theologyText}</p></article><article className="card"><span className="eyebrow">02 / EDUCATION</span><h3>{t.ece}</h3><p>{t.eceText}</p></article></div></section>
+      <section id="history" className="section"><div className="center"><span className="eyebrow">{locale==="ko"?"학교 연혁":"ကျောင်းသမိုင်း"}</span><h2>{t.history}</h2><p>{t.historyIntro}</p></div><div className="history-timeline">{t.milestones.map(([year,description],i)=><article className="history-item" key={year}><div className="history-year">{year}</div><div className="history-copy"><h3>{year}</h3><p>{description}</p></div></article>)}</div></section>
+      <section id="contact" className="section soft"><div className="contact"><div><span className="eyebrow">{locale==="ko"?"연락처":"ဆက်သွယ်ရန်"}</span><h2>{t.contactTitle}</h2><p>{t.contactText}</p></div><p>{t.addressText}</p></div></section>
     </main>
     <footer className="footer"><span>{officialName}</span><span>© {new Date().getFullYear()} MRPST</span></footer>
   </>;

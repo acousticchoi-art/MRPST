@@ -84,12 +84,63 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
       <div className="header-tools"><div className="langs"><Link href="/my" aria-label="မြန်မာဘာသာ">မြန်မာ</Link><Link href="/ko" aria-label="한국어">한국어</Link></div><Link className="admin-link" href={`/${locale}/admin`}>{locale==="ko"?"관리자":"အုပ်ချုပ်ရေး"}</Link></div>
       <details className="mobile-menu"><summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary><nav className="mobile-nav"><a href="#about">{t.about}</a><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><a href="#contact">{t.contact}</a><Link href={`/${locale}/admin`}>Admin</Link><div className="mobile-langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div></nav></details>
     </header>
-    <main>
-      <section className="hero"><div><span className="eyebrow">{officialName.toUpperCase()}</span><h1>{t.title}</h1><p>{t.intro}</p><div className="actions"><a className="btn primary" href="#academics">{t.academics}</a><a className="btn secondary" href="#about">{t.about}</a></div></div><div className="hero-image"/></section>
-      <section id="about" className="section"><div className="center"><span className="eyebrow">{locale==="ko"?"학교 소개":"ကျောင်းအကြောင်း"}</span><h2>{t.aboutTitle}</h2><p>{t.aboutText}</p></div></section>
-      <section id="academics" className="section soft"><div className="center"><span className="eyebrow">{locale==="ko"?"교육과정":"ပညာရေး"}</span><h2>{t.departments}</h2></div><div className="cards"><article className="card"><span className="eyebrow">01 / THEOLOGY</span><h3>{t.theology}</h3><p>{t.theologyText}</p></article><article className="card"><span className="eyebrow">02 / EDUCATION</span><h3>{t.ece}</h3><p>{t.eceText}</p></article></div></section>
-      <section id="history" className="section"><div className="center"><span className="eyebrow">{locale==="ko"?"학교 연혁":"ကျောင်းသမိုင်း"}</span><h2>{t.history}</h2><p>{t.historyIntro}</p></div><div className="history-timeline">{t.milestones.map(([year,description],i)=><article className="history-item" key={year}><div className="history-year">{year}</div><div className="history-copy"><h3>{year}</h3><p>{description}</p></div></article>)}</div></section>
-      <section id="contact" className="section soft"><div className="contact"><div><span className="eyebrow">{locale==="ko"?"연락처":"ဆက်သွယ်ရန်"}</span><h2>{t.contactTitle}</h2><p>{t.contactText}</p></div><p>{t.addressText}</p></div></section>
+    <main className="homepage">
+      <section className="hero hero-redesign">
+        <div className="hero-copy">
+          <span className="eyebrow">{locale==="ko"?"MYANMAR · YANGON · EST. 2007":"MYANMAR · YANGON · EST. 2007"}</span>
+          <h1>{t.title}</h1>
+          <p>{t.intro}</p>
+          <div className="actions">
+            <a className="btn primary" href="#academics">{t.academics}<span aria-hidden="true"> ↗</span></a>
+            <a className="btn secondary" href="#about">{t.about}</a>
+          </div>
+          <div className="hero-principles">
+            <span>{locale==="ko"?"성경 중심":"သမ္မာကျမ်းစာကို ဗဟိုပြုခြင်း"}</span>
+            <i />
+            <span>{locale==="ko"?"개혁주의 신학":"ပြုပြင်ပြောင်းလဲရေး ဓမ္မပညာ"}</span>
+            <i />
+            <span>{locale==="ko"?"현장 중심의 섬김":"လက်တွေ့အမှုတော်"}</span>
+          </div>
+        </div>
+        <div className="hero-visual">
+          <div className="hero-image" />
+          <div className="hero-image-caption"><span>MRPST</span><small>{locale==="ko"?"신실한 일꾼을 세우는 신학교":"သစ္စာရှိသော အမှုတော်ဆောင်များကို ပြုစုပျိုးထောင်ခြင်း"}</small></div>
+          <div className="hero-seal"><strong>MRPST</strong><span>REFORMED<br/>THEOLOGY</span></div>
+        </div>
+      </section>
+
+      <section id="about" className="section intro-section">
+        <div className="intro-heading">
+          <span className="eyebrow">{locale==="ko"?"01 — OUR FOUNDATION":"01 — OUR FOUNDATION"}</span>
+          <h2>{t.aboutTitle}</h2>
+          <div className="gold-rule" />
+          <p className="intro-note">{locale==="ko"?"말씀 위에 세우고, 믿음으로 가르치며, 삶과 사역으로 이어지는 교육":"သမ္မာကျမ်းစာပေါ်တွင် တည်ဆောက်၍ ယုံကြည်ခြင်းဖြင့် သင်ကြားကာ အသက်တာနှင့် အမှုတော်တွင် အသုံးချခြင်း"}</p>
+        </div>
+        <div className="intro-body"><p>{t.aboutText}</p><a className="text-link" href="#history">{t.history}<span aria-hidden="true"> ↗</span></a></div>
+      </section>
+
+      <section className="principles-band">
+        <div className="principle"><span>01</span><div><strong>{locale==="ko"?"성경의 권위":"သမ္မာကျမ်းစာ၏ အခွင့်အာဏာ"}</strong><p>{locale==="ko"?"모든 교육과 사역의 변하지 않는 기초":"ပညာရေးနှင့် အမှုတော်အားလုံး၏ အခြေခံ"}</p></div></div>
+        <div className="principle"><span>02</span><div><strong>{locale==="ko"?"개혁주의 신앙":"ပြုပြင်ပြောင်းလဲရေး ယုံကြည်ခြင်း"}</strong><p>{locale==="ko"?"웨스트민스터 신앙고백에 기초한 신학":"Westminster ယုံကြည်ခြင်းဝန်ခံချက်ကို အခြေခံသော ဓမ္မပညာ"}</p></div></div>
+        <div className="principle"><span>03</span><div><strong>{locale==="ko"?"교회와 지역사회":"အသင်းတော်နှင့် လူမှုအသိုင်းအဝိုင်း"}</strong><p>{locale==="ko"?"배운 진리를 삶과 현장의 섬김으로":"သင်ယူထားသော အမှန်တရားကို လက်တွေ့အသက်တာတွင် ကျင့်သုံးခြင်း"}</p></div></div>
+      </section>
+
+      <section id="academics" className="section academics-section">
+        <div className="section-heading-row"><div><span className="eyebrow">{locale==="ko"?"02 — ACADEMICS":"02 — ACADEMICS"}</span><h2>{t.departments}</h2></div><p>{locale==="ko"?"배움이 소명으로 이어지도록, 각 분야의 전문성과 기독교적 가치관을 함께 세웁니다.":"ပညာသင်ယူမှုမှ ခေါ်တော်မူခြင်းသို့ ရောက်ရှိစေရန် ပညာရပ်ဆိုင်ရာ ကျွမ်းကျင်မှုနှင့် ခရစ်ယာန်တန်ဖိုးများကို အတူတကွ ပျိုးထောင်ပါသည်။"}</p></div>
+        <div className="cards academic-cards">
+          <article className="card academic-card theology-card"><div className="academic-card-top"><span>01 / THEOLOGY</span><span className="academic-symbol">✦</span></div><div><h3>{t.theology}</h3><p>{t.theologyText}</p></div><a href="#contact" aria-label={t.theology}> <span aria-hidden="true">↗</span></a></article>
+          <article className="card academic-card education-card"><div className="academic-card-top"><span>02 / EDUCATION</span><span className="academic-symbol">✳</span></div><div><h3>{t.ece}</h3><p>{t.eceText}</p></div><a href="#contact" aria-label={t.ece}><span aria-hidden="true">↗</span></a></article>
+        </div>
+      </section>
+
+      <section id="history" className="section history-section">
+        <div className="history-intro"><span className="eyebrow">{locale==="ko"?"03 — OUR JOURNEY":"03 — OUR JOURNEY"}</span><h2>{t.history}</h2><p>{t.historyIntro}</p></div>
+        <div className="history-timeline">{t.milestones.map(([year,description],i)=><article className="history-item" key={year}><div className="history-year">{year}</div><div className="history-copy"><h3>{year}</h3><p>{description}</p></div></article>)}</div>
+      </section>
+
+      <section id="contact" className="contact-section">
+        <div className="contact"><div><span className="eyebrow">{locale==="ko"?"04 — GET IN TOUCH":"04 — GET IN TOUCH"}</span><h2>{t.contactTitle}</h2><p>{t.contactText}</p></div><div className="contact-action"><p>{t.addressText}</p><a className="btn light" href="mailto:info@mrpst.org">{locale==="ko"?"문의하기":"ဆက်သွယ်ရန်"} <span aria-hidden="true">↗</span></a></div></div>
+      </section>
     </main>
     <footer className="footer"><span>{officialName}</span><span>© {new Date().getFullYear()} MRPST</span></footer>
   </>;

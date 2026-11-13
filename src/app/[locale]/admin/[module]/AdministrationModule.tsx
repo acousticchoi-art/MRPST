@@ -6,15 +6,15 @@ type P={user_id:string;full_name:string;email:string|null;preferred_locale:strin
 type D={id:string;code:string;name_en:string;name_my:string|null;name_ko:string|null;is_active:boolean};
 const roles=["super_admin","administrator","finance_officer","academic_officer","student_officer","librarian","facility_manager","faculty","staff","student"];
 const names:Record<string,string>={super_admin:"최고 관리자",administrator:"관리자",finance_officer:"재정 담당",academic_officer:"학사 담당",student_officer:"학생 담당",librarian:"도서관 담당",facility_manager:"시설 담당",faculty:"교수",staff:"직원",student:"학생"};
-const localeNames:Record<string,string>={ko:"한국어",en:"English",my:"မြန်မာ"};
+const localeNames:Record<string,string>={ko:"한국어",my:"မြန်မာ"};
 export default function AdministrationModule(){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [users,setUsers]=useState<P[]>([]),[deps,setDeps]=useState<D[]>([]),[logs,setLogs]=useState<any[]>([]);
  const [tab,setTab]=useState("users"),[search,setSearch]=useState(""),[statusFilter,setStatusFilter]=useState("all");
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
- const [selectedId,setSelectedId]=useState(""),[fullName,setFullName]=useState(""),[preferredLocale,setPreferredLocale]=useState("en"),[role,setRole]=useState("staff"),[depId,setDepId]=useState("");
+ const [selectedId,setSelectedId]=useState(""),[fullName,setFullName]=useState(""),[preferredLocale,setPreferredLocale]=useState("ko"),[role,setRole]=useState("staff"),[depId,setDepId]=useState("");
  const [newDep,setNewDep]=useState({code:"",name_en:"",name_my:"",name_ko:""}),[depOpen,setDepOpen]=useState(false);
- const [createOpen,setCreateOpen]=useState(false),[newUser,setNewUser]=useState({full_name:"",email:"",password:"",preferred_locale:"en",role:"staff",department_id:""}),[newPassword,setNewPassword]=useState("");
+ const [createOpen,setCreateOpen]=useState(false),[newUser,setNewUser]=useState({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""}),[newPassword,setNewPassword]=useState("");
  const [moduleKey,setModuleKey]=useState("students"),[moduleView,setModuleView]=useState(true),[moduleManage,setModuleManage]=useState(false);
  const selected=users.find(x=>x.user_id===selectedId)||null;
  const load=useCallback(async()=>{
@@ -37,14 +37,14 @@ export default function AdministrationModule(){
  },[db]);
  useEffect(()=>{void load();},[load]);
  async function invokeAdmin(body:Record<string,unknown>){if(!db)throw new Error("데이터베이스 연결을 확인해 주세요.");const {data,error}=await db.functions.invoke("admin-manage-user",{body});if(error)throw error;if(data?.error)throw new Error(data.error);return data;}
- async function createAccount(){if(!newUser.full_name.trim()||!newUser.email.trim()||newUser.password.length<8){setError("이름, 이메일, 8자 이상의 비밀번호를 입력해 주세요.");return;}const ok=await run(()=>invokeAdmin({action:"create",...newUser,full_name:newUser.full_name.trim(),email:newUser.email.trim()}),"새 계정을 생성했습니다.");if(!ok)return;setCreateOpen(false);setNewUser({full_name:"",email:"",password:"",preferred_locale:"en",role:"staff",department_id:""});}
+ async function createAccount(){if(!newUser.full_name.trim()||!newUser.email.trim()||newUser.password.length<8){setError("이름, 이메일, 8자 이상의 비밀번호를 입력해 주세요.");return;}const ok=await run(()=>invokeAdmin({action:"create",...newUser,full_name:newUser.full_name.trim(),email:newUser.email.trim()}),"새 계정을 생성했습니다.");if(!ok)return;setCreateOpen(false);setNewUser({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""});}
  async function run(fn:()=>any,msg:string){
   setSaving(true);setError("");setNotice("");
   try{const r=await fn();if(r?.error)throw r.error;setNotice(msg);await load();return true;}
   catch(e:any){setError(e?.message||"처리하지 못했습니다.");return false;}
   finally{setSaving(false);}
  }
- function openUser(p:P){setSelectedId(p.user_id);setFullName(p.full_name||"");setPreferredLocale(p.preferred_locale||"en");setRole("staff");setDepId("");setNewPassword("");setNotice("");setError("");}
+ function openUser(p:P){setSelectedId(p.user_id);setFullName(p.full_name||"");setPreferredLocale(p.preferred_locale==="my"?"my":"ko");setRole("staff");setDepId("");setNewPassword("");setNotice("");setError("");}
  const filtered=users.filter(x=>{
   const text=[x.full_name,x.email||"",x.user_id,...x.roles.map(r=>names[r.role]||r.role),...x.roles.map(r=>deps.find(d=>d.id===r.department_id)?.name_ko||"")].join(" ").toLowerCase();
   return (!search||text.includes(search.toLowerCase()))&&(statusFilter==="all"||(statusFilter==="active"?x.is_active:!x.is_active));
@@ -78,7 +78,7 @@ export default function AdministrationModule(){
       <div className="settings-account-id">{selected.user_id}</div>
       <div className="settings-form-grid">
        <label>회원 이름<input value={fullName} onChange={e=>setFullName(e.target.value)}/></label>
-       <label>기본 언어<select value={preferredLocale} onChange={e=>setPreferredLocale(e.target.value)}><option value="ko">한국어</option><option value="en">English</option><option value="my">မြန်မာ</option></select></label>
+       <label>기본 언어<select value={preferredLocale} onChange={e=>setPreferredLocale(e.target.value)}><option value="ko">한국어</option><option value="my">မြန်မာ</option></select></label>
       </div>
       <button className="settings-primary" disabled={saving||!fullName.trim()} onClick={()=>void run(()=>db!.from("user_profiles").update({full_name:fullName.trim(),preferred_locale:preferredLocale}).eq("user_id",selected.user_id),"회원 정보를 저장했습니다.")}>회원 정보 저장</button>
       <div className="settings-detail-section"><h4>비밀번호 변경</h4><p className="settings-form-hint">새 비밀번호를 설정하면 기존 비밀번호는 즉시 사용할 수 없게 됩니다.</p><div className="settings-password-row"><input type="password" autoComplete="new-password" minLength={8} placeholder="새 비밀번호 (8자 이상)" value={newPassword} onChange={e=>setNewPassword(e.target.value)}/><button className="settings-primary" disabled={saving||newPassword.length<8} onClick={()=>void run(()=>invokeAdmin({action:"update_password",user_id:selected.user_id,password:newPassword}),"비밀번호를 변경했습니다.")}>비밀번호 변경</button></div></div>

@@ -139,7 +139,7 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
       </section>
 
       <section id="contact" className="contact-section">
-        <div className="contact"><div><span className="eyebrow">{locale==="ko"?"04 — GET IN TOUCH":"04 — GET IN TOUCH"}</span><h2>{t.contactTitle}</h2><p>{t.contactText}</p></div><div className="contact-action"><p>{t.addressText}</p><a className="btn light" href="mailto:info@mrpst.org">{locale==="ko"?"문의하기":"ဆက်သွယ်ရန်"} <span aria-hidden="true">↗</span></a></div></div>
+        <div className="contact"><div><span className="eyebrow">{locale==="ko"?"04 — GET IN TOUCH":"04 — GET IN TOUCH"}</span><h2>{t.contactTitle}</h2><p>{t.contactText}</p></div><div className="contact-action"><p>{t.addressText}</p><span className="btn light contact-label">{locale==="ko"?"MRPST":"MRPST"}</span></div></div>
       </section>
     </main>
     <footer className="footer"><span>{officialName}</span><span>© {new Date().getFullYear()} MRPST</span></footer>

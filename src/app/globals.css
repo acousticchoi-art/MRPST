@@ -263,3 +263,106 @@ button,a,input,select,textarea{transition-color:.16s}
  .admin-language a{min-width:0;padding:6px 8px}
  .login-card{padding:24px 20px}
 }
+
+/* MRPST public homepage — editorial academic redesign */
+.homepage{overflow:hidden}
+.hero.hero-redesign{min-height:650px;grid-template-columns:minmax(0,1.05fr) minmax(340px,.95fr);gap:clamp(34px,6vw,92px);padding:clamp(70px,8vw,118px) clamp(24px,9vw,140px);background:linear-gradient(112deg,#f3f6f7 0%,#fff 58%,#f3efe5 100%)}
+.hero-copy{position:relative;z-index:2}
+.hero-copy .eyebrow{display:inline-flex;align-items:center;gap:10px;color:#987b48;letter-spacing:.16em}
+.hero-copy .eyebrow:before{content:"";width:28px;height:1px;background:var(--gold)}
+.hero.hero-redesign h1{max-width:680px;margin:25px 0 20px;font-size:clamp(39px,5vw,66px);line-height:1.2;letter-spacing:-.055em}
+.hero.hero-redesign p{max-width:590px;font-size:16px;line-height:2.05;color:#5d6c76}
+.hero-redesign .actions{margin-top:32px;gap:13px}
+.hero-redesign .btn{min-height:49px;padding:13px 21px}
+.hero-redesign .btn.primary span{margin-left:9px;color:#d9c49c}
+.hero-principles{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:45px;color:#53636e;font-size:11px;font-weight:700;letter-spacing:.015em}
+.hero-principles i{width:3px;height:3px;border-radius:50%;background:var(--gold)}
+.hero-visual{position:relative;min-width:0;padding:0 0 28px 28px}
+.hero-visual:before{content:"";position:absolute;left:0;top:-24px;width:72%;height:72%;border:1px solid rgba(185,154,97,.55);border-radius:3px}
+.hero-visual .hero-image{position:relative;z-index:1;width:100%;height:430px;min-height:360px;border-radius:3px;background-image:linear-gradient(180deg,rgba(16,45,66,.03),rgba(16,45,66,.12)),url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1400&q=88');background-position:center;background-size:cover;box-shadow:0 24px 55px rgba(16,45,66,.16)}
+.hero-image-caption{position:absolute;z-index:2;left:48px;bottom:48px;color:#fff;display:grid;gap:5px;text-shadow:0 2px 12px rgba(0,0,0,.4)}
+.hero-image-caption span{font:700 23px Georgia,serif;letter-spacing:.12em}
+.hero-image-caption small{font-size:10px;letter-spacing:.08em}
+.hero-seal{position:absolute;z-index:3;right:-18px;top:36px;width:105px;height:105px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--navy);color:#fff;border:5px solid #fff;box-shadow:0 8px 24px rgba(16,45,66,.18);text-align:center}
+.hero-seal strong{font:700 18px Georgia,serif;letter-spacing:.06em}
+.hero-seal span{font-size:7px;line-height:1.4;letter-spacing:.12em;margin-top:4px;color:#e2d2b2}
+.intro-section{display:grid;grid-template-columns:minmax(250px,.78fr) minmax(0,1.22fr);gap:clamp(36px,8vw,120px);align-items:start;padding-top:100px;padding-bottom:100px}
+.intro-heading h2{max-width:420px;margin:20px 0 22px;font-size:clamp(30px,3.5vw,44px)}
+.gold-rule{width:48px;height:3px;background:var(--gold);margin:25px 0}
+.intro-note{max-width:320px;color:#8b7754;font-size:13px;line-height:1.9;font-weight:650}
+.intro-body{padding-top:36px}
+.intro-body>p{margin:0;color:#596a75;font-size:15px;line-height:2.15}
+.text-link{display:inline-flex;align-items:center;gap:14px;margin-top:28px;padding-bottom:8px;border-bottom:1px solid var(--gold);color:var(--navy);font-size:13px;font-weight:750}
+.principles-band{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:36px clamp(24px,9vw,140px);background:var(--deep);color:#fff}
+.principle{display:flex;align-items:flex-start;gap:18px;padding:12px 26px;border-right:1px solid rgba(255,255,255,.16)}
+.principle:first-child{padding-left:0}
+.principle:last-child{border:0;padding-right:0}
+.principle>span{font:italic 20px Georgia,serif;color:#c9ad79}
+.principle strong{display:block;font-size:15px;line-height:1.6}
+.principle p{margin:6px 0 0;color:#bdcbd3;font-size:11px;line-height:1.7}
+.academics-section{background:#f5f7f8}
+.section-heading-row{display:flex;justify-content:space-between;align-items:end;gap:40px;max-width:1120px;margin:0 auto 42px}
+.section-heading-row h2{margin:15px 0 0;font-size:clamp(32px,4vw,46px)}
+.section-heading-row>p{max-width:420px;margin:0;color:var(--muted);font-size:13px;line-height:1.9}
+.academic-cards{gap:20px}
+.academic-card{position:relative;min-height:270px;display:flex;flex-direction:column;justify-content:space-between;padding:28px 30px 25px;border:1px solid #e4e9ec;overflow:hidden}
+.academic-card:after{content:"";position:absolute;right:-54px;bottom:-92px;width:220px;height:220px;border:1px solid rgba(185,154,97,.22);border-radius:50%;box-shadow:0 0 0 22px rgba(185,154,97,.035),0 0 0 44px rgba(185,154,97,.025)}
+.theology-card{background:linear-gradient(135deg,#fff 0%,#f5f7f8 100%)}
+.education-card{background:linear-gradient(135deg,#fff 0%,#f7f3eb 100%)}
+.academic-card-top{display:flex;justify-content:space-between;align-items:center;color:#9a8051;font-size:10px;font-weight:800;letter-spacing:.14em}
+.academic-symbol{font-size:24px;color:#b99a61}
+.academic-card h3{margin:12px 0;font-size:26px}
+.academic-card p{max-width:450px;margin:0;font-size:13px;line-height:1.9}
+.academic-card>a{position:relative;z-index:2;display:grid;place-items:center;width:38px;height:38px;margin-top:18px;border:1px solid #d7dfe3;border-radius:50%;color:var(--navy);font-size:18px;transition:all .2s}
+.academic-card>a:hover{background:var(--navy);color:#fff;border-color:var(--navy);transform:translate(2px,-2px)}
+.history-section{display:grid;grid-template-columns:minmax(230px,.7fr) minmax(0,1.3fr);gap:clamp(35px,7vw,100px);align-items:start}
+.history-intro{position:sticky;top:120px}
+.history-intro h2{font-size:clamp(34px,4vw,48px);margin:18px 0}
+.history-intro>p{max-width:360px;color:var(--muted);font-size:14px;line-height:2}
+.history-section .history-timeline{margin:0;width:100%}
+.contact-section{padding:0 clamp(18px,8vw,120px) 90px;background:#fff}
+.contact-section .contact{max-width:1200px;margin:0 auto;padding:clamp(30px,5vw,58px);background:linear-gradient(120deg,#173c55,#102d42);border-radius:3px;gap:50px}
+.contact-section .contact h2{font-size:clamp(30px,4vw,44px);margin:16px 0}
+.contact-section .contact>div:first-child{max-width:580px}
+.contact-section .contact>div:first-child>p{font-size:14px;line-height:1.9}
+.contact-action{max-width:360px}
+.contact-action>p{font-size:12px;line-height:1.9;color:#c5d1d8}
+.btn.light{display:inline-flex;margin-top:12px;background:#e8dcc4;color:#243d4d;border:1px solid #e8dcc4}
+.contact-label{letter-spacing:.08em;font-size:11px}
+@media(max-width:900px){
+ .hero.hero-redesign{grid-template-columns:1fr;min-height:0;padding:70px 7%;gap:48px}
+ .hero-visual{width:min(620px,92%);margin:0 auto}
+ .hero-visual .hero-image{height:380px}
+ .intro-section,.history-section{grid-template-columns:1fr;gap:20px}
+ .intro-body{padding-top:0}
+ .history-intro{position:static}
+ .history-section .history-timeline{margin-top:20px}
+}
+@media(max-width:650px){
+ .hero.hero-redesign{padding:52px 20px 48px;gap:36px}
+ .hero.hero-redesign h1{font-size:clamp(32px,9vw,43px);line-height:1.28;margin:20px 0 15px}
+ .hero.hero-redesign p{font-size:14px;line-height:1.95}
+ .hero-principles{gap:8px;margin-top:30px;font-size:9px}
+ .hero-visual{width:calc(100% - 12px);padding:0 0 18px 12px}
+ .hero-visual:before{top:-12px;width:76%;height:70%}
+ .hero-visual .hero-image{height:270px;min-height:230px}
+ .hero-seal{width:78px;height:78px;right:-12px;top:18px;border-width:4px}
+ .hero-seal strong{font-size:14px}
+ .hero-seal span{font-size:6px}
+ .hero-image-caption{left:28px;bottom:34px}
+ .hero-image-caption span{font-size:18px}
+ .hero-image-caption small{font-size:8px}
+ .intro-section{padding-top:58px;padding-bottom:58px}
+ .intro-body>p{font-size:13px;line-height:2}
+ .principles-band{grid-template-columns:1fr;padding:16px 22px}
+ .principle,.principle:first-child,.principle:last-child{padding:18px 0;border-right:0;border-bottom:1px solid rgba(255,255,255,.14)}
+ .principle:last-child{border-bottom:0}
+ .section-heading-row{display:block;margin-bottom:28px}
+ .section-heading-row>p{margin-top:16px;font-size:12px}
+ .academic-card{min-height:235px;padding:23px}
+ .academic-card h3{font-size:22px}
+ .contact-section{padding:0 16px 56px}
+ .contact-section .contact{display:grid;gap:16px;padding:27px 22px}
+ .contact-action{max-width:none}
+ .history-section{padding-top:58px;padding-bottom:58px}
+}

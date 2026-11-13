@@ -61,7 +61,7 @@ const copy = {
 
 export default async function Admin({params}:{params:Promise<{locale:string}>}) {
   const {locale}=await params;
-  const lang=(locale in copy?locale:"en") as keyof typeof copy;
+  const lang=(locale==="my"?"my":"ko") as "my"|"ko";
   const t=copy[lang];
   const supabase=await createSupabaseServerClient();
   let userEmail="";
@@ -93,7 +93,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
     <main className="admin-main">
       <header className="topbar"><strong>{t.admin}</strong><div className="admin-user">
         <nav className="admin-language" aria-label="Language">
-          <a className={locale==="en"?"selected":""} href="/en/admin">EN</a><a className={locale==="my"?"selected":""} href="/my/admin">MY</a><a className={locale==="ko"?"selected":""} href="/ko/admin">KO</a>
+          <a className={locale==="my"?"selected":""} href="/my/admin">မြန်မာ</a><a className={locale==="ko"?"selected":""} href="/ko/admin">한국어</a>
         </nav><span>{userEmail||"Preview mode"}</span><Link href={`/${locale}`}>{t.view}</Link>{supabase&&<AdminActions locale={locale}/>}
       </div></header>
       <div className="content"><span className="eyebrow">{t.eyebrow}</span><h1 className="admin-heading">{t.title}</h1><p className="admin-subtitle">{t.subtitle}</p>

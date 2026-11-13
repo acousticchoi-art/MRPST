@@ -445,3 +445,6 @@ input,select,textarea,button{max-width:100%}
  .finance-subheading{font-size:14px}
 }
 @media(max-width:380px){.fund-grid{grid-template-columns:minmax(0,1fr)}.finance-metrics article>strong{font-size:17px}}
+
+/* Academic read-only permission notice */
+.academics-readonly-note{margin:12px 0;padding:11px 14px;border:1px solid #e8dfcb;border-left:3px solid #b99a61;border-radius:6px;background:#fbf9f4;color:#6f6046;font-size:12px;line-height:1.65}

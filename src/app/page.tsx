@@ -3,5 +3,5 @@ import {cookies} from "next/headers";
 export default async function IndexPage(){
  const jar=await cookies();
  const saved=jar.get("mrpst_locale")?.value;
- redirect(saved==="ko"||saved==="my"||saved==="en"?`/${saved}`:"/en");
+ redirect(saved==="ko"||saved==="my"?`/${saved}`:"/ko");
 }

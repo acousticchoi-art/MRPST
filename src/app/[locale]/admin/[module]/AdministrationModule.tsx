@@ -1,0 +1,100 @@
+"use client";
+import {useCallback,useEffect,useMemo,useState} from "react";
+import {createSupabaseBrowserClient} from "@/lib/supabase/client";
+type UserRole={id:string;role:string;department_id:string|null};
+type P={user_id:string;full_name:string;email:string|null;preferred_locale:string;is_active:boolean;created_at:string;roles:UserRole[]};
+type D={id:string;code:string;name_en:string;name_my:string|null;name_ko:string|null;is_active:boolean};
+const roles=["super_admin","administrator","finance_officer","academic_officer","student_officer","librarian","facility_manager","faculty","staff","student"];
+const names:Record<string,string>={super_admin:"최고 관리자",administrator:"관리자",finance_officer:"재정 담당",academic_officer:"학사 담당",student_officer:"학생 담당",librarian:"도서관 담당",facility_manager:"시설 담당",faculty:"교수",staff:"직원",student:"학생"};
+const localeNames:Record<string,string>={ko:"한국어",my:"မြန်မာ"};
+export default function AdministrationModule(){
+ const db=useMemo(()=>createSupabaseBrowserClient(),[]);
+ const [users,setUsers]=useState<P[]>([]),[deps,setDeps]=useState<D[]>([]),[logs,setLogs]=useState<any[]>([]);
+ const [tab,setTab]=useState("users"),[search,setSearch]=useState(""),[statusFilter,setStatusFilter]=useState("all");
+ const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
+ const [selectedId,setSelectedId]=useState(""),[fullName,setFullName]=useState(""),[preferredLocale,setPreferredLocale]=useState("ko"),[role,setRole]=useState("staff"),[depId,setDepId]=useState("");
+ const [newDep,setNewDep]=useState({code:"",name_en:"",name_my:"",name_ko:""}),[depOpen,setDepOpen]=useState(false);
+ const [createOpen,setCreateOpen]=useState(false),[newUser,setNewUser]=useState({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""}),[newPassword,setNewPassword]=useState("");
+ const [moduleKey,setModuleKey]=useState("students"),[moduleView,setModuleView]=useState(true),[moduleManage,setModuleManage]=useState(false);
+ const selected=users.find(x=>x.user_id===selectedId)||null;
+ const load=useCallback(async()=>{
+  if(!db){setLoading(false);setError("데이터베이스 연결을 확인해 주세요.");return;}
+  setLoading(true);setError("");
+  const [p,d,l]=await Promise.all([
+   db.from("user_profiles").select("user_id,full_name,email,preferred_locale,is_active,created_at").order("created_at",{ascending:false}),
+   db.from("departments").select("*").order("code"),
+   db.from("admin_audit_log").select("*").order("created_at",{ascending:false}).limit(100)
+  ]);
+  const errs=[p,d,l].filter(x=>x.error).map(x=>x.error!.message);
+  if(errs.length){setError(errs.join(" · "));setLoading(false);return;}
+  const rows=(p.data||[]) as Omit<P,"roles">[],ids=rows.map(x=>x.user_id);
+  let rr:UserRole[]=[];
+  if(ids.length){const r=await db.from("user_roles").select("id,user_id,role,department_id").in("user_id",ids);if(r.error){setError(r.error.message);setLoading(false);return;}rr=(r.data||[]) as UserRole[];}
+  const mapped=rows.map(x=>({...x,roles:rr.filter(y=>(y as any).user_id===x.user_id)})) as P[];
+  setUsers(mapped);setDeps((d.data||[]) as D[]);setLogs(l.data||[]);
+  setSelectedId(current=>current&&mapped.some(x=>x.user_id===current)?current:"");
+  setLoading(false);
+ },[db]);
+ useEffect(()=>{void load();},[load]);
+ async function invokeAdmin(body:Record<string,unknown>){if(!db)throw new Error("데이터베이스 연결을 확인해 주세요.");const {data,error}=await db.functions.invoke("admin-manage-user",{body});if(error)throw error;if(data?.error)throw new Error(data.error);return data;}
+ async function createAccount(){if(!newUser.full_name.trim()||!newUser.email.trim()||newUser.password.length<8){setError("이름, 이메일, 8자 이상의 비밀번호를 입력해 주세요.");return;}const ok=await run(()=>invokeAdmin({action:"create",...newUser,full_name:newUser.full_name.trim(),email:newUser.email.trim()}),"새 계정을 생성했습니다.");if(!ok)return;setCreateOpen(false);setNewUser({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""});}
+ async function run(fn:()=>any,msg:string){
+  setSaving(true);setError("");setNotice("");
+  try{const r=await fn();if(r?.error)throw r.error;setNotice(msg);await load();return true;}
+  catch(e:any){setError(e?.message||"처리하지 못했습니다.");return false;}
+  finally{setSaving(false);}
+ }
+ function openUser(p:P){setSelectedId(p.user_id);setFullName(p.full_name||"");setPreferredLocale(p.preferred_locale==="my"?"my":"ko");setRole("staff");setDepId("");setNewPassword("");setNotice("");setError("");}
+ const filtered=users.filter(x=>{
+  const text=[x.full_name,x.email||"",x.user_id,...x.roles.map(r=>names[r.role]||r.role),...x.roles.map(r=>deps.find(d=>d.id===r.department_id)?.name_ko||"")].join(" ").toLowerCase();
+  return (!search||text.includes(search.toLowerCase()))&&(statusFilter==="all"||(statusFilter==="active"?x.is_active:!x.is_active));
+ });
+ const assign=()=>{
+  if(!selected)return;
+  if(selected.roles.some(r=>r.role===role&&r.department_id===(depId||null))){setError("이미 동일한 역할과 부서가 지정되어 있습니다.");return;}
+  void run(()=>db!.from("user_roles").insert({user_id:selected.user_id,role,department_id:depId||null}),"역할을 추가했습니다.");
+ };
+ const toggle=(p:P)=>void run(()=>db!.rpc("mrpst_set_user_active",{target_user:p.user_id,make_active:!p.is_active}),p.is_active?"계정을 비활성화했습니다.":"계정을 활성화했습니다.");
+ const tabs=[["users","회원·권한 관리"],["departments","부서 관리"],["audit","변경 이력"]];
+ return <div className="settings-workspace">
+  <div className="settings-heading"><span className="eyebrow">SYSTEM GOVERNANCE</span><h2>회원 관리</h2><p>회원 상태와 소속, 관리자 권한을 한 화면에서 확인하고 관리합니다.</p></div>
+  <div className="settings-stats">
+   <article><span>전체 회원</span><strong>{users.length}</strong></article>
+   <article><span>활성 회원</span><strong>{users.filter(x=>x.is_active).length}</strong></article>
+   <article><span>비활성 회원</span><strong>{users.filter(x=>!x.is_active).length}</strong></article>
+   <article><span>부여된 권한</span><strong>{users.reduce((n,x)=>n+x.roles.length,0)}</strong></article>
+  </div>
+  {error&&<div className="settings-alert error">{error}</div>}{notice&&<div className="settings-alert success">{notice}</div>}
+  <nav className="settings-tabs">{tabs.map(([k,v])=><button key={k} className={tab===k?"active":""} onClick={()=>{setTab(k);setSelectedId("");}}>{v}</button>)}</nav>
+  {tab==="users"&&<section className="settings-panel">
+   <div className="settings-panel-head"><div><h3>계정 목록</h3><p>관리자가 계정을 직접 생성하고 비밀번호와 권한을 관리합니다.</p></div><div className="settings-account-actions"><button className="settings-refresh" disabled={loading} onClick={()=>void load()}>새로고침</button><button className="settings-primary" onClick={()=>setCreateOpen(true)}>＋ 계정 등록</button></div></div>
+   <div className="settings-toolbar"><input className="settings-search" placeholder="이름, 이메일, 역할 검색" value={search} onChange={e=>setSearch(e.target.value)}/><select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option value="all">전체 상태</option><option value="active">활성 회원</option><option value="inactive">비활성 회원</option></select><span>{filtered.length}명 표시</span></div>
+   <div className="settings-member-layout">
+    <div className="settings-member-list">{loading?<Empty>회원 정보를 불러오는 중입니다.</Empty>:filtered.map(p=><button type="button" className={"settings-member-item "+(selectedId===p.user_id?"selected":"")} key={p.user_id} onClick={()=>openUser(p)}>
+      <span className="settings-member-avatar">{(p.full_name||"?").trim().slice(0,1)}</span><span className="settings-member-copy"><strong>{p.full_name||"이름 미등록"}</strong><small>{p.email||"이메일 미등록"} · {p.roles.length? p.roles.map(r=>names[r.role]||r.role).join(" · "):"권한 미지정"}</small></span><span className={p.is_active?"settings-status active":"settings-status inactive"}>{p.is_active?"활성":"비활성"}</span>
+     </button>)}{!loading&&!filtered.length&&<Empty>검색 조건에 맞는 회원이 없습니다.</Empty>}</div>
+    {selected?<div className="settings-member-detail">
+      <div className="settings-detail-head"><div><span className="eyebrow">MEMBER PROFILE</span><h3>{selected.full_name||"이름 미등록"}</h3><small>{selected.email||"이메일 미등록"} · 등록일 {new Date(selected.created_at).toLocaleDateString()}</small></div><span className={selected.is_active?"settings-status active":"settings-status inactive"}>{selected.is_active?"활성 계정":"비활성 계정"}</span></div>
+      <div className="settings-account-id">{selected.user_id}</div>
+      <div className="settings-form-grid">
+       <label>회원 이름<input value={fullName} onChange={e=>setFullName(e.target.value)}/></label>
+       <label>기본 언어<select value={preferredLocale} onChange={e=>setPreferredLocale(e.target.value)}><option value="ko">한국어</option><option value="my">မြန်မာ</option></select></label>
+      </div>
+      <button className="settings-primary" disabled={saving||!fullName.trim()} onClick={()=>void run(()=>db!.from("user_profiles").update({full_name:fullName.trim(),preferred_locale:preferredLocale}).eq("user_id",selected.user_id),"회원 정보를 저장했습니다.")}>회원 정보 저장</button>
+      <div className="settings-detail-section"><h4>비밀번호 변경</h4><p className="settings-form-hint">새 비밀번호를 설정하면 기존 비밀번호는 즉시 사용할 수 없게 됩니다.</p><div className="settings-password-row"><input type="password" autoComplete="new-password" minLength={8} placeholder="새 비밀번호 (8자 이상)" value={newPassword} onChange={e=>setNewPassword(e.target.value)}/><button className="settings-primary" disabled={saving||newPassword.length<8} onClick={()=>void run(()=>invokeAdmin({action:"update_password",user_id:selected.user_id,password:newPassword}),"비밀번호를 변경했습니다.")}>비밀번호 변경</button></div></div>
+      <div className="settings-detail-section"><h4>현재 권한 <small>{selected.roles.length}개</small></h4>
+       {selected.roles.length?selected.roles.map(r=><div className="settings-role-row" key={r.id}><span><strong>{names[r.role]||r.role}</strong><small>{r.department_id?(deps.find(d=>d.id===r.department_id)?.name_ko||deps.find(d=>d.id===r.department_id)?.name_en||"부서"):"전체 부서"}</small></span><button disabled={saving||r.role==="super_admin"} title={r.role==="super_admin"?"최고 관리자 권한은 이 화면에서 해제할 수 없습니다.":""} onClick={()=>void run(()=>db!.from("user_roles").delete().eq("id",r.id),"권한을 해제했습니다.")}>권한 해제</button></div>):<Empty>아직 부여된 권한이 없습니다.</Empty>}
+      </div>
+      <div className="settings-detail-section"><h4>새 권한 부여</h4><div className="settings-role-form"><select value={role} onChange={e=>setRole(e.target.value)}>{roles.filter(r=>r!=="super_admin"&&r!=="student").map(r=><option key={r} value={r}>{names[r]}</option>)}</select><select value={depId} onChange={e=>setDepId(e.target.value)}><option value="">전체 부서</option>{deps.filter(d=>d.is_active).map(d=><option key={d.id} value={d.id}>{d.name_ko||d.name_en}</option>)}</select><button className="settings-primary" disabled={saving||selected.roles.some(r=>r.role===role&&r.department_id===(depId||null))} onClick={assign}>권한 추가</button></div></div>
+      <div className="settings-detail-section"><h4>페이지별 접근 권한</h4><p className="settings-form-hint">기본 역할 권한을 이 회원에게만 별도로 허용하거나 차단할 수 있습니다. 개별 설정은 역할 기본값보다 우선합니다.</p><div className="settings-role-form"><select value={moduleKey} onChange={e=>setModuleKey(e.target.value)}><option value="finance">재정 관리</option><option value="students">학생 관리</option><option value="academics">학사 관리</option><option value="facilities">시설 관리</option><option value="library">도서관 관리</option><option value="meetings">회의 자료</option><option value="administration">회원 및 권한 관리</option><option value="website">홈페이지 관리</option><option value="calendar">학사일정</option></select><label><input type="checkbox" checked={moduleView} onChange={e=>setModuleView(e.target.checked)}/> 페이지 보기</label><label><input type="checkbox" checked={moduleManage} onChange={e=>setModuleManage(e.target.checked)}/> 관리·수정</label><button className="settings-primary" disabled={saving} onClick={()=>void run(()=>db!.from("user_module_permissions").upsert({user_id:selected.user_id,module_key:moduleKey,can_view:moduleView,can_manage:moduleManage,assigned_by:null,updated_at:new Date().toISOString()},{onConflict:"user_id,module_key"}),"페이지별 권한을 저장했습니다.")}>권한 저장</button></div><p className="settings-form-hint">페이지 보기를 해제하면 메뉴에서 숨겨지고 직접 주소로도 접근할 수 없습니다. 관리·수정 권한은 별도의 데이터 변경 정책과 함께 적용됩니다.</p><button className="settings-refresh" disabled={saving} onClick={()=>void run(()=>db!.from("user_module_permissions").delete().eq("user_id",selected.user_id).eq("module_key",moduleKey),"개별 설정을 삭제하고 역할 기본 권한으로 되돌렸습니다.")}>선택한 페이지의 개별 설정 초기화</button></div>
+      <div className="settings-danger-zone"><div><strong>계정 상태</strong><small>{selected.is_active?"현재 로그인 및 서비스 이용이 가능한 상태입니다.":"현재 비활성화된 계정입니다."}</small></div><button disabled={saving||selected.roles.some(r=>r.role==="super_admin")} onClick={()=>toggle(selected)}>{selected.is_active?"회원 비활성화":"회원 다시 활성화"}</button></div>
+     </div>:<div className="settings-member-empty"><strong>회원을 선택해 주세요</strong><p>왼쪽 목록에서 회원을 선택하면 상세 정보와 권한을 관리할 수 있습니다.</p></div>}
+   </div>
+  </section>}
+  {tab==="departments"&&<section className="settings-panel"><div className="settings-panel-head"><div><h3>부서 관리</h3><p>회원에게 부서별 역할을 지정할 때 사용하는 부서 목록입니다.</p></div><button className="settings-primary" onClick={()=>setDepOpen(true)}>＋ 부서 등록</button></div><div className="settings-table-wrap"><table className="settings-table"><thead><tr><th>코드</th><th>English</th><th>မြန်မာ</th><th>한국어</th><th>상태</th><th>관리</th></tr></thead><tbody>{deps.map(d=><tr key={d.id}><td>{d.code}</td><td>{d.name_en}</td><td>{d.name_my||"—"}</td><td>{d.name_ko||"—"}</td><td>{d.is_active?"활성":"비활성"}</td><td><button onClick={()=>void run(()=>db!.from("departments").update({is_active:!d.is_active}).eq("id",d.id),"부서 상태를 변경했습니다.")}>{d.is_active?"비활성화":"활성화"}</button></td></tr>)}</tbody></table>{!loading&&!deps.length&&<Empty>등록된 부서가 없습니다.</Empty>}</div></section>}
+  {tab==="audit"&&<section className="settings-panel"><div className="settings-panel-head"><div><h3>회원 관리 변경 이력</h3><p>최근 100건의 사용자·권한·부서 변경 기록입니다.</p></div></div><div className="settings-table-wrap"><table className="settings-table"><thead><tr><th>일시</th><th>작업자</th><th>대상</th><th>작업</th><th>변경 내용</th></tr></thead><tbody>{logs.map(x=><tr key={x.id}><td>{new Date(x.created_at).toLocaleString()}</td><td>{x.actor_id?.slice(0,8)||"system"}</td><td>{x.entity_type}</td><td>{x.action}</td><td><code>{JSON.stringify(x.details||{}).slice(0,150)}</code></td></tr>)}</tbody></table>{!loading&&!logs.length&&<Empty>기록된 작업이 없습니다.</Empty>}</div></section>}
+  {createOpen&&<div className="settings-modal-backdrop"><section className="settings-modal"><header><h3>새 계정 등록</h3><button onClick={()=>setCreateOpen(false)}>×</button></header><p className="settings-form-hint">계정은 즉시 활성화되며 등록한 이메일과 비밀번호로 로그인할 수 있습니다.</p><div className="settings-form-grid"><label>이름 *<input value={newUser.full_name} onChange={e=>setNewUser({...newUser,full_name:e.target.value})}/></label><label>이메일 *<input type="email" autoComplete="email" value={newUser.email} onChange={e=>setNewUser({...newUser,email:e.target.value})}/></label><label>초기 비밀번호 *<input type="password" autoComplete="new-password" minLength={8} value={newUser.password} onChange={e=>setNewUser({...newUser,password:e.target.value})}/></label><label>기본 언어<select value={newUser.preferred_locale} onChange={e=>setNewUser({...newUser,preferred_locale:e.target.value})}><option value="ko">한국어</option><option value="en">English</option><option value="my">မြန်မာ</option></select></label><label>역할<select value={newUser.role} onChange={e=>setNewUser({...newUser,role:e.target.value})}>{roles.filter(r=>r!=="super_admin"&&r!=="student").map(r=><option key={r} value={r}>{names[r]}</option>)}</select></label><label>부서<select value={newUser.department_id} onChange={e=>setNewUser({...newUser,department_id:e.target.value})}><option value="">전체 부서</option>{deps.filter(d=>d.is_active).map(d=><option key={d.id} value={d.id}>{d.name_ko||d.name_en}</option>)}</select></label></div><footer><button onClick={()=>setCreateOpen(false)}>취소</button><button className="settings-primary" disabled={saving||!newUser.full_name.trim()||!newUser.email.trim()||newUser.password.length<8} onClick={()=>void createAccount()}>{saving?"등록 중…":"계정 생성"}</button></footer></section></div>}
+  {depOpen&&<div className="settings-modal-backdrop"><section className="settings-modal"><header><h3>부서 등록</h3><button onClick={()=>setDepOpen(false)}>×</button></header><div className="settings-form-grid"><label>부서 코드 *<input value={newDep.code} onChange={e=>setNewDep({...newDep,code:e.target.value.toUpperCase()})}/></label><label>영어 이름 *<input value={newDep.name_en} onChange={e=>setNewDep({...newDep,name_en:e.target.value})}/></label><label>미얀마어 이름<input value={newDep.name_my} onChange={e=>setNewDep({...newDep,name_my:e.target.value})}/></label><label>한국어 이름<input value={newDep.name_ko} onChange={e=>setNewDep({...newDep,name_ko:e.target.value})}/></label></div><footer><button onClick={()=>setDepOpen(false)}>취소</button><button className="settings-primary" disabled={saving||!newDep.code.trim()||!newDep.name_en.trim()} onClick={()=>void run(()=>db!.from("departments").insert({code:newDep.code.trim(),name_en:newDep.name_en.trim(),name_my:newDep.name_my.trim()||null,name_ko:newDep.name_ko.trim()||null}),"부서를 등록했습니다.").then(()=>setDepOpen(false))}>등록</button></footer></section></div>}
+ </div>;
+}
+function Empty({children}:{children:React.ReactNode}){return <p className="settings-empty">{children}</p>}

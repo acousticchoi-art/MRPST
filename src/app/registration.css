@@ -1,0 +1,11 @@
+
+.signup-link{display:block;text-align:center;margin-top:18px;font-size:13px;color:var(--navy);font-weight:700}
+.registration-admin{min-height:100vh;background:#f6f8f9}.registration-inner{max-width:980px;margin:0 auto;padding:42px 28px}.registration-inner h1{font:500 32px Georgia,serif;color:var(--navy);margin:12px 0}.registration-count{margin:28px 0 12px;color:var(--muted);font-size:13px}.registration-row{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:20px;background:#fff;border:1px solid var(--line);border-radius:10px;margin:10px 0}.registration-row p{margin:5px 0;color:var(--muted);font-size:13px}.registration-row small{color:var(--muted)}.registration-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.registration-actions button{border:0;border-radius:6px;padding:9px 14px;background:var(--navy);color:white;cursor:pointer}.registration-actions button.reject{background:#fff;border:1px solid #d9a6a0;color:#9b4138}.registration-actions button:disabled{opacity:.5}.registration-status{font-size:12px;padding:6px 9px;border-radius:20px;background:#f1f3f4}.registration-status.approved{background:#e7f4ec;color:#287044}.registration-status.rejected{background:#faecea;color:#9b4138}.registration-notice{padding:12px;background:#e7f4ec;color:#287044;border-radius:7px;font-size:13px}
+@media(max-width:600px){.registration-row{align-items:flex-start;flex-direction:column}.registration-inner{padding:28px 16px}}
+
+.registration-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0 18px}
+.registration-toolbar input{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:#fff;color:var(--navy);font-size:12px}
+.registration-toolbar select{border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:#fff;color:var(--navy);font-size:12px}
+.registration-row{box-shadow:0 2px 10px #173c5507}
+.registration-actions{justify-content:flex-end}
+@media(max-width:600px){.registration-toolbar{display:grid;grid-template-columns:1fr}.registration-toolbar input,.registration-toolbar select{width:100%}.registration-actions{width:100%;justify-content:flex-start}}

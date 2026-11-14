@@ -1,0 +1,2 @@
+import StudentLoginForm from "./StudentLoginForm";
+export default async function StudentLoginPage({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <StudentLoginForm locale={locale}/>;}

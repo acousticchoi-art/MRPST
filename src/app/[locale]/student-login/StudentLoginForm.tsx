@@ -1,0 +1,10 @@
+"use client";
+import {useState,type FormEvent} from "react";
+import {useRouter} from "next/navigation";
+import Link from "next/link";
+import {createSupabaseBrowserClient} from "@/lib/supabase/client";
+export default function StudentLoginForm({locale}:{locale:string}){
+ const [email,setEmail]=useState(""),[password,setPassword]=useState(""),[error,setError]=useState(""),[busy,setBusy]=useState(false);const router=useRouter();
+ async function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();setError("");const supabase=createSupabaseBrowserClient();if(!supabase){setError("로그인 서비스 설정을 확인해 주세요.");return;}setBusy(true);try{const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;const {data:roles,error:roleError}=await supabase.from("user_roles").select("role").eq("user_id",data.user.id);if(roleError)throw roleError;const roleSet=(roles??[]).map(row=>row.role);if(!roleSet.includes("student")||roleSet.some(role=>role!=="student")){await supabase.auth.signOut();throw new Error("학생 전용 계정이 아닙니다. 임직원 로그인 화면을 이용해 주세요.");}router.replace(`/${locale}/student`);router.refresh();}catch(e){setError(e instanceof Error?e.message:"로그인할 수 없습니다.");}finally{setBusy(false);}}
+ return <main className="login-wrap"><section className="login-card"><Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>STUDENT PORTAL</small></span></Link><span className="eyebrow">STUDENT ACCESS</span><h1>학생 로그인</h1><p className="login-intro">학교에서 발급받은 이메일과 초기 비밀번호로 로그인하세요.</p><form onSubmit={submit} className="login-form"><label>이메일<input type="email" autoComplete="username" value={email} onChange={e=>setEmail(e.target.value)} required/></label><label>비밀번호<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required/></label>{error&&<p className="login-error" role="alert">{error}</p>}<button className="btn primary login-submit" disabled={busy}>{busy?"로그인 중…":"학생 로그인"}</button></form><p className="login-foot"><Link href={`/${locale}/login`}>임직원 로그인</Link></p></section></main>;
+}

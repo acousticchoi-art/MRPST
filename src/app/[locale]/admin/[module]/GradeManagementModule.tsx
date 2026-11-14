@@ -7,7 +7,6 @@ type Department={id:string;code:string;name_en:string;name_ko:string|null;name_m
 type Term={id:string;term_code:string;name:string;academic_year:number;status:string};
 type Student={id:string;student_number:string;full_name:string;program_code:string|null;cohort:string|null;student_status:string};
 type Course={id:string;course_code:string;title:string;department_id:string|null;level:string|null;is_active:boolean};
-type Enrollment={id:string;student_id:string;course_id:string;term_id:string;enrollment_status:string};
 type Grade={id:string;student_id:string;course_id:string;term_id:string;score:number|null;grade:string|null;remarks:string|null;updated_at:string};
 
 const roleCanEnter=["super_admin","administrator","academic_officer"];
@@ -19,7 +18,6 @@ export default function GradeManagementModule(){
  const [terms,setTerms]=useState<Term[]>([]);
  const [students,setStudents]=useState<Student[]>([]);
  const [courses,setCourses]=useState<Course[]>([]);
- const [enrollments,setEnrollments]=useState<Enrollment[]>([]);
  const [grades,setGrades]=useState<Grade[]>([]);
  const [termId,setTermId]=useState("");
  const [departmentId,setDepartmentId]=useState("");
@@ -44,19 +42,18 @@ export default function GradeManagementModule(){
    const roleResult=await db.from("user_roles").select("role").eq("user_id",user.id);
    if(roleResult.error)throw roleResult.error;
    setCanManage((roleResult.data??[]).some((r:any)=>roleCanEnter.includes(r.role)));
-   const [d,t,s,c,e,g]=await Promise.all([
+   const [d,t,s,c,g]=await Promise.all([
     db.from("departments").select("id,code,name_en,name_ko,name_my").eq("is_active",true).order("code"),
     db.from("academic_terms").select("id,term_code,name,academic_year,status").order("academic_year",{ascending:false}).order("term_code",{ascending:false}),
     db.from("students").select("id,student_number,full_name,program_code,cohort,student_status").order("full_name"),
     db.from("academic_courses").select("id,course_code,title,department_id,level,is_active").eq("is_active",true).order("course_code"),
-    db.from("academic_enrollments").select("id,student_id,course_id,term_id,enrollment_status").order("created_at"),
     db.from("academic_grades").select("id,student_id,course_id,term_id,score,grade,remarks,updated_at").order("updated_at",{ascending:false})
    ]);
-   const errors=[d.error,t.error,s.error,c.error,e.error,g.error].filter(Boolean).map((x:any)=>x.message);
+   const errors=[d.error,t.error,s.error,c.error,g.error].filter(Boolean).map((x:any)=>x.message);
    if(errors.length)throw new Error(errors.join(" · "));
    const nextTerms=(t.data??[]) as Term[];
    const nextDepartments=(d.data??[]) as Department[];
-   setDepartments(nextDepartments);setTerms(nextTerms);setStudents((s.data??[]) as Student[]);setCourses((c.data??[]) as Course[]);setEnrollments((e.data??[]) as Enrollment[]);setGrades((g.data??[]) as Grade[]);
+   setDepartments(nextDepartments);setTerms(nextTerms);setStudents((s.data??[]) as Student[]);setCourses((c.data??[]) as Course[]);setGrades((g.data??[]) as Grade[]);
    if(!termId&&nextTerms.length){setTermId((nextTerms.find(x=>x.status==="active")??nextTerms[0]).id);}
    if(!departmentId&&nextDepartments.length){setDepartmentId(nextDepartments[0].id);}
   }catch(err:any){setError(err?.message||"성적 데이터를 불러오지 못했습니다.");}
@@ -79,8 +76,7 @@ export default function GradeManagementModule(){
  const gradeByKey=useMemo(()=>new Map(termGrades.map(x=>[x.student_id+"|"+x.course_id,x])),[termGrades]);
  const selectedStudent=students.find(x=>x.id===selectedStudentId);
  const studentCourses=visibleCourses.map(course=>({course,grade:gradeByKey.get(selectedStudentId+"|"+course.id)}));
- const courseEnrollments=useMemo(()=>enrollments.filter(x=>x.term_id===termId&&x.course_id===courseId&&x.enrollment_status!=="withdrawn"),[enrollments,termId,courseId]);
- const inputStudents=useMemo(()=>courseEnrollments.map(x=>students.find(s=>s.id===x.student_id)).filter((x):x is Student=>Boolean(x)).sort((a,b)=>a.full_name.localeCompare(b.full_name)),[courseEnrollments,students]);
+ const inputStudents=useMemo(()=>courseId?visibleStudents:[],[courseId,visibleStudents]);
  const currentCourse=visibleCourses.find(x=>x.id===courseId);
  useEffect(()=>{
   const next:Record<string,string>={};
@@ -161,14 +157,14 @@ export default function GradeManagementModule(){
    </div>}
   </section>}
   {tab==="entry"&&<section className={styles.panel}>
-   <div className={styles.panelHead}><div><h3>과목별 일괄 입력</h3><p>과목을 선택하면 해당 학기 수강 등록 학생이 표시됩니다. 점수는 0~100점, 소수점 입력을 지원합니다.</p></div></div>
+   <div className={styles.panelHead}><div><h3>과목별 일괄 입력</h3><p>과목을 선택하면 선택한 학과·학년의 학생 목록이 표시됩니다. 점수는 0~100점, 소수점 입력을 지원합니다.</p></div></div>
    <div className={styles.entryFilters}>
     <label>과목<select value={courseId} onChange={e=>setCourseId(e.target.value)}><option value="">과목 선택</option>{visibleCourses.map(x=><option key={x.id} value={x.id}>{x.course_code} · {x.title}</option>)}</select></label>
    </div>
    {currentCourse&&<div className={styles.entryTitle}><strong>{currentCourse.title}</strong><span>{currentCourse.course_code} · {terms.find(x=>x.id===termId)?.name||"학기 미선택"}</span></div>}
    <div className={styles.tableWrap}><table><thead><tr><th>학번</th><th>학생 이름</th><th>점수</th><th>기존 점수</th><th>작업</th></tr></thead><tbody>
     {inputStudents.map(student=>{const old=gradeByKey.get(student.id+"|"+courseId);return <tr key={student.id}><td>{student.student_number}</td><td>{student.full_name}</td><td><input className={styles.scoreInput} type="number" min="0" max="100" step="0.01" value={inputValues[student.id]??""} onChange={e=>setInputValues(v=>({...v,[student.id]:e.target.value}))} aria-label={student.full_name+" 점수"}/></td><td>{old?.score??"—"}</td><td>{old&&<button className={styles.deleteButton} disabled={saving} onClick={()=>void deleteScore(student)}>삭제</button>}</td></tr>;})}
-    {!inputStudents.length&&<tr><td colSpan={5} className={styles.empty}>{!termId?"먼저 학기를 선택하세요.":!courseId?"과목을 선택하세요.":"이 과목에 수강 등록된 학생이 없습니다. 학사관리에서 수강 등록을 먼저 진행하세요."}</td></tr>}
+    {!inputStudents.length&&<tr><td colSpan={5} className={styles.empty}>{!termId?"먼저 학기를 선택하세요.":!courseId?"과목을 선택하세요.":"선택한 학과·학년에 등록된 학생이 없습니다."}</td></tr>}
    </tbody></table></div>
    <div className={styles.saveRow}><span>{inputStudents.length}명 · 빈 칸은 저장하지 않습니다.</span><button className={styles.primary} disabled={!canManage||saving||!inputStudents.length||!courseId||!termId} onClick={()=>void saveScores()}>{saving?"저장 중…":"변경 점수 저장"}</button></div>
   </section>}

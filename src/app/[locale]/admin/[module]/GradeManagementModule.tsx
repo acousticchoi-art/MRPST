@@ -71,7 +71,7 @@ export default function GradeManagementModule(){
  useEffect(()=>{if(levels.length&&!levels.includes(level))setLevel(levels[0]);},[levels,level]);
  const visibleCourses=useMemo(()=>courses.filter(x=>x.department_id===departmentId&&(!level||x.level===level)),[courses,departmentId,level]);
  useEffect(()=>{if(!visibleCourses.some(x=>x.id===courseId))setCourseId(visibleCourses[0]?.id??"");},[visibleCourses,courseId]);
- const visibleStudents=useMemo(()=>students.filter(x=>x.program_code===programCode&&(!level||x.cohort===level)&&(!search.trim()||x.full_name.toLowerCase().includes(search.toLowerCase())||x.student_number.toLowerCase().includes(search.toLowerCase()))),[students,programCode,level,search]);
+ const visibleStudents=useMemo(()=>students.filter(x=>x.program_code===programCode&&(!level||x.cohort===level)&&(!search.trim()||x.full_name.toLowerCase().includes(search.toLowerCase())||x.student_number.toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>Number.isFinite(Number(a.student_number))&&Number.isFinite(Number(b.student_number))?Number(a.student_number)-Number(b.student_number):a.student_number.localeCompare(b.student_number)),[students,programCode,level,search]);
  const termGrades=useMemo(()=>grades.filter(x=>x.term_id===termId),[grades,termId]);
  const gradeByKey=useMemo(()=>new Map(termGrades.map(x=>[x.student_id+"|"+x.course_id,x])),[termGrades]);
  const selectedStudent=students.find(x=>x.id===selectedStudentId);
@@ -85,7 +85,7 @@ export default function GradeManagementModule(){
  },[inputStudents,gradeByKey,courseId]);
 
  const exportCsv=()=>{
-  const rows=[["Student Number","Student Name","Department","Year","Average Score","Entered Subjects","Total Subjects"],...visibleStudents.map(student=>{
+  const rows=[["Serial No.","Student Name","Department","Year","Average Score","Entered Subjects","Total Subjects"],...visibleStudents.map(student=>{
    const scores=visibleCourses.map(course=>gradeByKey.get(student.id+"|"+course.id)?.score).filter((v):v is number=>v!==null&&v!==undefined);
    const average=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null;
    return [student.student_number,student.full_name,department?.name_en||department?.code,student.cohort,average===null?"":average.toFixed(2),scores.length,visibleCourses.length];
@@ -143,13 +143,13 @@ export default function GradeManagementModule(){
   <div className={styles.tabs}><button className={tab==="lookup"?styles.activeTab:""} onClick={()=>setTab("lookup")}>성적 조회</button><button className={tab==="entry"?styles.activeTab:""} onClick={()=>setTab("entry")}>과목별 성적 입력</button></div>
   {tab==="lookup"&&<section className={styles.panel}>
    <div className={styles.panelHead}><div><h3>학생별 성적 조회</h3><p>학생을 선택하면 과목별 점수와 미입력 과목을 확인할 수 있습니다.</p></div><div className={styles.actions}><button onClick={exportCsv} disabled={!visibleStudents.length}>엑셀용 CSV</button><button onClick={()=>window.print()}>인쇄</button></div></div>
-   <input className={styles.search} value={search} onChange={e=>setSearch(e.target.value)} placeholder="학생 이름 또는 학번 검색"/>
-   {loading?<p className={styles.empty}>데이터를 불러오는 중입니다…</p>:<div className={styles.tableWrap}><table><thead><tr><th>학번</th><th>학생 이름</th><th>학년</th><th>입력 과목</th><th>평균 점수</th><th></th></tr></thead><tbody>
+   <input className={styles.search} value={search} onChange={e=>setSearch(e.target.value)} placeholder="학생 이름 또는 순번 검색"/>
+   {loading?<p className={styles.empty}>데이터를 불러오는 중입니다…</p>:<div className={styles.tableWrap}><table><thead><tr><th>순번</th><th>학생 이름</th><th>학년</th><th>입력 과목</th><th>평균 점수</th><th></th></tr></thead><tbody>
     {visibleStudents.map(student=>{const scores=visibleCourses.map(course=>gradeByKey.get(student.id+"|"+course.id)?.score).filter((v):v is number=>v!==null&&v!==undefined);const average=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null;return <tr key={student.id} className={selectedStudentId===student.id?styles.selectedRow:""}><td>{student.student_number}</td><td><button className={styles.nameButton} onClick={()=>setSelectedStudentId(student.id)}>{student.full_name}</button></td><td>{student.cohort||"—"}</td><td>{scores.length} / {visibleCourses.length}</td><td>{average===null?"—":average.toFixed(2)}</td><td><button className={styles.smallButton} onClick={()=>setSelectedStudentId(student.id)}>상세</button></td></tr>;})}
     {!visibleStudents.length&&<tr><td colSpan={6} className={styles.empty}>선택한 조건에 해당하는 학생이 없습니다.</td></tr>}
    </tbody></table></div>}
    {selectedStudent&&<div className={styles.detail}>
-    <div className={styles.panelHead}><div><h3>{selectedStudent.full_name}</h3><p>{selectedStudent.student_number} · {department?.name_ko||department?.name_en||""} · {selectedStudent.cohort||""}</p></div><button onClick={()=>setSelectedStudentId("")}>닫기</button></div>
+    <div className={styles.panelHead}><div><h3>{selectedStudent.full_name}</h3><p>순번 {selectedStudent.student_number} · {department?.name_ko||department?.name_en||""} · {selectedStudent.cohort||""}</p></div><button onClick={()=>setSelectedStudentId("")}>닫기</button></div>
     <div className={styles.tableWrap}><table><thead><tr><th>과목 코드</th><th>과목명</th><th>점수</th><th>상태</th></tr></thead><tbody>
      {studentCourses.map(({course,grade})=><tr key={course.id}><td>{course.course_code}</td><td>{course.title}</td><td>{grade?.score??"—"}</td><td>{grade?.score===null||grade?.score===undefined?<span className={styles.missing}>미입력</span>:<span className={styles.complete}>입력 완료</span>}</td></tr>)}
      {!studentCourses.length&&<tr><td colSpan={4} className={styles.empty}>등록된 과목이 없습니다.</td></tr>}
@@ -162,7 +162,7 @@ export default function GradeManagementModule(){
     <label>과목<select value={courseId} onChange={e=>setCourseId(e.target.value)}><option value="">과목 선택</option>{visibleCourses.map(x=><option key={x.id} value={x.id}>{x.course_code} · {x.title}</option>)}</select></label>
    </div>
    {currentCourse&&<div className={styles.entryTitle}><strong>{currentCourse.title}</strong><span>{currentCourse.course_code} · {terms.find(x=>x.id===termId)?.name||"학기 미선택"}</span></div>}
-   <div className={styles.tableWrap}><table><thead><tr><th>학번</th><th>학생 이름</th><th>점수</th><th>기존 점수</th><th>작업</th></tr></thead><tbody>
+   <div className={styles.tableWrap}><table><thead><tr><th>순번</th><th>학생 이름</th><th>점수</th><th>기존 점수</th><th>작업</th></tr></thead><tbody>
     {inputStudents.map(student=>{const old=gradeByKey.get(student.id+"|"+courseId);return <tr key={student.id}><td>{student.student_number}</td><td>{student.full_name}</td><td><input className={styles.scoreInput} type="number" min="0" max="100" step="0.01" value={inputValues[student.id]??""} onChange={e=>setInputValues(v=>({...v,[student.id]:e.target.value}))} aria-label={student.full_name+" 점수"}/></td><td>{old?.score??"—"}</td><td>{old&&<button className={styles.deleteButton} disabled={saving} onClick={()=>void deleteScore(student)}>삭제</button>}</td></tr>;})}
     {!inputStudents.length&&<tr><td colSpan={5} className={styles.empty}>{!termId?"먼저 학기를 선택하세요.":!courseId?"과목을 선택하세요.":"선택한 학과·학년에 등록된 학생이 없습니다."}</td></tr>}
    </tbody></table></div>

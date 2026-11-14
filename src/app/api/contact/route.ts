@@ -18,16 +18,16 @@ export async function POST(request: Request) {
     if (!name || !email || !subject || !message ||
         name.length > MAX_LENGTH.name || email.length > MAX_LENGTH.email ||
         subject.length > MAX_LENGTH.subject || message.length > MAX_LENGTH.message ||
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
-        /[\r\n]/.test(email) || /[\r\n]/.test(subject)) {
-      return NextResponse.json({ error: "입력 내용을 확인해 주세요." }, { status: 400 });
+        !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) ||
+        /[\\r\\n]/.test(email) || /[\\r\\n]/.test(subject)) {
+      return NextResponse.json({ error: "အချက်အလက်များကို မှန်ကန်စွာ ဖြည့်သွင်းပေးပါ။" }, { status: 400 });
     }
 
     const apiKey = process.env.RESEND_API_KEY;
     const from = process.env.RESEND_FROM_EMAIL;
     const to = process.env.CONTACT_TO_EMAIL || "acousticchoi@gmail.com";
     if (!apiKey || !from) {
-      return NextResponse.json({ error: "문의 메일 설정이 아직 완료되지 않았습니다." }, { status: 503 });
+      return NextResponse.json({ error: "အီးမေးလ်ပို့ခြင်းစနစ်ကို ပြင်ဆင်နေဆဲဖြစ်ပါသည်။" }, { status: 503 });
     }
 
     const response = await fetch("https://api.resend.com/emails", {
@@ -40,24 +40,29 @@ export async function POST(request: Request) {
         from,
         to: [to],
         reply_to: email,
-        subject: "[MRPST 홈페이지 문의] " + subject,
+        subject: "[MRPST ဝက်ဘ်ဆိုက်မှ မေးမြန်းချက်] " + subject,
         text: [
-          "MRPST 홈페이지에서 새 문의가 접수되었습니다.",
+          "MRPST ဝက်ဘ်ဆိုက်မှ မေးမြန်းချက်အသစ်တစ်စောင် လက်ခံရရှိပါသည်။",
           "",
-          "이름: " + name,
-          "이메일: " + email,
+          "အမည်: " + name,
+          "အီးမေးလ်: " + email,
           "",
-          "문의 내용:",
+          "မေးမြန်းချက် ခေါင်းစဉ်:",
+          subject,
+          "",
+          "မေးမြန်းချက် အသေးစိတ်:",
           message,
-        ].join("\n"),
+          "",
+          "ဤအီးမေးလ်ကို ပြန်လည်ဖြေကြားရန် Reply ကို နှိပ်ပါ။",
+        ].join("\\n"),
       }),
     });
 
     if (!response.ok) {
-      return NextResponse.json({ error: "메일 발송에 실패했습니다. 잠시 후 다시 시도해 주세요." }, { status: 502 });
+      return NextResponse.json({ error: "အီးမေးလ်ပို့ရာတွင် အမှားဖြစ်ပွားခဲ့ပါသည်။ ထပ်မံကြိုးစားပေးပါ။" }, { status: 502 });
     }
     return NextResponse.json({ ok: true });
   } catch {
-    return NextResponse.json({ error: "요청을 처리하지 못했습니다." }, { status: 400 });
+    return NextResponse.json({ error: "တောင်းဆိုမှုကို လုပ်ဆောင်၍ မရနိုင်ပါ။" }, { status: 400 });
   }
 }

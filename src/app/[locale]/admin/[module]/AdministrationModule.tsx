@@ -57,6 +57,31 @@ export default function AdministrationModule(){
  useEffect(()=>{void load();},[load]);
  async function invokeAdmin(body:Record<string,unknown>){if(!db)throw new Error("데이터베이스 연결을 확인해 주세요.");const {data,error}=await db.functions.invoke("admin-manage-user",{body});if(error)throw error;if(data?.error)throw new Error(data.error);return data;}
  async function createAccount(){if(!newUser.full_name.trim()||!newUser.email.trim()||newUser.password.length<8){setError("이름, 이메일, 8자 이상의 비밀번호를 입력해 주세요.");return;}const ok=await run(()=>invokeAdmin({action:"create",...newUser,full_name:newUser.full_name.trim(),email:newUser.email.trim()}),"새 계정을 생성했습니다.");if(!ok)return;setCreateOpen(false);setNewUser({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""});}
+ async function createTestAccounts(){
+  const testAccounts=[
+   {full_name:"테스트 재정 담당",email:"test_finance@mrpst.test",role:"finance_officer",pages:["finance"]},
+   {full_name:"테스트 학사 담당",email:"test_academic@mrpst.test",role:"academic_officer",pages:["academics","students"]},
+   {full_name:"테스트 시설 담당",email:"test_facility@mrpst.test",role:"facility_manager",pages:["facilities","library","meetings"]}
+  ];
+  const existing=new Set(users.map(user=>(user.email||"").toLowerCase()));
+  const created:string[]=[];
+  const skipped:string[]=[];
+  setSaving(true);setError("");setNotice("");
+  try{
+   for(const account of testAccounts){
+    if(existing.has(account.email)){skipped.push(account.email);continue;}
+    const result=await invokeAdmin({action:"create",full_name:account.full_name,email:account.email,password:"test1234",preferred_locale:"ko",role:account.role,department_id:""});
+    if(!result?.user_id)throw new Error(account.email+" 계정 생성 결과를 확인할 수 없습니다.");
+    const permissions=pageOptions.map(option=>({user_id:result.user_id,module_key:option.key,can_view:account.pages.includes(option.key),can_manage:false,assigned_by:null}));
+    const {error:permissionError}=await db!.from("user_module_permissions").upsert(permissions,{onConflict:"user_id,module_key"});
+    if(permissionError)throw new Error(account.email+" 페이지 권한 저장 실패: "+permissionError.message);
+    created.push(account.email);
+   }
+   setNotice(created.length+"개 테스트 계정을 생성했습니다."+(skipped.length?" 이미 존재하여 건너뜀: "+skipped.join(", "):""));
+   await load();
+  }catch(e:any){setError((e?.message||"테스트 계정 생성에 실패했습니다.")+(created.length?" 이미 생성된 계정: "+created.join(", "):""));}
+  finally{setSaving(false);}
+ }
  async function run(fn:()=>any,msg:string){
   setSaving(true);setError("");setNotice("");
   try{const r=await fn();if(r?.error)throw r.error;setNotice(msg);await load();return true;}
@@ -98,7 +123,7 @@ export default function AdministrationModule(){
   {error&&<div className="settings-alert error">{error}</div>}{notice&&<div className="settings-alert success">{notice}</div>}
   <nav className="settings-tabs">{tabs.map(([k,v])=><button key={k} className={tab===k?"active":""} onClick={()=>{setTab(k);setSelectedId("");}}>{v}</button>)}</nav>
   {tab==="users"&&<section className="settings-panel">
-   <div className="settings-panel-head"><div><h3>계정 목록</h3><p>관리자가 계정을 직접 생성하고 비밀번호와 권한을 관리합니다.</p></div><div className="settings-account-actions"><button className="settings-refresh" disabled={loading} onClick={()=>void load()}>새로고침</button><button className="settings-primary" onClick={()=>setCreateOpen(true)}>＋ 계정 등록</button></div></div>
+   <div className="settings-panel-head"><div><h3>계정 목록</h3><p>관리자가 계정을 직접 생성하고 비밀번호와 권한을 관리합니다.</p></div><div className="settings-account-actions"><button className="settings-refresh" disabled={loading} onClick={()=>void load()}>새로고침</button><button className="settings-refresh" disabled={saving||loading} onClick={()=>void createTestAccounts()}>테스트 계정 3개 생성</button><button className="settings-primary" onClick={()=>setCreateOpen(true)}>＋ 계정 등록</button></div></div>
    <div className="settings-toolbar"><input className="settings-search" placeholder="이름, 이메일, 역할 검색" value={search} onChange={e=>setSearch(e.target.value)}/><select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option value="all">전체 상태</option><option value="active">활성 회원</option><option value="inactive">비활성 회원</option></select><span>{filtered.length}명 표시</span></div>
    <div className="settings-member-layout">
     <div className="settings-member-list">{loading?<Empty>회원 정보를 불러오는 중입니다.</Empty>:filtered.map(p=><button type="button" className={"settings-member-item "+(selectedId===p.user_id?"selected":"")} key={p.user_id} onClick={()=>openUser(p)}>

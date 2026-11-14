@@ -794,3 +794,88 @@ input,select,textarea,button{max-width:100%}
  .facility-panel-head{align-items:flex-start;flex-direction:column}
  .facility-maintenance-table{min-width:820px}
 }
+
+
+/* Mobile-first usability pass across all administration modules */
+@media(max-width:760px){
+  .admin{width:100%;overflow-x:clip}
+  .admin-main{width:100%;min-width:0}
+  .admin-main>.content{
+    width:100%;min-width:0;
+    padding:124px 14px 38px!important;
+  }
+  .admin-heading{font-size:27px;line-height:1.2}
+  .admin-subtitle{font-size:13px;line-height:1.6}
+  .module-heading{margin:25px 0 12px;gap:8px;align-items:flex-start}
+  .module-heading h2{font-size:21px}
+  .modules{grid-template-columns:minmax(0,1fr)!important;gap:10px}
+  .module{padding:17px!important}
+  .stats,.dashboard-overview{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px}
+  .stat{min-width:0;padding:13px!important}
+  .finance-panel,.student-workspace,.library-workspace,.facility-workspace,
+  .meeting-workspace,.academic-workspace,.administration-workspace{min-width:0;width:100%}
+  .finance-panel-head,.student-intro,.facility-intro,.meeting-panel-head,
+  .academic-panel-head,.library-panel-head{align-items:stretch!important;flex-direction:column!important;gap:10px}
+  .finance-action-group,.facility-actions,.student-actions,.meeting-actions{
+    display:flex;flex-wrap:wrap;gap:7px;width:100%
+  }
+  .finance-action-group button,.facility-actions button,.student-actions button,
+  .meeting-actions button{flex:1 1 auto;min-height:42px}
+  .finance-form-grid,.student-form-grid,.facility-form-grid,.meeting-form-grid,
+  .academic-form-grid,.library-form-grid{grid-template-columns:minmax(0,1fr)!important}
+  .finance-form-grid .wide,.facility-form-grid .full{grid-column:auto!important}
+  .finance-line,.finance-budget-line{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .finance-line>* ,.finance-budget-line>*{min-width:0;width:100%}
+  .student-layout{grid-template-columns:minmax(0,1fr)!important}
+  .student-roster-list{max-height:260px}
+  .student-tabs,.facility-tabs,.meeting-tabs,.academic-tabs,.library-tabs{
+    display:flex!important;overflow-x:auto!important;overscroll-behavior-x:contain;
+    white-space:nowrap;scrollbar-width:thin;max-width:100%;
+  }
+  .student-tabs button,.facility-tabs button,.meeting-tabs button,
+  .academic-tabs button,.library-tabs button{flex:0 0 auto;min-width:max-content}
+  .facility-tabs{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .facility-tabs button{min-width:0!important}
+  .finance-table-wrap,.facility-table-wrap,.student-table-wrap,.meeting-table-wrap,
+  .academic-table-wrap,.library-table-wrap,.table-wrap,[class$="-table-wrap"]{
+    display:block;max-width:100%;overflow-x:auto!important;
+    -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
+  }
+  .finance-table,.facility-table,.student-table,.meeting-table,.academic-table,
+  .library-table{min-width:680px}
+  .finance-filter{flex-wrap:wrap}
+  .finance-filter>*{flex:1 1 130px;min-width:0}
+  .facility-maintenance-table{min-width:820px}
+  .facility-maintenance-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .facility-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .facility-overview-grid,.meeting-overview,.student-info-grid{grid-template-columns:minmax(0,1fr)!important}
+  .facility-modal-backdrop{padding:10px!important;align-items:flex-end!important}
+  .facility-modal,.finance-modal,.student-modal,.meeting-modal,.library-modal,
+  .academic-modal,.administration-modal{
+    width:100%!important;max-width:100%!important;max-height:88dvh!important;
+    overflow-y:auto!important;border-radius:14px 14px 8px 8px!important;
+  }
+  .facility-form-grid input,.facility-form-grid select,.facility-form-grid textarea,
+  .finance-form input,.finance-form select,.finance-line input,.finance-line select,
+  .student-workspace input,.student-workspace select,.student-workspace textarea,
+  .meeting-workspace input,.meeting-workspace select,.meeting-workspace textarea,
+  .academic-workspace input,.academic-workspace select,.academic-workspace textarea,
+  .library-workspace input,.library-workspace select,.library-workspace textarea{
+    min-height:42px;font-size:16px!important;max-width:100%;min-width:0;
+  }
+  .facility-form-grid textarea,.student-workspace textarea,
+  .meeting-workspace textarea,.academic-workspace textarea{min-height:92px}
+  .facility-modal-actions,.finance-form-actions{position:sticky;bottom:0;background:#fff;padding:10px 0 2px}
+  .facility-modal-actions button,.finance-form-actions button{min-height:44px;flex:1}
+  .admin-main button,.admin-main a,.admin-main select{touch-action:manipulation}
+}
+@media(max-width:390px){
+  .admin-main>.content{padding:116px 10px 30px!important}
+  .admin-heading{font-size:24px}
+  .stats,.dashboard-overview,.facility-stats{gap:7px}
+  .stat{padding:10px!important}
+  .module{padding:14px!important}
+  .facility-tabs{gap:6px;padding:7px}
+  .facility-tabs button{font-size:11px;padding:9px 6px}
+  .finance-line,.finance-budget-line{grid-template-columns:minmax(0,1fr)!important}
+}

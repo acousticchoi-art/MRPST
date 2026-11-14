@@ -86,7 +86,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
       </div></header>
       <div className="content">
         <span className="eyebrow">{t.module}</span>
-        {key==="finance"?<FinanceModule/>:key==="students"?<StudentModule/>:key==="library"?<LibraryModule/>:key==="facilities"?<FacilitiesModule/>:key==="meetings"?<MeetingsModule/>:key==="academics"?<AcademicsModule/>:key==="administration"?<AdministrationModule/>:<><h1 className="admin-heading">{moduleNames[key]??item.title}</h1><p className="admin-subtitle">{item.description}</p><div className="module-placeholder"><strong>Module foundation</strong><p>This section is reserved for the {item.title.toLowerCase()} workflow. Data entry, approval steps, reporting and department-level database policies will be added in the next implementation phase.</p><span>Not connected to live records</span></div></>}
+        {key==="finance"?<FinanceModule/>:key==="students"?<StudentModule/>:key==="library"?<LibraryModule/>:key==="facilities"?<FacilitiesModule/>:key==="meetings"?<MeetingsModule/>:key==="academics"?<AcademicsModule/>:key==="grades"?<GradeManagementModule/>:key==="administration"?<AdministrationModule/>:<><h1 className="admin-heading">{moduleNames[key]??item.title}</h1><p className="admin-subtitle">{item.description}</p><div className="module-placeholder"><strong>Module foundation</strong><p>This section is reserved for the {item.title.toLowerCase()} workflow. Data entry, approval steps, reporting and department-level database policies will be added in the next implementation phase.</p><span>Not connected to live records</span></div></>}
           </div>
     </main>
   </div></>;

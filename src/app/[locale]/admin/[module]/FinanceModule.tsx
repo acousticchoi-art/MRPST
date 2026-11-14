@@ -35,7 +35,7 @@ export default function FinanceModule(){
  supabase.from("finance_accounts").select("id,code,name_ko,name_en,account_type").eq("is_active",true).order("code"),
  supabase.from("journal_entries").select("id,entry_no,entry_date,description,status,fund_id,reference_no,journal_lines(account_id,description,debit,credit)").order("entry_date",{ascending:false}).limit(300),
  supabase.from("finance_donors").select("id,donor_code,display_name,donor_type,phone,email,country").eq("is_active",true).order("display_name"),
- supabase.from("finance_budgets").select("id,fiscal_year,title,fund_id,status,finance_budget_lines(id,account_id,planned_amount,finance_accounts(code,name_ko,name_en))").order("fiscal_year",{ascending:false}),
+ supabase.from("finance_budgets").select("id,fiscal_year,title,fund_id,status,finance_budget_lines(id,account_id,planned_amount,notes,finance_accounts(code,name_ko,name_en))").order("fiscal_year",{ascending:false}),
  supabase.from("finance_budget_vs_actual").select("*"),
  supabase.from("donor_contributions").select("id,contribution_date,purpose,original_currency,original_amount,exchange_rate,base_amount,donor_id,fund_id,journal_entry_id").order("contribution_date",{ascending:false}).limit(300),
  supabase.from("students").select("id,student_number,full_name,program,cohort,admission_year,student_status").order("student_number"),

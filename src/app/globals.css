@@ -599,3 +599,32 @@ button,a,input,select,textarea{transition-color:.16s}
   .header .brand>span:last-child{font-size:16px}
   .header .brand small{max-width:175px;font-size:6px}
 }
+
+
+/* Public contact page */
+.contact-page{max-width:1160px;margin:0 auto;padding:76px 28px 90px}
+.contact-page-heading{max-width:700px;margin:0 auto 42px;text-align:center}
+.contact-page-heading .eyebrow{color:#987b48;letter-spacing:.16em;font-size:11px;font-weight:800}
+.contact-page-heading h1{margin:15px 0;font-size:clamp(36px,5vw,54px);color:var(--navy);letter-spacing:-.04em}
+.contact-page-heading>p{color:#63727c;font-size:15px;line-height:1.9}
+.contact-page-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:22px;align-items:start}
+.contact-info-card,.contact-form-card{padding:clamp(25px,4vw,42px);border:1px solid #e4eaee;background:#fff;box-shadow:0 12px 36px rgba(16,45,66,.055)}
+.contact-info-card{background:linear-gradient(145deg,#f5f7f8,#fff 75%)}
+.contact-info-card .eyebrow{font-size:10px;color:#987b48;letter-spacing:.15em;font-weight:800}
+.contact-info-card h2{margin:18px 0;font-size:23px;line-height:1.5;color:var(--navy)}
+.contact-info-card>p{margin:0 0 22px;color:#596a75;font-size:14px;line-height:1.9;overflow-wrap:anywhere}
+.contact-info-divider{height:1px;background:#e3e9ec;margin:28px 0 20px}
+.contact-info-label{display:block;color:#7c8991;font-size:11px;font-weight:750}
+.contact-info-email{display:inline-block;margin-top:7px;color:var(--navy);font-weight:750}
+.contact-form-card h2{margin:0 0 25px;color:var(--navy);font-size:23px}
+.public-contact-form{display:grid;gap:17px}
+.public-contact-form label{display:grid;gap:8px;color:#40535f;font-size:13px;font-weight:700}
+.public-contact-form input,.public-contact-form textarea{width:100%;min-width:0;border:1px solid #dce4e8;border-radius:7px;background:#fff;padding:12px 13px;color:#263b49;font:inherit;font-size:14px;outline:none}
+.public-contact-form input{height:46px}
+.public-contact-form textarea{resize:vertical;min-height:140px;line-height:1.75}
+.public-contact-form input:focus,.public-contact-form textarea:focus{border-color:#9b8255;box-shadow:0 0 0 3px rgba(185,154,97,.13)}
+.public-contact-form .btn{justify-content:center;cursor:pointer;border:0}
+.contact-form-note{margin:0;color:#7a8790;font-size:11px;line-height:1.8}
+.contact-page-back{margin-top:32px;text-align:center}
+.contact-page-back a{color:var(--navy);font-size:13px;font-weight:750}
+@media(max-width:760px){.contact-page{padding:50px 18px 62px}.contact-page-heading{margin-bottom:28px}.contact-page-heading>p{font-size:13px}.contact-page-grid{grid-template-columns:1fr;gap:14px}.contact-info-card,.contact-form-card{padding:24px 20px}.contact-info-card h2,.contact-form-card h2{font-size:20px}}

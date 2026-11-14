@@ -50,7 +50,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
     roles=(roleRows??[]).map(row=>row.role as MrpstRole);
     overrides=permissions??[];
     if(error||!roleRows?.length||profile?.is_active!==true||!canAccessModule(roles,key,overrides)){
-      return <main className="login-wrap"><section className="login-card"><span className="eyebrow">PERMISSION REQUIRED</span><h1>Module access restricted</h1><p className="login-intro">Your assigned role does not include access to {item.title}. Contact the Super Administrator if this access is required for your work.</p><Link className="btn secondary" href={`/${locale}/admin`}>{t.back}</Link></section></main>;
+      return <main className="login-wrap"><section className="login-card"><span className="eyebrow">PERMISSION REQUIRED</span><h1>Module access restricted</h1><p className="login-intro">Your assigned role does not include access to {item.title}. Contact the Super Administrator if this access is required for your work.</p></section></main>;
     }
   }
   const visible=Object.entries(MODULES).filter(([moduleKey])=>!supabase||canAccessModule(roles,moduleKey as keyof typeof MODULES,overrides));
@@ -85,8 +85,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
       <div className="content">
         <span className="eyebrow">{t.module}</span>
         {key==="finance"?<FinanceModule/>:key==="students"?<StudentModule/>:key==="library"?<LibraryModule/>:key==="facilities"?<FacilitiesModule/>:key==="meetings"?<MeetingsModule/>:key==="academics"?<AcademicsModule/>:key==="administration"?<AdministrationModule/>:<><h1 className="admin-heading">{moduleNames[key]??item.title}</h1><p className="admin-subtitle">{item.description}</p><div className="module-placeholder"><strong>Module foundation</strong><p>This section is reserved for the {item.title.toLowerCase()} workflow. Data entry, approval steps, reporting and department-level database policies will be added in the next implementation phase.</p><span>Not connected to live records</span></div></>}
-        <Link className="btn secondary" href={`/${locale}/admin`}>{t.back}</Link>
-      </div>
+          </div>
     </main>
   </div></>;
 }

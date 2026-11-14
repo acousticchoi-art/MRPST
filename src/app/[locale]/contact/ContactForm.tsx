@@ -11,7 +11,8 @@ export default function ContactForm({locale}:{locale:string}) {
     event.preventDefault();
     setStatus("sending");
     setError("");
-    const form=new FormData(event.currentTarget);
+    const formElement=event.currentTarget;
+    const form=new FormData(formElement);
     const payload={
       name:String(form.get("name")||"").trim(),
       email:String(form.get("email")||"").trim(),
@@ -23,7 +24,7 @@ export default function ContactForm({locale}:{locale:string}) {
       const response=await fetch("/api/contact",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
       const result=await response.json();
       if(!response.ok) throw new Error(result.error||"메일 발송에 실패했습니다.");
-      event.currentTarget.reset();
+      formElement.reset();
       setStatus("success");
     } catch (err) {
       setError(err instanceof Error?err.message:"메일 발송 중 오류가 발생했습니다.");

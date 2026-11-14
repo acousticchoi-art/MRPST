@@ -11,18 +11,19 @@ const LibraryModule=dynamic(()=>import("./LibraryModule"));
 const FacilitiesModule=dynamic(()=>import("./FacilitiesModule"));
 const MeetingsModule=dynamic(()=>import("./MeetingsModule"));
 const AcademicsModule=dynamic(()=>import("./AcademicsModule"));
+const GradeManagementModule=dynamic(()=>import("./GradeManagementModule"));
 const AdministrationModule=dynamic(()=>import("./AdministrationModule"));
 
 const copy = {
   ko:{
     admin:"MRPST 관리자",dashboard:"대시보드",view:"홈페이지 보기 ↗",
-    finance:"재정 관리",students:"학생 관리",academics:"학사 관리",facilities:"시설 관리",
+    finance:"재정 관리",students:"학생 관리",academics:"학사 관리",grades:"성적 관리",facilities:"시설 관리",
     library:"도서관 관리",meetings:"회의 관리",administration:"회원 및 권한 관리",website:"홈페이지 관리",
     workspace:"관리 메뉴",back:"대시보드로 돌아가기",module:"관리 모듈"
   },
   my:{
     admin:"MRPST အုပ်ချုပ်ရေး",dashboard:"ဒက်ရှ်ဘုတ်",view:"ဝဘ်ဆိုက်ကြည့်ရန် ↗",
-    finance:"ဘဏ္ဍာရေး",students:"ကျောင်းသား",academics:"ပညာရေး",facilities:"အဆောက်အအုံ",
+    finance:"ဘဏ္ဍာရေး",students:"ကျောင်းသား",academics:"ပညာရေး",grades:"အမှတ်စာရင်း",facilities:"အဆောက်အအုံ",
     library:"စာကြည့်တိုက်",meetings:"အစည်းအဝေး",administration:"အသင်းဝင်နှင့် ခွင့်ပြုချက်",website:"ဝဘ်ဆိုက်",
     workspace:"စီမံခန့်ခွဲမှု",back:"ဒက်ရှ်ဘုတ်သို့ ပြန်သွားရန်",module:"စီမံခန့်ခွဲမှုကဏ္ဍ"
   }
@@ -55,7 +56,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
     }
   }
   const visible=Object.entries(MODULES).filter(([moduleKey])=>!supabase||canAccessModule(roles,moduleKey as keyof typeof MODULES,overrides));
-  const moduleNames:Record<string,string>={finance:t.finance,students:t.students,academics:t.academics,facilities:t.facilities,library:t.library,meetings:t.meetings,administration:t.administration,website:t.website};
+  const moduleNames:Record<string,string>={finance:t.finance,students:t.students,academics:t.academics,grades:t.grades,facilities:t.facilities,library:t.library,meetings:t.meetings,administration:t.administration,website:t.website};
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
     <aside className="sidebar">
       <div className="sidebar-nav">

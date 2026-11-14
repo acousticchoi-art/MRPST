@@ -723,3 +723,50 @@ input,select,textarea,button{max-width:100%}
  .admin-global-links{padding-inline:6px}
  .admin-global-link{padding-inline:8px;font-size:10px}
 }
+
+
+/* Facilities submenu: clear, high-contrast navigation */
+.facility-tabs{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:8px;
+  padding:12px;
+  margin:16px 0 18px;
+  overflow:visible;
+  border:1px solid #dce4e9;
+  border-radius:12px;
+  background:#f3f6f8;
+}
+.facility-tabs button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:54px;
+  padding:12px 10px;
+  border:1px solid #d8e1e7;
+  border-radius:9px;
+  background:#fff;
+  color:#334b5b;
+  font-size:13px;
+  font-weight:650;
+  white-space:normal;
+  line-height:1.35;
+  transition:background .15s,border-color .15s,color .15s,box-shadow .15s;
+}
+.facility-tabs button:hover{
+  border-color:#8da5b4;
+  background:#f8fbfc;
+}
+.facility-tabs button.selected{
+  border:2px solid #173c55;
+  background:#173c55;
+  color:#fff;
+  box-shadow:0 3px 9px rgba(23,60,85,.18);
+}
+@media(max-width:900px){
+  .facility-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:560px){
+  .facility-tabs{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:9px}
+  .facility-tabs button{min-height:48px;font-size:12px;padding:10px 8px}
+}

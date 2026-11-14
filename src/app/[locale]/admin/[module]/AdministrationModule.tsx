@@ -17,15 +17,6 @@ const pageOptions=[
  {key:"meetings",title:"회의 자료",description:"교수회 및 각종 회의 자료"},
  {key:"website",title:"홈페이지 관리",description:"학교 소개, 공지 및 홈페이지 콘텐츠"}
 ] as const;
-const defaultPageRoles:Record<string,string[]>={
- finance:["super_admin","administrator","finance_officer"],
- students:["super_admin","administrator","student_officer","academic_officer"],
- academics:["super_admin","administrator","academic_officer","faculty"],
- facilities:["super_admin","administrator","facility_manager"],
- library:["super_admin","administrator","librarian"],
- meetings:["super_admin","administrator","academic_officer","faculty","staff"],
- website:["super_admin","administrator"]
-};
 export default function AdministrationModule(){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [users,setUsers]=useState<P[]>([]),[deps,setDeps]=useState<D[]>([]),[logs,setLogs]=useState<any[]>([]);
@@ -74,11 +65,7 @@ export default function AdministrationModule(){
  }
  function openUser(p:P){
   setSelectedId(p.user_id);setFullName(p.full_name||"");setPreferredLocale(p.preferred_locale==="my"?"my":"ko");setRole("staff");setDepId("");setNewPassword("");setNotice("");setError("");
-  const allowed=pageOptions.filter(option=>{
-   const override=p.permissions.find(permission=>permission.module_key===option.key);
-   return override?override.can_view:p.roles.some(userRole=>defaultPageRoles[option.key].includes(userRole.role));
-  }).map(option=>option.key);
-  setSelectedPageKeys(allowed);
+  setSelectedPageKeys(pageOptions.filter(option=>p.permissions.some(permission=>permission.module_key===option.key&&permission.can_view)).map(option=>option.key));
  }
  const filtered=users.filter(x=>{
   const text=[x.full_name,x.email||"",x.user_id,...x.roles.map(r=>names[r.role]||r.role),...x.roles.map(r=>deps.find(d=>d.id===r.department_id)?.name_ko||"")].join(" ").toLowerCase();
@@ -97,7 +84,7 @@ export default function AdministrationModule(){
    const existing=selected.permissions.find(permission=>permission.module_key===option.key);
    return {user_id:selected.user_id,module_key:option.key,can_view:selectedPageKeys.includes(option.key),can_manage:existing?.can_manage??false,assigned_by:user?.id??null,updated_at:new Date().toISOString()};
   });
-  await run(()=>db.from("user_module_permissions").upsert(rows,{onConflict:"user_id,module_key"}),"선เลือกထားသော စာမျက်နှာခွင့်ပြုချက်များကို သိမ်းဆည်းပြီးပါပြီ။");
+  await run(()=>db.from("user_module_permissions").upsert(rows,{onConflict:"user_id,module_key"}),"페이지 표시 설정을 저장했습니다.");
  }
  const tabs=[["users","회원·권한 관리"],["departments","부서 관리"],["audit","변경 이력"]];
  return <div className="settings-workspace">
@@ -131,21 +118,18 @@ export default function AdministrationModule(){
       </div>
       <div className="settings-detail-section"><h4>새 권한 부여</h4><div className="settings-role-form"><select value={role} onChange={e=>setRole(e.target.value)}>{roles.filter(r=>r!=="super_admin"&&r!=="student").map(r=><option key={r} value={r}>{names[r]}</option>)}</select><select value={depId} onChange={e=>setDepId(e.target.value)}><option value="">전체 부서</option>{deps.filter(d=>d.is_active).map(d=><option key={d.id} value={d.id}>{d.name_ko||d.name_en}</option>)}</select><button className="settings-primary" disabled={saving||selected.roles.some(r=>r.role===role&&r.department_id===(depId||null))} onClick={assign}>권한 추가</button></div></div>
       <div className="settings-detail-section">
-       <h4>페이지별 접근 권한 <small>{selectedPageKeys.length}/{pageOptions.length}개 허용</small></h4>
-       <p className="settings-form-hint">이 회원이 볼 수 있는 관리 페이지를 직접 선택합니다. 체크하지 않은 페이지는 역할 기본 권한과 관계없이 접근이 차단됩니다. 설정을 저장하면 메뉴와 직접 주소 접근 모두에 적용됩니다.</p>
+       <h4>보여줄 페이지 <small>{selectedPageKeys.length}/{pageOptions.length}</small></h4>
+       <p className="settings-form-hint">이 회원에게 보여줄 페이지만 선택하세요.</p>
        <div className="settings-page-permissions">
         {pageOptions.map(option=><label className="settings-page-permission" key={option.key}>
-         <input type="checkbox" checked={selectedPageKeys.includes(option.key)} onChange={e=>setSelectedPageKeys(current=>e.target.checked?[...current,option.key]:current.filter(key=>key!==option.key))}/>
-         <span><strong>{option.title}</strong><small>{option.description}</small></span>
+         <input type="checkbox" checked={selectedPageKeys.includes(option.key)} disabled={selected.roles.some(r=>r.role==="super_admin")} onChange={e=>setSelectedPageKeys(current=>e.target.checked?[...current,option.key]:current.filter(key=>key!==option.key))}/>
+         <span><strong>{option.title}</strong></span>
         </label>)}
-        <div className="settings-page-permission locked"><span className="settings-lock">관리자 전용</span><span><strong>회원 및 권한 관리</strong><small>최고 관리자만 접근할 수 있습니다.</small></span></div>
        </div>
        <div className="settings-page-permission-actions">
-        <button type="button" className="settings-refresh" disabled={saving} onClick={()=>setSelectedPageKeys(pageOptions.map(option=>option.key))}>전체 선택</button>
-        <button type="button" className="settings-refresh" disabled={saving} onClick={()=>setSelectedPageKeys([])}>전체 해제</button>
-        <button type="button" className="settings-primary" disabled={saving||selected.roles.some(r=>r.role==="super_admin")} onClick={()=>void savePagePermissions()}>{saving?"저장 중…":"페이지 권한 저장"}</button>
+        <button type="button" className="settings-primary" disabled={saving||selected.roles.some(r=>r.role==="super_admin")} onClick={()=>void savePagePermissions()}>{saving?"저장 중…":"저장"}</button>
        </div>
-       {selected.roles.some(r=>r.role==="super_admin")&&<p className="settings-form-hint">최고 관리자는 모든 관리 페이지에 접근할 수 있으며, 이 설정으로 제한되지 않습니다.</p>}
+       {selected.roles.some(r=>r.role==="super_admin")&&<p className="settings-form-hint">최고 관리자는 모든 페이지가 표시됩니다.</p>}
       </div>
       <div className="settings-danger-zone"><div><strong>계정 상태</strong><small>{selected.is_active?"현재 로그인 및 서비스 이용이 가능한 상태입니다.":"현재 비활성화된 계정입니다."}</small></div><button disabled={saving||selected.roles.some(r=>r.role==="super_admin")} onClick={()=>toggle(selected)}>{selected.is_active?"회원 비활성화":"회원 다시 활성화"}</button></div>
      </div>:<div className="settings-member-empty"><strong>회원을 선택해 주세요</strong><p>왼쪽 목록에서 회원을 선택하면 상세 정보와 권한을 관리할 수 있습니다.</p></div>}

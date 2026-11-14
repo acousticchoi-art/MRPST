@@ -23,11 +23,11 @@ export default function ContactForm({locale}:{locale:string}) {
     try {
       const response=await fetch("/api/contact",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
       const result=await response.json();
-      if(!response.ok) throw new Error(result.error||"메일 발송에 실패했습니다.");
+      if(!response.ok) throw new Error(result.error||(isKo?"메일 발송에 실패했습니다.":"အီးမေးလ်ပို့၍ မရပါ။"));
       formElement.reset();
       setStatus("success");
     } catch (err) {
-      setError(err instanceof Error?err.message:"메일 발송 중 오류가 발생했습니다.");
+      setError(err instanceof Error?err.message:(isKo?"메일 발송 중 오류가 발생했습니다.":"အီးမေးလ်ပို့ရာတွင် အမှားဖြစ်ပွားခဲ့ပါသည်။"));
       setStatus("error");
     }
   }

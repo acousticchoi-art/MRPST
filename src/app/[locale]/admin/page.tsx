@@ -1,10 +1,11 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {redirect} from "next/navigation";
 import {createSupabaseServerClient} from "@/lib/supabase/server";
 import {isSupabaseConfigured} from "@/lib/supabase/config";
 import {MODULES,canAccessModule,type MrpstRole} from "@/lib/auth/permissions";
 import AdminActions from "./AdminActions";
-import AdminMyanmarTranslator from "./AdminMyanmarTranslator";
+const AdminMyanmarTranslator=dynamic(()=>import("./AdminMyanmarTranslator"));
 
 const copy = {
   en: {
@@ -84,7 +85,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   }
   if(accessDenied) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>{t.denied}</h1><p className="login-intro">{t.deniedText}</p><Link className="btn secondary" href={`/${locale}`}>{t.back}</Link></section></main>;
   const visible=Object.entries(MODULES).filter(([key])=>!supabase||canAccessModule(roles,key as keyof typeof MODULES,moduleOverrides));
-  return <><AdminMyanmarTranslator locale={locale}/><div className="admin">
+  return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
     <aside className="sidebar">
       <div className="sidebar-nav">
         <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{t.admin}</small></span></Link>

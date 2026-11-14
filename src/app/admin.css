@@ -888,3 +888,70 @@ input,select,textarea,button{max-width:100%}
   .finance-sheet-action{justify-content:stretch}
   .finance-sheet-link{width:100%;min-height:46px}
 }
+
+
+/* Per-member page access controls */
+.settings-page-permissions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin:14px 0;
+}
+.settings-page-permission{
+  display:flex;
+  align-items:flex-start;
+  gap:11px;
+  min-width:0;
+  padding:13px 14px;
+  border:1px solid var(--admin-border,#e5e7eb);
+  border-radius:12px;
+  background:var(--admin-card,#fff);
+  cursor:pointer;
+}
+.settings-page-permission input{
+  width:18px;
+  height:18px;
+  flex:0 0 18px;
+  margin:2px 0 0;
+  accent-color:var(--admin-accent,#d84b83);
+}
+.settings-page-permission span{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width:0;
+}
+.settings-page-permission strong{font-size:14px;line-height:1.4}
+.settings-page-permission small{font-size:12px;line-height:1.5;color:#7b8492}
+.settings-page-permission.locked{
+  cursor:not-allowed;
+  background:#f8f8fa;
+  border-style:dashed;
+}
+.settings-page-permission .settings-lock{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:22px;
+  padding:2px 7px;
+  border-radius:6px;
+  background:#f0edf0;
+  color:#666;
+  font-size:10px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.settings-page-permission-actions{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+.settings-page-permission-actions .settings-primary{margin-left:auto}
+@media(max-width:640px){
+  .settings-page-permissions{grid-template-columns:minmax(0,1fr);gap:8px}
+  .settings-page-permission{padding:12px}
+  .settings-page-permission-actions{display:grid;grid-template-columns:1fr 1fr}
+  .settings-page-permission-actions .settings-primary{grid-column:1/-1;margin-left:0;width:100%}
+}

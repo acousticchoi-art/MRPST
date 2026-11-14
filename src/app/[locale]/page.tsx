@@ -22,7 +22,7 @@ const copy = {
       ["2024","A report by the MRPST Student Affairs Director noted that graduates were serving in approximately 50 churches connected with the Myanmar Reformed Presbyterian Community Church (MRPCC)."],
     ],
     contactText:"Contact the seminary for program information, admissions and institutional enquiries.",
-    addressText:"Official address, phone number and email will be added after confirmation."
+    addressText:"No.286, 10th Kaya St, Thingangyungyi, Mingladon Township, Yangon, Myanmar"
   },
   my: {
     about:"ကျောင်းအကြောင်း", academics:"ပညာရေး", history:"သမိုင်း", contact:"ဆက်သွယ်ရန်",
@@ -45,7 +45,7 @@ const copy = {
       ["၂၀၂၄","MRPST ကျောင်းသားရေးရာတာဝန်ခံ၏ အစီရင်ခံစာတွင် ကျောင်းဆင်းများသည် Myanmar Reformed Presbyterian Community Church နှင့် ဆက်စပ်သော အသင်းတော် ၅၀ ခန့်တွင် အမှုတော်ဆောင်နေကြောင်း ဖော်ပြထားပြီး ဓမ္မပညာသင်ကြားရေး၊ ဆရာအင်အားပြုစုပျိုးထောင်ရေးနှင့် အသင်းတော်တည်ထောင်ရေးလုပ်ငန်းများကို ဆက်လက်အလေးထားကြောင်း ဖော်ပြထားပါသည်။"]
     ],
     contactText:"သင်တန်းအစီအစဉ်၊ ဝင်ခွင့်နှင့် ကျောင်းဆိုင်ရာ အချက်အလက်များအတွက် ဆက်သွယ်နိုင်ပါသည်။",
-    addressText:"တရားဝင်လိပ်စာ၊ ဖုန်းနံပါတ်နှင့် အီးမေးလ်ကို အတည်ပြုပြီး ထည့်သွင်းပါမည်။"
+    addressText:"No.286, 10th Kaya St, Thingangyungyi, Mingladon Township, Yangon, Myanmar"
   },
   ko: {
     about:"학교 소개", academics:"학과 안내", history:"연혁", contact:"연락처",
@@ -68,7 +68,7 @@ const copy = {
       ["2024년","MRPST 학생처장의 사역 보고서에 따르면 졸업생들은 미얀마개혁장로교공동체교회(MRPCC)와 연결된 약 50개 교회에서 사역하고 있습니다."],
     ],
     contactText:"교육과정, 입학 및 학교 관련 문의는 아래 연락처를 통해 해주시기 바랍니다.",
-    addressText:"공식 주소와 전화번호, 이메일은 확인 후 안내할 예정입니다."
+    addressText:"No.286, 10th Kaya St, Thingangyungyi, Mingladon Township, Yangon, Myanmar"
   }
 } as const;
 
@@ -80,9 +80,9 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
   return <>
     <header className="header">
       <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{officialName.toUpperCase()}</small></span></Link>
-      <nav className="nav"><a href="#about">{t.about}</a><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><a href="#contact">{t.contact}</a></nav>
+      <nav className="nav"><a href="#about">{t.about}</a><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><Link href={`/${locale}/contact`}>{t.contact}</Link></nav>
       <div className="header-tools"><div className="langs"><Link href="/my" aria-label="မြန်မာဘာသာ">မြန်မာ</Link><Link href="/ko" aria-label="한국어">한국어</Link></div><Link className="admin-link" href={`/${locale}/admin`}>{locale==="ko"?"관리자":"အုပ်ချုပ်ရေး"}</Link></div>
-      <details className="mobile-menu"><summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary><nav className="mobile-nav"><a href="#about">{t.about}</a><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><a href="#contact">{t.contact}</a><Link href={`/${locale}/admin`}>Admin</Link><div className="mobile-langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div></nav></details>
+      <details className="mobile-menu"><summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary><nav className="mobile-nav"><a href="#about">{t.about}</a><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><a href="#contact">{t.contact}</a><Link href={`/${locale}/contact`}>{t.contact}</Link><Link href={`/${locale}/admin`}>Admin</Link><div className="mobile-langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div></nav></details>
     </header>
     <main className="homepage">
       <section className="hero hero-redesign">
@@ -139,9 +139,9 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
       </section>
 
       <section id="contact" className="contact-section">
-        <div className="contact"><div><span className="eyebrow">{locale==="ko"?"04 — GET IN TOUCH":"04 — GET IN TOUCH"}</span><h2>{t.contactTitle}</h2><p>{t.contactText}</p></div><div className="contact-action"><p>{t.addressText}</p><span className="btn light contact-label">{locale==="ko"?"MRPST":"MRPST"}</span></div></div>
+        <div className="contact"><div><span className="eyebrow">{locale==="ko"?"04 — GET IN TOUCH":"04 — GET IN TOUCH"}</span><h2>{t.contactTitle}</h2><p>{t.contactText}</p></div><div className="contact-action"><p className="contact-address">{t.addressText}</p><a className="btn light" href="https://maps.app.goo.gl/rqupUXw5JiumcrMv9?g_st=ic" target="_blank" rel="noopener noreferrer">{locale==="ko"?"구글 지도에서 위치 보기":"Google Maps ဖြင့် ကြည့်ရန်"} ↗</a><p className="contact-email"><a href="mailto:acousticchoi@gmail.com">acousticchoi@gmail.com</a></p><Link className="btn light" href={`/${locale}/contact`}>{locale==="ko"?"문의하기":"ဆက်သွယ်ရန်"} ↗</Link></div></div>
       </section>
     </main>
-    <footer className="footer"><span>{officialName}</span><span>© {new Date().getFullYear()} MRPST</span></footer>
+    <footer className="footer"><span>{officialName}</span><span><Link href={`/${locale}/contact`}>{t.contact}</Link> · © {new Date().getFullYear()} MRPST</span></footer>
   </>;
 }

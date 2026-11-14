@@ -509,3 +509,93 @@ button,a,input,select,textarea{transition-color:.16s}
   .header{padding-inline:13px}
   .header .brand small{max-width:175px;font-size:6.5px}
 }
+
+
+/* MRPST identity lockup — refined academic monogram */
+.header .brand{
+  gap:13px;
+  align-items:center;
+}
+.header .brand .mark{
+  position:relative;
+  isolation:isolate;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  width:49px;
+  height:49px;
+  overflow:hidden;
+  border:1px solid rgba(185,154,97,.8);
+  border-radius:9px;
+  background:linear-gradient(145deg,#1b4965 0%,#102d42 78%);
+  color:#fff;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:29px;
+  font-weight:700;
+  line-height:1;
+  letter-spacing:-.08em;
+  padding-right:2px;
+  box-shadow:0 5px 14px rgba(16,45,66,.14),inset 0 1px 0 rgba(255,255,255,.12);
+}
+.header .brand .mark:before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:4px;
+  border:1px solid rgba(232,215,181,.38);
+  border-radius:5px;
+}
+.header .brand .mark:after{
+  content:"";
+  position:absolute;
+  bottom:7px;
+  left:50%;
+  width:15px;
+  height:1px;
+  transform:translateX(-50%);
+  background:#d6bd8e;
+}
+.header .brand>span:last-child{
+  display:block;
+  color:var(--navy);
+  font-family:Georgia,"Noto Sans KR",serif;
+  font-size:20px;
+  font-weight:800;
+  line-height:1.1;
+  letter-spacing:.075em;
+}
+.header .brand small{
+  display:block;
+  margin-top:5px;
+  color:#71808a;
+  font-family:Arial,"Noto Sans Myanmar","Noto Sans KR",sans-serif;
+  font-size:7.5px;
+  font-weight:700;
+  line-height:1.45;
+  letter-spacing:.105em;
+  white-space:nowrap;
+}
+@media(max-width:980px) and (min-width:761px){
+  .header .brand{gap:10px}
+  .header .brand .mark{width:44px;height:44px;font-size:26px}
+  .header .brand>span:last-child{font-size:18px}
+  .header .brand small{font-size:6.5px;letter-spacing:.075em}
+}
+@media(max-width:760px){
+  .header .brand{gap:9px}
+  .header .brand .mark{width:42px;height:42px;font-size:25px;border-radius:8px}
+  .header .brand .mark:before{inset:3px}
+  .header .brand .mark:after{bottom:6px;width:13px}
+  .header .brand>span:last-child{font-size:17px;letter-spacing:.07em}
+  .header .brand small{
+    max-width:205px;
+    margin-top:4px;
+    font-size:6.5px;
+    letter-spacing:.065em;
+  }
+}
+@media(max-width:380px){
+  .header .brand .mark{width:39px;height:39px;font-size:23px}
+  .header .brand>span:last-child{font-size:16px}
+  .header .brand small{max-width:175px;font-size:6px}
+}

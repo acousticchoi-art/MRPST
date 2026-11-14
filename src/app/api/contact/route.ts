@@ -18,8 +18,8 @@ export async function POST(request: Request) {
     if (!name || !email || !subject || !message ||
         name.length > MAX_LENGTH.name || email.length > MAX_LENGTH.email ||
         subject.length > MAX_LENGTH.subject || message.length > MAX_LENGTH.message ||
-        !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) ||
-        /[\\r\\n]/.test(email) || /[\\r\\n]/.test(subject)) {
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+        /[\r\n]/.test(email) || /[\r\n]/.test(subject)) {
       return NextResponse.json({ error: "အချက်အလက်များကို မှန်ကန်စွာ ဖြည့်သွင်းပေးပါ။" }, { status: 400 });
     }
 
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
           message,
           "",
           "ဤအီးမေးလ်ကို ပြန်လည်ဖြေကြားရန် Reply ကို နှိပ်ပါ။",
-        ].join("\\n"),
+        ].join("\n"),
       }),
     });
 

@@ -1040,3 +1040,142 @@ input,select,textarea,button{max-width:100%}
  .settings-danger-zone{align-items:flex-start;flex-direction:column}
  .settings-danger-zone button{width:100%}
 }
+
+
+
+/* Global admin form controls: consistent sizing and visual language */
+.module-page-content :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea),
+.admin-main .content :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea){
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  min-height:42px;
+  padding:10px 12px;
+  border:1px solid #d5dfe6;
+  border-radius:8px;
+  background-color:#fff;
+  color:#173c55;
+  font:inherit;
+  font-size:13px;
+  line-height:1.45;
+  box-shadow:none;
+  transition:border-color .15s ease,box-shadow .15s ease,background-color .15s ease;
+}
+.module-page-content :is(input,select,textarea)::placeholder,
+.admin-main .content :is(input,select,textarea)::placeholder{color:#9aa7af;opacity:1}
+.module-page-content :is(input,select,textarea):hover,
+.admin-main .content :is(input,select,textarea):hover{border-color:#aabac5}
+.module-page-content :is(input,select,textarea):focus,
+.admin-main .content :is(input,select,textarea):focus{
+  outline:none;border-color:#64869c;
+  box-shadow:0 0 0 3px rgba(72,112,139,.12);
+}
+.module-page-content select,
+.admin-main .content select{
+  appearance:none;
+  padding-right:36px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235d7484' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  background-size:14px;
+  cursor:pointer;
+}
+.module-page-content textarea,
+.admin-main .content textarea{min-height:92px;resize:vertical}
+.module-page-content :is(input[type="checkbox"],input[type="radio"]),
+.admin-main .content :is(input[type="checkbox"],input[type="radio"]){
+  accent-color:#173c55;
+  width:17px;height:17px;min-width:17px;min-height:17px;
+  padding:0;vertical-align:middle;
+}
+.module-page-content :is(input:disabled,select:disabled,textarea:disabled),
+.admin-main .content :is(input:disabled,select:disabled,textarea:disabled){
+  background:#f2f5f7;color:#84919a;cursor:not-allowed;opacity:.8
+}
+.module-page-content :is(.finance-form-grid,.student-form-grid,.academics-form-grid,.facility-form-grid,.library-form-grid,.meeting-form-grid,.settings-form-grid) label,
+.admin-main .content :is(.finance-form-grid,.student-form-grid,.academics-form-grid,.facility-form-grid,.library-form-grid,.meeting-form-grid,.settings-form-grid) label{
+  min-width:0;line-height:1.45;font-weight:600;color:#435866
+}
+
+/* Modal layers must sit above the sticky admin navigation */
+:is(.student-modal-backdrop,.academics-modal-backdrop,.facility-modal-backdrop,.library-modal-backdrop,.meeting-modal-backdrop,.settings-modal-backdrop){
+  position:fixed;
+  inset:0;
+  z-index:500!important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:clamp(12px,3vw,28px);
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  background:rgba(12,29,42,.56);
+  -webkit-backdrop-filter:blur(2px);
+  backdrop-filter:blur(2px);
+}
+:is(.student-modal,.academics-modal,.facility-modal,.library-modal,.meeting-modal,.settings-modal){
+  box-sizing:border-box;
+  width:min(760px,100%);
+  max-width:100%;
+  max-height:calc(100dvh - 40px);
+  margin:auto;
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  border:1px solid #e1e8ed;
+  border-radius:14px;
+  padding:clamp(16px,2.5vw,24px);
+  background:#fff;
+  box-shadow:0 22px 70px rgba(9,27,40,.24);
+}
+:is(.student-modal-head,.facility-modal-head,.library-modal-head,.meeting-modal>header,.academics-modal>header,.settings-modal>header){
+  position:sticky;
+  top:calc(-1 * clamp(16px,2.5vw,24px));
+  z-index:2;
+  padding:3px 0 12px;
+  background:#fff;
+}
+:is(.student-modal-actions,.facility-modal-actions,.library-modal-actions,.meeting-modal-actions,.academics-modal-actions,.settings-modal footer){
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  align-items:center;
+  gap:9px;
+  margin-top:20px;
+  padding-top:14px;
+  border-top:1px solid #e8edf0;
+  background:#fff;
+}
+:is(.student-modal-actions,.facility-modal-actions,.library-modal-actions,.meeting-modal-actions,.academics-modal-actions,.settings-modal footer) button{
+  min-height:40px;
+  padding:9px 15px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:650;
+}
+@media(max-width:760px){
+  .module-page-content :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea),
+  .admin-main .content :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea){
+    min-height:44px;
+    font-size:16px!important;
+  }
+  :is(.student-modal-backdrop,.academics-modal-backdrop,.facility-modal-backdrop,.library-modal-backdrop,.meeting-modal-backdrop,.settings-modal-backdrop){
+    align-items:center;
+    padding:12px;
+  }
+  :is(.student-modal,.academics-modal,.facility-modal,.library-modal,.meeting-modal,.settings-modal){
+    width:100%;
+    max-height:calc(100dvh - 24px);
+    border-radius:12px;
+    padding:16px;
+  }
+  :is(.student-modal-actions,.facility-modal-actions,.library-modal-actions,.meeting-modal-actions,.academics-modal-actions,.settings-modal footer){
+    position:sticky;
+    bottom:-16px;
+    margin-inline:-16px;
+    padding:12px 16px 2px;
+  }
+  :is(.student-modal-actions,.facility-modal-actions,.library-modal-actions,.meeting-modal-actions,.academics-modal-actions,.settings-modal footer) button{
+    flex:1 1 120px;
+  }
+}

@@ -1,16 +1,17 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {notFound,redirect} from "next/navigation";
 import {createSupabaseServerClient} from "@/lib/supabase/server";
 import {MODULES,getModuleKey,canAccessModule,type MrpstRole} from "@/lib/auth/permissions";
 import AdminActions from "../AdminActions";
-import AdminMyanmarTranslator from "../AdminMyanmarTranslator";
-import FinanceModule from "./FinanceModule";
-import StudentModule from "./StudentModule";
-import LibraryModule from "./LibraryModule";
-import FacilitiesModule from "./FacilitiesModule";
-import MeetingsModule from "./MeetingsModule";
-import AcademicsModule from "./AcademicsModule";
-import AdministrationModule from "./AdministrationModule";
+const AdminMyanmarTranslator=dynamic(()=>import("../AdminMyanmarTranslator"));
+const FinanceModule=dynamic(()=>import("./FinanceModule"));
+const StudentModule=dynamic(()=>import("./StudentModule"));
+const LibraryModule=dynamic(()=>import("./LibraryModule"));
+const FacilitiesModule=dynamic(()=>import("./FacilitiesModule"));
+const MeetingsModule=dynamic(()=>import("./MeetingsModule"));
+const AcademicsModule=dynamic(()=>import("./AcademicsModule"));
+const AdministrationModule=dynamic(()=>import("./AdministrationModule"));
 
 const copy = {
   ko:{
@@ -55,7 +56,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
   }
   const visible=Object.entries(MODULES).filter(([moduleKey])=>!supabase||canAccessModule(roles,moduleKey as keyof typeof MODULES,overrides));
   const moduleNames:Record<string,string>={finance:t.finance,students:t.students,academics:t.academics,facilities:t.facilities,library:t.library,meetings:t.meetings,administration:t.administration,website:t.website};
-  return <><AdminMyanmarTranslator locale={locale}/><div className="admin">
+  return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
     <aside className="sidebar">
       <div className="sidebar-nav">
         <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{t.admin}</small></span></Link>

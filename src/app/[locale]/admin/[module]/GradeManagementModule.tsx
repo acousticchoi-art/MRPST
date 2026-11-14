@@ -123,7 +123,7 @@ export default function GradeManagementModule(){
 
  return <div className={styles.workspace}>
   <div className={styles.heading}>
-   <div><span className={styles.eyebrow}>ACADEMIC RECORDS</span><h2>성적관리</h2><p>학과·학년·학기별 성적을 조회하고 과목별 점수를 일괄 입력합니다.</p></div>
+   <div><span className={styles.eyebrow}>ACADEMIC RECORDS</span><h2>성적관리</h2><p>학과·학년·학기별 성적을 조회하고 과목별 점수를 일괄 입력합니다. 공식 학번은 추후 등록하며, 현재는 순번으로 구분합니다.</p></div>
    <span className={styles.permission}>행정 담당자 전용 입력</span>
   </div>
   <div className={styles.filters}>

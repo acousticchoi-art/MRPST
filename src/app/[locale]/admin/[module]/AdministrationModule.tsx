@@ -2,11 +2,30 @@
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 type UserRole={id:string;role:string;department_id:string|null};
-type P={user_id:string;full_name:string;email:string|null;preferred_locale:string;is_active:boolean;created_at:string;roles:UserRole[]};
+type UserModulePermission={module_key:string;can_view:boolean;can_manage:boolean};
+type P={user_id:string;full_name:string;email:string|null;preferred_locale:string;is_active:boolean;created_at:string;roles:UserRole[];permissions:UserModulePermission[]};
 type D={id:string;code:string;name_en:string;name_my:string|null;name_ko:string|null;is_active:boolean};
 const roles=["super_admin","administrator","finance_officer","academic_officer","student_officer","librarian","facility_manager","faculty","staff","student"];
 const names:Record<string,string>={super_admin:"최고 관리자",administrator:"관리자",finance_officer:"재정 담당",academic_officer:"학사 담당",student_officer:"학생 담당",librarian:"도서관 담당",facility_manager:"시설 담당",faculty:"교수",staff:"직원",student:"학생"};
 const localeNames:Record<string,string>={ko:"한국어",my:"မြန်မာ"};
+const pageOptions=[
+ {key:"finance",title:"재정 관리",description:"회계, 예산, 후원금 및 지출"},
+ {key:"students",title:"학생 관리",description:"학생 정보, 학적 및 장학"},
+ {key:"academics",title:"학사 관리",description:"학과, 과목, 시간표 및 성적"},
+ {key:"facilities",title:"시설 관리",description:"건물, 비품, 차량 및 유지보수"},
+ {key:"library",title:"도서관 관리",description:"도서 목록, 대출 및 반납"},
+ {key:"meetings",title:"회의 자료",description:"교수회 및 각종 회의 자료"},
+ {key:"website",title:"홈페이지 관리",description:"학교 소개, 공지 및 홈페이지 콘텐츠"}
+] as const;
+const defaultPageRoles:Record<string,string[]>={
+ finance:["super_admin","administrator","finance_officer"],
+ students:["super_admin","administrator","student_officer","academic_officer"],
+ academics:["super_admin","administrator","academic_officer","faculty"],
+ facilities:["super_admin","administrator","facility_manager"],
+ library:["super_admin","administrator","librarian"],
+ meetings:["super_admin","administrator","academic_officer","faculty","staff"],
+ website:["super_admin","administrator"]
+};
 export default function AdministrationModule(){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [users,setUsers]=useState<P[]>([]),[deps,setDeps]=useState<D[]>([]),[logs,setLogs]=useState<any[]>([]);
@@ -15,7 +34,7 @@ export default function AdministrationModule(){
  const [selectedId,setSelectedId]=useState(""),[fullName,setFullName]=useState(""),[preferredLocale,setPreferredLocale]=useState("ko"),[role,setRole]=useState("staff"),[depId,setDepId]=useState("");
  const [newDep,setNewDep]=useState({code:"",name_en:"",name_my:"",name_ko:""}),[depOpen,setDepOpen]=useState(false),[editingDepId,setEditingDepId]=useState("");
  const [createOpen,setCreateOpen]=useState(false),[newUser,setNewUser]=useState({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""}),[newPassword,setNewPassword]=useState("");
- const [moduleKey,setModuleKey]=useState("students"),[moduleView,setModuleView]=useState(true),[moduleManage,setModuleManage]=useState(false);
+ const [selectedPageKeys,setSelectedPageKeys]=useState<string[]>([]);
  const selected=users.find(x=>x.user_id===selectedId)||null;
  const load=useCallback(async()=>{
   if(!db){setLoading(false);setError("데이터베이스 연결을 확인해 주세요.");return;}
@@ -29,8 +48,17 @@ export default function AdministrationModule(){
   if(errs.length){setError(errs.join(" · "));setLoading(false);return;}
   const rows=(p.data||[]) as Omit<P,"roles">[],ids=rows.map(x=>x.user_id);
   let rr:UserRole[]=[];
-  if(ids.length){const r=await db.from("user_roles").select("id,user_id,role,department_id").in("user_id",ids);if(r.error){setError(r.error.message);setLoading(false);return;}rr=(r.data||[]) as UserRole[];}
-  const mapped=rows.map(x=>({...x,roles:rr.filter(y=>(y as any).user_id===x.user_id)})) as P[];
+  let pp:(UserModulePermission & {user_id:string})[]=[];
+  if(ids.length){
+   const [r,permissions]=await Promise.all([
+    db.from("user_roles").select("id,user_id,role,department_id").in("user_id",ids),
+    db.from("user_module_permissions").select("user_id,module_key,can_view,can_manage").in("user_id",ids)
+   ]);
+   if(r.error||permissions.error){setError(r.error?.message||permissions.error?.message||"권한 정보를 불러오지 못했습니다.");setLoading(false);return;}
+   rr=(r.data||[]) as UserRole[];
+   pp=(permissions.data||[]) as (UserModulePermission & {user_id:string})[];
+  }
+  const mapped=rows.map(x=>({...x,roles:rr.filter(y=>(y as any).user_id===x.user_id),permissions:pp.filter(y=>y.user_id===x.user_id)})) as P[];
   setUsers(mapped);setDeps((d.data||[]) as D[]);setLogs(l.data||[]);
   setSelectedId(current=>current&&mapped.some(x=>x.user_id===current)?current:"");
   setLoading(false);
@@ -44,7 +72,14 @@ export default function AdministrationModule(){
   catch(e:any){setError(e?.message||"처리하지 못했습니다.");return false;}
   finally{setSaving(false);}
  }
- function openUser(p:P){setSelectedId(p.user_id);setFullName(p.full_name||"");setPreferredLocale(p.preferred_locale==="my"?"my":"ko");setRole("staff");setDepId("");setNewPassword("");setNotice("");setError("");}
+ function openUser(p:P){
+  setSelectedId(p.user_id);setFullName(p.full_name||"");setPreferredLocale(p.preferred_locale==="my"?"my":"ko");setRole("staff");setDepId("");setNewPassword("");setNotice("");setError("");
+  const allowed=pageOptions.filter(option=>{
+   const override=p.permissions.find(permission=>permission.module_key===option.key);
+   return override?override.can_view:p.roles.some(userRole=>defaultPageRoles[option.key].includes(userRole.role));
+  }).map(option=>option.key);
+  setSelectedPageKeys(allowed);
+ }
  const filtered=users.filter(x=>{
   const text=[x.full_name,x.email||"",x.user_id,...x.roles.map(r=>names[r.role]||r.role),...x.roles.map(r=>deps.find(d=>d.id===r.department_id)?.name_ko||"")].join(" ").toLowerCase();
   return (!search||text.includes(search.toLowerCase()))&&(statusFilter==="all"||(statusFilter==="active"?x.is_active:!x.is_active));
@@ -55,6 +90,15 @@ export default function AdministrationModule(){
   void run(()=>db!.from("user_roles").insert({user_id:selected.user_id,role,department_id:depId||null}),"역할을 추가했습니다.");
  };
  const toggle=(p:P)=>void run(()=>db!.rpc("mrpst_set_user_active",{target_user:p.user_id,make_active:!p.is_active}),p.is_active?"계정을 비활성화했습니다.":"계정을 활성화했습니다.");
+ async function savePagePermissions(){
+  if(!selected||!db)return;
+  const {data:{user}}=await db.auth.getUser();
+  const rows=pageOptions.map(option=>{
+   const existing=selected.permissions.find(permission=>permission.module_key===option.key);
+   return {user_id:selected.user_id,module_key:option.key,can_view:selectedPageKeys.includes(option.key),can_manage:existing?.can_manage??false,assigned_by:user?.id??null,updated_at:new Date().toISOString()};
+  });
+  await run(()=>db.from("user_module_permissions").upsert(rows,{onConflict:"user_id,module_key"}),"선เลือกထားသော စာမျက်နှာခွင့်ပြုချက်များကို သိမ်းဆည်းပြီးပါပြီ။");
+ }
  const tabs=[["users","회원·권한 관리"],["departments","부서 관리"],["audit","변경 이력"]];
  return <div className="settings-workspace">
   <div className="settings-heading"><span className="eyebrow">SYSTEM GOVERNANCE</span><h2>회원 관리</h2><p>회원 상태와 소속, 관리자 권한을 한 화면에서 확인하고 관리합니다.</p></div>
@@ -86,7 +130,23 @@ export default function AdministrationModule(){
        {selected.roles.length?selected.roles.map(r=><div className="settings-role-row" key={r.id}><span><strong>{names[r.role]||r.role}</strong><small>{r.department_id?(deps.find(d=>d.id===r.department_id)?.name_ko||deps.find(d=>d.id===r.department_id)?.name_en||"부서"):"전체 부서"}</small></span><button disabled={saving||r.role==="super_admin"} title={r.role==="super_admin"?"최고 관리자 권한은 이 화면에서 해제할 수 없습니다.":""} onClick={()=>void run(()=>db!.from("user_roles").delete().eq("id",r.id),"권한을 해제했습니다.")}>권한 해제</button></div>):<Empty>아직 부여된 권한이 없습니다.</Empty>}
       </div>
       <div className="settings-detail-section"><h4>새 권한 부여</h4><div className="settings-role-form"><select value={role} onChange={e=>setRole(e.target.value)}>{roles.filter(r=>r!=="super_admin"&&r!=="student").map(r=><option key={r} value={r}>{names[r]}</option>)}</select><select value={depId} onChange={e=>setDepId(e.target.value)}><option value="">전체 부서</option>{deps.filter(d=>d.is_active).map(d=><option key={d.id} value={d.id}>{d.name_ko||d.name_en}</option>)}</select><button className="settings-primary" disabled={saving||selected.roles.some(r=>r.role===role&&r.department_id===(depId||null))} onClick={assign}>권한 추가</button></div></div>
-      <div className="settings-detail-section"><h4>페이지별 접근 권한</h4><p className="settings-form-hint">기본 역할 권한을 이 회원에게만 별도로 허용하거나 차단할 수 있습니다. 개별 설정은 역할 기본값보다 우선합니다.</p><div className="settings-role-form"><select value={moduleKey} onChange={e=>setModuleKey(e.target.value)}><option value="finance">재정 관리</option><option value="students">학생 관리</option><option value="academics">학사 관리</option><option value="facilities">시설 관리</option><option value="library">도서관 관리</option><option value="meetings">회의 자료</option><option value="administration">회원 및 권한 관리</option><option value="website">홈페이지 관리</option><option value="calendar">학사일정</option></select><label><input type="checkbox" checked={moduleView} onChange={e=>setModuleView(e.target.checked)}/> 페이지 보기</label><label><input type="checkbox" checked={moduleManage} onChange={e=>setModuleManage(e.target.checked)}/> 관리·수정</label><button className="settings-primary" disabled={saving} onClick={()=>void run(()=>db!.from("user_module_permissions").upsert({user_id:selected.user_id,module_key:moduleKey,can_view:moduleView,can_manage:moduleManage,assigned_by:null,updated_at:new Date().toISOString()},{onConflict:"user_id,module_key"}),"페이지별 권한을 저장했습니다.")}>권한 저장</button></div><p className="settings-form-hint">페이지 보기를 해제하면 메뉴에서 숨겨지고 직접 주소로도 접근할 수 없습니다. 관리·수정 권한은 별도의 데이터 변경 정책과 함께 적용됩니다.</p><button className="settings-refresh" disabled={saving} onClick={()=>void run(()=>db!.from("user_module_permissions").delete().eq("user_id",selected.user_id).eq("module_key",moduleKey),"개별 설정을 삭제하고 역할 기본 권한으로 되돌렸습니다.")}>선택한 페이지의 개별 설정 초기화</button></div>
+      <div className="settings-detail-section">
+       <h4>페이지별 접근 권한 <small>{selectedPageKeys.length}/{pageOptions.length}개 허용</small></h4>
+       <p className="settings-form-hint">이 회원이 볼 수 있는 관리 페이지를 직접 선택합니다. 체크하지 않은 페이지는 역할 기본 권한과 관계없이 접근이 차단됩니다. 설정을 저장하면 메뉴와 직접 주소 접근 모두에 적용됩니다.</p>
+       <div className="settings-page-permissions">
+        {pageOptions.map(option=><label className="settings-page-permission" key={option.key}>
+         <input type="checkbox" checked={selectedPageKeys.includes(option.key)} onChange={e=>setSelectedPageKeys(current=>e.target.checked?[...current,option.key]:current.filter(key=>key!==option.key))}/>
+         <span><strong>{option.title}</strong><small>{option.description}</small></span>
+        </label>)}
+        <div className="settings-page-permission locked"><span className="settings-lock">관리자 전용</span><span><strong>회원 및 권한 관리</strong><small>최고 관리자만 접근할 수 있습니다.</small></span></div>
+       </div>
+       <div className="settings-page-permission-actions">
+        <button type="button" className="settings-refresh" disabled={saving} onClick={()=>setSelectedPageKeys(pageOptions.map(option=>option.key))}>전체 선택</button>
+        <button type="button" className="settings-refresh" disabled={saving} onClick={()=>setSelectedPageKeys([])}>전체 해제</button>
+        <button type="button" className="settings-primary" disabled={saving||selected.roles.some(r=>r.role==="super_admin")} onClick={()=>void savePagePermissions()}>{saving?"저장 중…":"페이지 권한 저장"}</button>
+       </div>
+       {selected.roles.some(r=>r.role==="super_admin")&&<p className="settings-form-hint">최고 관리자는 모든 관리 페이지에 접근할 수 있으며, 이 설정으로 제한되지 않습니다.</p>}
+      </div>
       <div className="settings-danger-zone"><div><strong>계정 상태</strong><small>{selected.is_active?"현재 로그인 및 서비스 이용이 가능한 상태입니다.":"현재 비활성화된 계정입니다."}</small></div><button disabled={saving||selected.roles.some(r=>r.role==="super_admin")} onClick={()=>toggle(selected)}>{selected.is_active?"회원 비활성화":"회원 다시 활성화"}</button></div>
      </div>:<div className="settings-member-empty"><strong>회원을 선택해 주세요</strong><p>왼쪽 목록에서 회원을 선택하면 상세 정보와 권한을 관리할 수 있습니다.</p></div>}
    </div>

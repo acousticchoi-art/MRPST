@@ -26,7 +26,7 @@ const copy = {
 
 export default async function ContactPage({params}:{params:Promise<{locale:string}>}) {
   const {locale}=await params;
-  const t=copy[locale as keyof typeof copy]??copy.ko;
+  const t=copy[locale as keyof typeof copy]??copy.my;
   return <>
     <header className="header">
       <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>MYANMAR REFORMED PRESBYTERIAN SCHOOL OF THEOLOGY</small></span></Link>

@@ -63,23 +63,28 @@ export default function AdministrationModule(){
    {full_name:"테스트 학사 담당",email:"test_academic@mrpst.test",role:"academic_officer",pages:["academics","students"]},
    {full_name:"테스트 시설 담당",email:"test_facility@mrpst.test",role:"facility_manager",pages:["facilities","library","meetings"]}
   ];
-  const existing=new Set(users.map(user=>(user.email||"").toLowerCase()));
   const created:string[]=[];
-  const skipped:string[]=[];
+  const updated:string[]=[];
   setSaving(true);setError("");setNotice("");
   try{
+   const {data:{user:actor}}=await db!.auth.getUser();
    for(const account of testAccounts){
-    if(existing.has(account.email)){skipped.push(account.email);continue;}
-    const result=await invokeAdmin({action:"create",full_name:account.full_name,email:account.email,password:"test1234",preferred_locale:"ko",role:account.role,department_id:""});
-    if(!result?.user_id)throw new Error(account.email+" 계정 생성 결과를 확인할 수 없습니다.");
-    const permissions=pageOptions.map(option=>({user_id:result.user_id,module_key:option.key,can_view:account.pages.includes(option.key),can_manage:false,assigned_by:null}));
+    let userId=users.find(user=>(user.email||"").toLowerCase()===account.email)?.user_id;
+    if(!userId){
+     const result=await invokeAdmin({action:"create",full_name:account.full_name,email:account.email,password:"test1234",preferred_locale:"ko",role:account.role,department_id:""});
+     userId=result?.user_id;
+     if(!userId)throw new Error(account.email+" 계정 생성 결과를 확인할 수 없습니다.");
+     created.push(account.email);
+    }else{
+     updated.push(account.email);
+    }
+    const permissions=pageOptions.map(option=>({user_id:userId,module_key:option.key,can_view:account.pages.includes(option.key),can_manage:false,assigned_by:actor?.id??null}));
     const {error:permissionError}=await db!.from("user_module_permissions").upsert(permissions,{onConflict:"user_id,module_key"});
     if(permissionError)throw new Error(account.email+" 페이지 권한 저장 실패: "+permissionError.message);
-    created.push(account.email);
    }
-   setNotice(created.length+"개 테스트 계정을 생성했습니다."+(skipped.length?" 이미 존재하여 건너뜀: "+skipped.join(", "):""));
+   setNotice("테스트 계정 설정을 완료했습니다. 신규 생성 "+created.length+"개, 기존 계정 권한 재설정 "+updated.length+"개.");
    await load();
-  }catch(e:any){setError((e?.message||"테스트 계정 생성에 실패했습니다.")+(created.length?" 이미 생성된 계정: "+created.join(", "):""));}
+  }catch(e:any){setError((e?.message||"테스트 계정 생성에 실패했습니다.")+(created.length?" 생성된 계정: "+created.join(", "):""));}
   finally{setSaving(false);}
  }
  async function run(fn:()=>any,msg:string){

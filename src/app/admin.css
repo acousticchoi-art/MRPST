@@ -879,3 +879,12 @@ input,select,textarea,button{max-width:100%}
   .facility-tabs button{font-size:11px;padding:9px 6px}
   .finance-line,.finance-budget-line{grid-template-columns:minmax(0,1fr)!important}
 }
+
+
+/* Finance Google Sheets shortcut */
+.finance-sheet-action{display:flex;justify-content:flex-end;margin:0 0 14px}
+.finance-sheet-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 16px;text-decoration:none;white-space:nowrap}
+@media(max-width:640px){
+  .finance-sheet-action{justify-content:stretch}
+  .finance-sheet-link{width:100%;min-height:46px}
+}

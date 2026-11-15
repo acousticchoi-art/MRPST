@@ -120,7 +120,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
           
         </div>
         <div className="module-heading"><h2>{t.modules}</h2><span>{visible.length}{lang==="ko"?"개 모듈 사용 가능":lang==="my"?" ကဏ္ဍ အသုံးပြုနိုင်သည်": " available modules"}</span></div>
-        <div className="module-groups">{moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<section className="module-group" key={group}><h3>{t.groups[group]}</h3><div className="modules">{items.map(([key,item])=>{const words=t[key as keyof typeof t] as readonly string[];return <Link href={`/${locale}/admin/${key}`} className="module" key={key}><strong>{words?.[0]??item.title}</strong><p>{words?.[1]??item.description}</p><span className="module-open">{t.open}</span></Link>})}</div></section>:null;})}</div>
+        <div className="module-groups">{moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<section className="module-group" key={group}><h3>{t.groups[group]}</h3><div className="modules">{items.map(([key,item])=>{const words=(t as any)[key] as readonly string[];return <Link href={`/${locale}/admin/${key}`} className="module" key={key}><strong>{words?.[0]??item.title}</strong><p>{words?.[1]??item.description}</p><span className="module-open">{t.open}</span></Link>})}</div></section>:null;})}</div>
       </div>
     </main>
   </div></>;

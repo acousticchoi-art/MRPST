@@ -100,9 +100,9 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
   return <>
     <header className="header">
       <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{officialName.toUpperCase()}</small></span></Link>
-      <nav className="nav"><a href="#about">{t.about}</a><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><Link href={`/${locale}/contact`}>{t.contact}</Link></nav>
+      <nav className="nav"><a href="#about">{t.about}</a><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><Link href={`/${locale}/calendar`}>{locale==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</Link><Link href={`/${locale}/contact`}>{t.contact}</Link></nav>
       <div className="header-tools"><div className="langs"><Link href="/my" aria-label="မြန်မာဘာသာ">မြန်မာ</Link><Link href="/ko" aria-label="한국어">한국어</Link></div><Link className="admin-link" href={`/${locale}/admin`}>{locale==="ko"?"관리자":"အုပ်ချုပ်ရေး"}</Link></div>
-      <details className="mobile-menu"><summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary><nav className="mobile-nav"><a href="#about">{t.about}</a><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><Link href={`/${locale}/contact`}>{t.contact}</Link><Link href={`/${locale}/admin`}>Admin</Link><div className="mobile-langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div></nav></details>
+      <details className="mobile-menu"><summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary><nav className="mobile-nav"><a href="#about">{t.about}</a><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><Link href={`/${locale}/calendar`}>{locale==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</Link><Link href={`/${locale}/contact`}>{t.contact}</Link><Link href={`/${locale}/admin`}>Admin</Link><div className="mobile-langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div></nav></details>
     </header>
     <main className="homepage">
       <section className="hero hero-redesign">

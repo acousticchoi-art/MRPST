@@ -11,19 +11,18 @@ const LibraryModule=dynamic(()=>import("./LibraryModule"));
 const FacilitiesModule=dynamic(()=>import("./FacilitiesModule"));
 const MeetingsModule=dynamic(()=>import("./MeetingsModule"));
 const AcademicsModule=dynamic(()=>import("./AcademicsModule"));
-const GradeManagementModule=dynamic(()=>import("./GradeManagementModule"));
 const AdministrationModule=dynamic(()=>import("./AdministrationModule"));
 
 const copy = {
   ko:{
     admin:"MRPST 관리자",dashboard:"대시보드",view:"홈페이지 보기 ↗",
-    finance:"재정 관리",students:"학생 관리",academics:"학사 관리",grades:"성적 관리",facilities:"시설 관리",
+    finance:"재정 관리",students:"학생 관리",academics:"학사 관리",facilities:"시설 관리",
     library:"도서관 관리",meetings:"회의 관리",administration:"회원 및 권한 관리",website:"홈페이지 관리",
     workspace:"관리 메뉴",back:"대시보드로 돌아가기",module:"관리 모듈"
   },
   my:{
     admin:"MRPST အုပ်ချုပ်ရေး",dashboard:"ဒက်ရှ်ဘုတ်",view:"ဝဘ်ဆိုက်ကြည့်ရန် ↗",
-    finance:"ဘဏ္ဍာရေး",students:"ကျောင်းသား",academics:"ပညာရေး",grades:"အမှတ်စာရင်း",facilities:"အဆောက်အအုံ",
+    finance:"ဘဏ္ဍာရေး",students:"ကျောင်းသား",academics:"ပညာရေး",facilities:"အဆောက်အအုံ",
     library:"စာကြည့်တိုက်",meetings:"အစည်းအဝေး",administration:"အသင်းဝင်နှင့် ခွင့်ပြုချက်",website:"ဝဘ်ဆိုက်",
     workspace:"စီမံခန့်ခွဲမှု",back:"ဒက်ရှ်ဘုတ်သို့ ပြန်သွားရန်",module:"စီမံခန့်ခွဲမှုကဏ္ဍ"
   }
@@ -86,7 +85,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
       </div></header>
       <div className="content">
         <span className="eyebrow">{t.module}</span>
-        {key==="finance"?<FinanceModule/>:key==="students"?<StudentModule/>:key==="library"?<LibraryModule/>:key==="facilities"?<FacilitiesModule/>:key==="meetings"?<MeetingsModule/>:key==="academics"?<AcademicsModule/>:key==="grades"?<GradeManagementModule/>:key==="administration"?<AdministrationModule/>:<><h1 className="admin-heading">{moduleNames[key]??item.title}</h1><p className="admin-subtitle">{item.description}</p><div className="module-placeholder"><strong>Module foundation</strong><p>This section is reserved for the {item.title.toLowerCase()} workflow. Data entry, approval steps, reporting and department-level database policies will be added in the next implementation phase.</p><span>Not connected to live records</span></div></>}
+        {key==="finance"?<FinanceModule/>:key==="students"?<StudentModule/>:key==="library"?<LibraryModule/>:key==="facilities"?<FacilitiesModule/>:key==="meetings"?<MeetingsModule/>:key==="academics"?<AcademicsModule/>:key==="administration"?<AdministrationModule/>:<><h1 className="admin-heading">{moduleNames[key]??item.title}</h1><p className="admin-subtitle">{item.description}</p><div className="module-placeholder"><strong>Module foundation</strong><p>This section is reserved for the {item.title.toLowerCase()} workflow. Data entry, approval steps, reporting and department-level database policies will be added in the next implementation phase.</p><span>Not connected to live records</span></div></>}
           </div>
     </main>
   </div></>;

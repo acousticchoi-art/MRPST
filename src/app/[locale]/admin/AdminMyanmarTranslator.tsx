@@ -996,7 +996,7 @@ function translateText(node:Text){
 }
 
 function translateElement(el:Element){
-  if(el instanceof HTMLElement && !el.closest("script,style,textarea,[contenteditable=true],.notranslate,[data-no-translate]")){
+  if(el instanceof HTMLElement && !el.closest("script,style,[contenteditable=true],.notranslate,[data-no-translate]")){
     for(const attr of ["placeholder","title","aria-label"]){
       const value=el.getAttribute(attr);
       if(value&&MY[value]) el.setAttribute(attr,MY[value]);
@@ -1047,7 +1047,26 @@ export default function AdminMyanmarTranslator({locale}:{locale:string}){
       observer.disconnect();
       if(frame) cancelAnimationFrame(frame);
       pending.clear();
-    };
+   
+  "이름을 입력하세요": "အမည်ထည့်ပါ",
+  "검색어를 입력하세요": "ရှာဖွေလိုသည့် စကားလုံးကို ထည့်ပါ",
+  "검색어 입력": "ရှာဖွေလိုသည့် စကားလုံးထည့်ပါ",
+  "검색...": "ရှာဖွေရန်...",
+  "검색어": "ရှာဖွေရန်",
+  "선택하세요": "ရွေးချယ်ပါ",
+  "선택해 주세요": "ရွေးချယ်ပါ",
+  "내용을 입력하세요": "အကြောင်းအရာကို ထည့်ပါ",
+  "상세 내용을 입력하세요": "အသေးစိတ်အကြောင်းအရာကို ထည့်ပါ",
+  "비고를 입력하세요": "မှတ်ချက်ကို ထည့်ပါ",
+  "설명을 입력하세요": "ဖော်ပြချက်ကို ထည့်ပါ",
+  "이메일을 입력하세요": "အီးမေးလ်ထည့်ပါ",
+  "전화번호를 입력하세요": "ဖုန်းနံပါတ်ထည့်ပါ",
+  "제목을 입력하세요": "ခေါင်းစဉ်ထည့်ပါ",
+  "이름 또는 이메일 검색": "အမည် သို့မဟုတ် အီးမေးလ်ဖြင့် ရှာဖွေပါ",
+  "학생 이름 검색": "ကျောင်းသားအမည်ဖြင့် ရှာဖွေပါ",
+  "도서 검색": "စာအုပ်ရှာဖွေရန်",
+  "회원 검색": "အသင်းဝင်ရှာဖွေရန်",
+ };
   },[locale]);
   return null;
 }

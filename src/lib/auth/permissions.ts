@@ -11,7 +11,8 @@ export const MODULES:Record<ModuleKey,{title:string;description:string;roles:Mrp
  website:{title:"Website CMS",description:"Public website content, institutional history, announcements and contact details.",roles:["super_admin","administrator"]}
 };
 export function canAccessModule(roles:MrpstRole[],module:ModuleKey,overrides?:{module_key:string;can_view:boolean}[]){
- if(module==="administration")return roles.includes("super_admin");
+ if(roles.includes("super_admin"))return true;
+ if(module==="administration")return false;
  const override=overrides?.find(x=>x.module_key===module);
  if(override)return override.can_view;
  return roles.some(role=>MODULES[module].roles.includes(role));

@@ -66,7 +66,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   const lang=(locale==="my"?"my":"ko") as "my"|"ko";
   const t=copy[lang];
   const supabase=await createSupabaseServerClient();
-  if(!supabase) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>관리자 서비스에 연결할 수 없습니다</h1><p className="login-intro">로그인 서비스 설정이 확인되지 않아 관리자 화면을 열 수 없습니다. 서비스 설정을 확인한 뒤 다시 시도해 주세요.</p><Link className="btn secondary" href={`/${locale}`}>홈페이지로 돌아가기</Link></section></main>;
+  if(!supabase) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>{lang==="my"?"စီမံခန့်ခွဲသူ ဝန်ဆောင်မှုသို့ ချိတ်ဆက်၍ မရပါ":"관리자 서비스에 연결할 수 없습니다"}</h1><p className="login-intro">{lang==="my"?"အကောင့်ဝင်ရောက်မှု ဝန်ဆောင်မှုကို မသတ်မှတ်ရသေးသောကြောင့် စီမံခန့်ခွဲသူစာမျက်နှာကို ဖွင့်၍မရပါ။ ဝန်ဆောင်မှုဆက်တင်များကို စစ်ဆေးပြီး ထပ်မံကြိုးစားပါ။":"로그인 서비스 설정이 확인되지 않아 관리자 화면을 열 수 없습니다. 서비스 설정을 확인한 뒤 다시 시도해 주세요."}</p><Link className="btn secondary" href={`/${locale}`}>{lang==="my"?"ဝဘ်ဆိုက်သို့ ပြန်သွားရန်":"홈페이지로 돌아가기"}</Link></section></main>;
   let userEmail="";
   let roles:MrpstRole[]=[];
   let moduleOverrides:{module_key:string;can_view:boolean}[]=[];

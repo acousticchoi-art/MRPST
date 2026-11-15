@@ -22,7 +22,7 @@ export default function StudentModule(){
  const load=useCallback(async()=>{
   if(!supabase){setLoading(false);return;} setLoading(true);setError("");
   const [s,r,a]=await Promise.all([
-   supabase.from("students").select("id,auth_user_id,program_code,student_number,full_name_my,full_name_en,gender,date_of_birth,admission_year,program,cohort,student_status,phone,email,guardian_name,guardian_phone,notes").order("student_number"),
+   supabase.from("students").select("id,auth_user_id,program_code,student_number,full_name,full_name_my,full_name_en,gender,date_of_birth,admission_year,program,cohort,student_status,phone,email,guardian_name,guardian_phone,notes").order("student_number"),
    supabase.from("academic_grades").select("id,student_id,score,grade,remarks,academic_courses(course_code,title,credits),academic_terms(academic_year,name,term_code)").order("updated_at",{ascending:false}),
    supabase.rpc("mrpst_student_scholarship_history")
   ]);

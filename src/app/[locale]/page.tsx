@@ -1,4 +1,5 @@
 import Link from "next/link";
+import {createSupabaseServerClient} from "@/lib/supabase/server";
 
 const copy = {
   en: {
@@ -76,7 +77,25 @@ const officialName = "Myanmar Reformed Presbyterian School of Theology";
 
 export default async function Home({params}:{params:Promise<{locale:string}>}) {
   const {locale}=await params;
-  const t=copy[locale as keyof typeof copy]??copy.ko;
+  const base=copy[locale as keyof typeof copy]??copy.ko;
+  const supabase=await createSupabaseServerClient();
+  let cmsRows:{content_type:string;content_key:string;title:string;body:string;is_published:boolean;updated_at:string}[]=[];
+  if(supabase){
+    const {data}=await supabase.from("website_contents").select("content_type,content_key,title,body,is_published,updated_at").eq("locale",locale).eq("is_published",true);
+    cmsRows=(data??[]) as typeof cmsRows;
+  }
+  const page=(key:string)=>cmsRows.find(x=>x.content_type==="page"&&x.content_key===key);
+  const t={...base,
+    title:page("hero")?.title||base.title,
+    intro:page("hero")?.body||base.intro,
+    aboutTitle:page("about")?.title||base.aboutTitle,
+    aboutText:page("about")?.body||base.aboutText,
+    historyIntro:page("history")?.body||base.historyIntro,
+    contactTitle:page("contact")?.title||base.contactTitle,
+    contactText:page("contact")?.body||base.contactText,
+    addressText:page("address")?.body||base.addressText
+  };
+  const announcements=cmsRows.filter(x=>x.content_type==="announcement").sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
   return <>
     <header className="header">
       <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{officialName.toUpperCase()}</small></span></Link>
@@ -108,6 +127,8 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
           <div className="hero-seal"><strong>MRPST</strong><span>REFORMED<br/>THEOLOGY</span></div>
         </div>
       </section>
+
+      {announcements.length>0&&<section className="public-announcements"><div className="public-announcements-heading"><span className="eyebrow">{locale==="ko"?"MRPST 소식":"MRPST NEWS"}</span><h2>{locale==="ko"?"공지사항":"ကြေညာချက်များ"}</h2></div><div className="public-announcements-list">{announcements.map(item=><article className="public-announcement" key={item.content_key}><h3>{item.title}</h3><p>{item.body}</p></article>)}</div></section>}
 
       <section id="about" className="section intro-section">
         <div className="intro-heading">

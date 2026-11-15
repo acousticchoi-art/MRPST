@@ -73,7 +73,7 @@ export default function GradeManagementModule(){
  useEffect(()=>{if(level&&!levels.includes(level))setLevel("");},[levels,level]);
  const visibleCourses=useMemo(()=>courses.filter(x=>(!departmentId||x.department_id===departmentId)&&(!level||x.level===level)),[courses,departmentId,level]);
  useEffect(()=>{if(!visibleCourses.some(x=>x.id===courseId))setCourseId(visibleCourses[0]?.id??"");},[visibleCourses,courseId]);
- const visibleStudents=useMemo(()=>students.filter(x=>(!programCode||x.program_code===programCode)&&(!level||x.cohort===level)&&(!search.trim()||x.full_name.toLowerCase().includes(search.toLowerCase())||x.student_number.toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>Number.isFinite(Number(a.student_number))&&Number.isFinite(Number(b.student_number))?Number(a.student_number)-Number(b.student_number):a.student_number.localeCompare(b.student_number)),[students,programCode,level,search]);
+ const visibleStudents=useMemo(()=>students.filter(x=>x.student_status==="active"&&(!programCode||x.program_code===programCode)&&(!level||x.cohort===level)&&(!search.trim()||x.full_name.toLowerCase().includes(search.toLowerCase())||x.student_number.toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>Number.isFinite(Number(a.student_number))&&Number.isFinite(Number(b.student_number))?Number(a.student_number)-Number(b.student_number):a.student_number.localeCompare(b.student_number)),[students,programCode,level,search]);
  const termGrades=useMemo(()=>grades.filter(x=>x.term_id===termId),[grades,termId]);
  const gradeByKey=useMemo(()=>new Map(termGrades.map(x=>[x.student_id+"|"+x.course_id,x])),[termGrades]);
  const selectedStudent=students.find(x=>x.id===selectedStudentId);

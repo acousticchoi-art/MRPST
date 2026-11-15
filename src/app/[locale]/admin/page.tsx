@@ -20,7 +20,7 @@ const copy = {
     facilities:["School Facilities","Buildings, equipment inventory, vehicles, maintenance and repairs."],
     library:["Library Management","Book catalogue, circulation, loans, returns and library members."],
     meetings:["Meeting Materials","Academic committee, faculty and staff meeting records and documents."],
-    administration:["Member & Permission Management","Create accounts, change passwords, assign roles and departments, and review changes."],
+    administration:["Account & Permission Management","Create accounts, change passwords, assign roles and departments, and review changes."],
     website:["Website Management","Public website content, institutional history, announcements and contact details."],
     denied:"Access not assigned", deniedText:"Your account does not have an active MRPST profile and role. Ask the Super Administrator to grant access.",
     back:"Return to website", preview:"Preview mode: configure Supabase and assign staff roles to activate secure, role-specific access. Dashboard figures are placeholders."
@@ -37,7 +37,7 @@ const copy = {
     facilities:["시설 관리","건물, 비품, 차량, 시설 유지 보수 및 수리를 관리합니다."],
     library:["도서관 관리","도서 목록, 대출·반납 및 도서관 이용자를 관리합니다."],
     meetings:["회의 자료","학사위원회와 교수·직원 회의 기록 및 문서를 관리합니다."],
-    administration:["회원 및 권한 관리","회원 계정 생성, 비밀번호 변경, 역할·부서 지정 및 변경 이력을 관리합니다."],
+    administration:["계정·권한 관리","회원 계정 생성, 비밀번호 변경, 역할·부서 지정 및 변경 이력을 관리합니다."],
     website:["홈페이지 관리","학교 소개, 연혁, 공지사항 및 연락처 등 홈페이지 콘텐츠를 관리합니다."],
     denied:"접근 권한이 없습니다", deniedText:"현재 계정에 활성화된 MRPST 프로필 또는 역할이 없습니다. 최고 관리자에게 권한을 요청하세요.",
     back:"홈페이지로 돌아가기", preview:"미리보기 모드: Supabase를 연결하고 직원 역할을 지정하면 권한별 관리 기능이 활성화됩니다. 통계는 데이터 연동 후 표시됩니다."
@@ -54,7 +54,7 @@ const copy = {
     facilities:["ကျောင်းအဆောက်အအုံနှင့် ပစ္စည်းများ","အဆောက်အအုံ၊ ပစ္စည်းစာရင်း၊ ယာဉ်၊ ပြုပြင်ထိန်းသိမ်းမှုများ။"],
     library:["စာကြည့်တိုက်စီမံခန့်ခွဲမှု","စာအုပ်စာရင်း၊ ငှားရမ်းခြင်း၊ ပြန်အပ်ခြင်းနှင့် အသင်းဝင်များ။"],
     meetings:["အစည်းအဝေးမှတ်တမ်းများ","ပညာရေးကော်မတီ၊ ဆရာ၊ ဆရာမနှင့် ဝန်ထမ်းအစည်းအဝေးမှတ်တမ်းများ။"],
-    administration:["အသင်းဝင်နှင့် ခွင့်ပြုချက်စီမံခန့်ခွဲမှု","အကောင့်ဖန်တီးခြင်း၊ စကားဝှက်ပြောင်းခြင်း၊ ရာထူးနှင့် ဌာနသတ်မှတ်ခြင်း။"],
+    administration:["အကောင့်နှင့် ခွင့်ပြုချက်စီမံခန့်ခွဲမှု","အကောင့်ဖန်တီးခြင်း၊ စကားဝှက်ပြောင်းခြင်း၊ ရာထူးနှင့် ဌာနသတ်မှတ်ခြင်း။"],
     website:["ဝဘ်ဆိုက်စီမံခန့်ခွဲမှု","ကျောင်းအကြောင်းအရာ၊ သမိုင်းကြောင်း၊ ကြေညာချက်နှင့် ဆက်သွယ်ရန်အချက်အလက်။"],
     denied:"ဝင်ရောက်ခွင့် မရှိပါ", deniedText:"သင့်အကောင့်တွင် အသုံးပြုနိုင်သော MRPST အခန်းကဏ္ဍ မရှိပါ။ အုပ်ချုပ်ရေးမှူးထံ ဆက်သွယ်ပါ။",
     back:"ဝဘ်ဆိုက်သို့ ပြန်သွားရန်", preview:"အစမ်းကြည့်ရှုမှု: Supabase ချိတ်ဆက်ပြီး ဝန်ထမ်းရာထူးများ သတ်မှတ်ပါက စီမံခန့်ခွဲမှုကို အသုံးပြုနိုင်ပါမည်။"

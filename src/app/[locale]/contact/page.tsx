@@ -9,7 +9,6 @@ const copy = {
     address:"No.286, 10th Kaya St, Thingangyungyi, Mingladon Township, Yangon, Myanmar",
     map:"구글 지도에서 위치 보기",
     email:"이메일",
-    back:"홈으로 돌아가기",
     formTitle:"문의 내용 작성",
   },
   my: {
@@ -19,7 +18,6 @@ const copy = {
     address:"No.286, 10th Kaya St, Thingangyungyi, Mingladon Township, Yangon, Myanmar",
     map:"Google Maps ဖြင့် ကြည့်ရန်",
     email:"အီးမေးလ်",
-    back:"ပင်မစာမျက်နှာသို့ ပြန်ရန်",
     formTitle:"မေးမြန်းချက် ရေးသားရန်",
   }
 } as const;
@@ -30,9 +28,9 @@ export default async function ContactPage({params}:{params:Promise<{locale:strin
   return <>
     <header className="header">
       <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>MYANMAR REFORMED PRESBYTERIAN SCHOOL OF THEOLOGY</small></span></Link>
-      <nav className="nav"><Link href={`/${locale}`}>{t.back}</Link></nav>
-      <div className="header-tools"><div className="langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div></div>
-      <details className="mobile-menu"><summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary><nav className="mobile-nav"><Link href={`/${locale}#about`}>{locale==="ko"?"학교 소개":"ကျောင်းအကြောင်း"}</Link><Link href={`/${locale}#academics`}>{locale==="ko"?"교육과정":"ပညာရေးအစီအစဉ်"}</Link><Link href={`/${locale}#history`}>{locale==="ko"?"학교 연혁":"ကျောင်းသမိုင်း"}</Link><Link href={`/${locale}/calendar`}>{locale==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</Link><Link href={`/${locale}/contact`}>{t.title}</Link><Link href={`/${locale}/admin`}>{locale==="ko"?"관리자":"အုပ်ချုပ်ရေး"}</Link><div className="mobile-langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div></nav></details>
+      <nav className="nav"><Link href={`/${locale}#about`}>{locale==="ko"?"학교 소개":"ကျောင်းအကြောင်း"}</Link><Link href={`/${locale}#academics`}>{locale==="ko"?"학과 안내":"ပညာရေး"}</Link><Link href={`/${locale}#history`}>{locale==="ko"?"연혁":"သမိုင်း"}</Link><Link href={`/${locale}/calendar`}>{locale==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</Link><Link href={`/${locale}/contact`}>{t.title}</Link></nav>
+      <div className="header-tools"><div className="langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div><Link className="admin-link" href={`/${locale}/admin`}>{locale==="ko"?"관리자":"အုပ်ချုပ်ရေး"}</Link></div>
+      <details className="mobile-menu"><summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary><nav className="mobile-nav"><Link href={`/${locale}#about`}>{locale==="ko"?"학교 소개":"ကျောင်းအကြောင်း"}</Link><Link href={`/${locale}#academics`}>{locale==="ko"?"학과 안내":"ပညာရေး"}</Link><Link href={`/${locale}#history`}>{locale==="ko"?"연혁":"သမိုင်း"}</Link><Link href={`/${locale}/calendar`}>{locale==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</Link><Link href={`/${locale}/contact`}>{t.title}</Link><Link href={`/${locale}/admin`}>{locale==="ko"?"관리자":"အုပ်ချုပ်ရေး"}</Link><div className="mobile-langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div></nav></details>
     </header>
     <main className="contact-page">
       <section className="contact-page-heading"><span className="eyebrow">{t.eyebrow}</span><h1>{t.title}</h1><p>{t.intro}</p></section>
@@ -47,7 +45,6 @@ export default async function ContactPage({params}:{params:Promise<{locale:strin
         </section>
         <section className="contact-form-card"><h2>{t.formTitle}</h2><ContactForm locale={locale}/></section>
       </div>
-      <div className="contact-page-back"><Link href={`/${locale}`}>← {t.back}</Link></div>
     </main>
     <footer className="footer"><span>Myanmar Reformed Presbyterian School of Theology</span><span>© {new Date().getFullYear()} MRPST</span></footer>
   </>;

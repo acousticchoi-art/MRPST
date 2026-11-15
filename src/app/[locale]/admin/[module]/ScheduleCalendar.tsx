@@ -7,7 +7,10 @@ const blank={title:"",description:"",event_type:"academic",start_date:"",end_dat
 export default function ScheduleCalendar({publicOnly=false,canManage=false}:{publicOnly?:boolean;canManage?:boolean}){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [rows,setRows]=useState<EventRow[]>([]),[month,setMonth]=useState(new Date(new Date().getFullYear(),new Date().getMonth(),1)),[form,setForm]=useState<any>(blank),[editing,setEditing]=useState(""),[show,setShow]=useState(false),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState("");
- const load=useCallback(async()=>{if(!db){setLoading(false);return;}setLoading(true);let q=db.from("academic_calendar_events").select("*").order("start_date");if(publicOnly)q=q.eq("is_published",true);const {data,error}=await q;if(error)setError(error.message);else setRows((data||[]) as EventRow[]);setLoading(false);},[db,publicOnly]);
+ const monthKey=month.getFullYear()+"-"+String(month.getMonth()+1).padStart(2,"0");
+ const monthStart=monthKey+"-01";
+ const monthEnd=monthKey+"-"+String(new Date(month.getFullYear(),month.getMonth()+1,0).getDate()).padStart(2,"0");
+ const load=useCallback(async()=>{if(!db){setLoading(false);return;}setLoading(true);let q=db.from("academic_calendar_events").select("*").lte("start_date",monthEnd).or(`end_date.is.null,end_date.gte.${monthStart}`).order("start_date");if(publicOnly)q=q.eq("is_published",true);const {data,error}=await q;if(error)setError(error.message);else setRows((data||[]) as EventRow[]);setLoading(false);},[db,publicOnly,monthStart,monthEnd]);
  useEffect(()=>{void load();},[load]);
  const first=new Date(month.getFullYear(),month.getMonth(),1),offset=(first.getDay()+6)%7,days=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();
  const dayKey=(d:number)=>[month.getFullYear(),String(month.getMonth()+1).padStart(2,"0"),String(d).padStart(2,"0")].join("-");
@@ -15,9 +18,6 @@ export default function ScheduleCalendar({publicOnly=false,canManage=false}:{pub
  const edit=(x:EventRow)=>{setEditing(x.id);setForm({...x,start_time:x.start_time?.slice(0,5)||"",end_time:x.end_time?.slice(0,5)||"",end_date:x.end_date||"",description:x.description||"",location:x.location||""});setShow(true);};
  const save=async()=>{if(!db||!form.title.trim()||!form.start_date)return;setSaving(true);setError("");const {data:{user}}=await db.auth.getUser();const payload={...form,title:form.title.trim(),description:form.description.trim()||null,end_date:form.end_date||null,start_time:form.start_time||null,end_time:form.end_time||null,location:form.location.trim()||null,updated_by:user?.id};const result=editing?await db.from("academic_calendar_events").update(payload).eq("id",editing):await db.from("academic_calendar_events").insert({...payload,created_by:user?.id});if(result.error)setError(result.error.message);else{setShow(false);setEditing("");setForm(blank);await load();}setSaving(false);};
  const remove=async(x:EventRow)=>{if(!db||!window.confirm("이 일정을 삭제할까요?"))return;const {error}=await db.from("academic_calendar_events").delete().eq("id",x.id);if(error)setError(error.message);else await load();};
- const monthKey=month.getFullYear()+"-"+String(month.getMonth()+1).padStart(2,"0");
- const monthStart=monthKey+"-01";
- const monthEnd=monthKey+"-"+String(new Date(month.getFullYear(),month.getMonth()+1,0).getDate()).padStart(2,"0");
  const visibleRows=rows.filter(x=>x.start_date<=monthEnd&&(x.end_date||x.start_date)>=monthStart);
  const monthLabel=month.toLocaleDateString("ko-KR",{year:"numeric",month:"long"});
  return <section className="academics-panel" style={{marginTop:20}}>

@@ -31,7 +31,7 @@ export default function TimetableBuilder(){
   const errs=[t.error,d.error,c.error,i.error].filter(Boolean).map(x=>x!.message);
   if(errs.length){setError(errs.join(" · "));setLoading(false);return;}
   setTerms(t.data||[]);setDepartments(d.data||[]);setCourses(c.data||[]);setInstructors(i.data||[]);
-  const nextTerm=termId||(t.data||[]).find(x=>x.status==="active")?.id||(t.data||[])[0]?.id||"";
+  const nextTerm=termId||(t.data||[]).find(x=>x.term_code==="2026-2027-1")?.id||(t.data||[]).find(x=>x.status==="active")?.id||(t.data||[])[0]?.id||"";
   const nextDept=departmentId||(d.data||[]).find(x=>x.code==="ECE")?.id||(d.data||[])[0]?.id||"";
   setTermId(nextTerm);setDepartmentId(nextDept);
   if(nextTerm&&nextDept){

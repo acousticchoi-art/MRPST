@@ -90,6 +90,7 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
     intro:page("hero")?.body||base.intro,
     aboutTitle:page("about")?.title||base.aboutTitle,
     aboutText:page("about")?.body||base.aboutText,
+    history:page("history")?.title||base.history,
     historyIntro:page("history")?.body||base.historyIntro,
     contactTitle:page("contact")?.title||base.contactTitle,
     contactText:page("contact")?.body||base.contactText,

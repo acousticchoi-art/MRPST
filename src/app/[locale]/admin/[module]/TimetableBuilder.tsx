@@ -89,6 +89,8 @@ export default function TimetableBuilder(){
   if(!window.confirm("선택한 학기의 시간표를 현재 학기로 복사할까요? 현재 학기에 이미 등록된 항목은 유지되고, 기존 항목과 시간이 완전히 같은 복사 항목은 건너뜁니다."))return;
   setSaving(true);setError("");
   try{
+   const {data:{user}}=await db.auth.getUser();
+   if(!user)throw new Error("로그인이 필요합니다.");
    const [a,b]=await Promise.all([
     db.from("academic_timetable_entries").select("*").eq("term_id",copyFrom).eq("department_id",departmentId),
     db.from("academic_timetable_events").select("*").eq("term_id",copyFrom).eq("department_id",departmentId)

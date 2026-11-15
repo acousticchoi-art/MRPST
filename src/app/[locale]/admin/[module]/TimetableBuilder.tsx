@@ -59,12 +59,12 @@ export default function TimetableBuilder(){
   if(e)setError(e.message);else{setNotice("시간표 항목을 삭제했습니다.");await load();}
  };
  const fixed=(period:string,day:number)=>{
-  if(period==="morning")return day===6?"": "Morning Devotion";
+  if(period==="morning")return "Morning Devotion";
   if(period==="early"){if(day===1)return "Bible Examination Preparation Time";if(day===6)return "Q.T. Check";}
   if(period==="chapel"){if(day===1)return "Bible Examination Preparation Time";if(day===6)return "Q.T. Check";return "Chapel";}
   if(period==="mid"&&day===1)return "Bible Examination Preparation Time";
-  if(period==="afternoon"&&day===1)return "Bible Examination\\n(Daw Grace Moon)";
-  if(period==="clean"){if([1,3,5].includes(day))return "Cleaning Time\\n(14:30–15:00)";if(day===2)return "Physical Education\\n(U Khin Tun)";if(day===4)return "Instrument Practice Time\\n(Thin Pwint Phyu, Simon, Hsal Takhe, Aung Htet Myat)";}
+  if(period==="afternoon"&&day===1)return "Bible Examination\n(Daw Grace Moon)";
+  if(period==="clean"){if([1,3,5].includes(day))return "Cleaning Time\n(14:30–15:00)";if(day===2)return "Physical Education\n(U Khin Tun)";if(day===4)return "Instrument Practice Time\n(Thin Pwint Phyu, Simon, Hsal Takhe, Aung Htet Myat)";}
   if(period==="prayer")return "Prayer Time with Student President";
   if(period==="evening"&&day===4)return "Sermon Practice for all Students";
   return "";

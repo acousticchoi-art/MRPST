@@ -2,7 +2,7 @@
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 
-type Student={id:string;auth_user_id:string|null;student_number:string;full_name:string;full_name_my:string|null;full_name_en:string|null;gender:string|null;date_of_birth:string|null;admission_year:number|null;program:string|null;cohort:string|null;student_status:string;phone:string|null;email:string|null;guardian_name:string|null;guardian_phone:string|null;notes:string|null};
+type Student={id:string;auth_user_id:string|null;program_code:string|null;student_number:string;full_name:string;full_name_my:string|null;full_name_en:string|null;gender:string|null;date_of_birth:string|null;admission_year:number|null;program:string|null;cohort:string|null;student_status:string;phone:string|null;email:string|null;guardian_name:string|null;guardian_phone:string|null;notes:string|null};
 type RecordRow={id:string;student_id:string;academic_year:number;term:string;course_code:string|null;course_name:string;credits:number|null;score:number|null;grade:string|null;remarks:string|null};
 type Award={award_id:string;student_id:string;academic_year:number;scholarship_name:string;base_amount:number;paid_amount:number;remaining_amount:number;status:string};
 const statusLabel:Record<string,string>={active:"재학",leave:"휴학",graduated:"졸업",withdrawn:"자퇴"};
@@ -22,7 +22,7 @@ export default function StudentModule(){
  const load=useCallback(async()=>{
   if(!supabase){setLoading(false);return;} setLoading(true);setError("");
   const [s,r,a]=await Promise.all([
-   supabase.from("students").select("id,auth_user_id,student_number,full_name,full_name_my,full_name_en,gender,date_of_birth,admission_year,program,cohort,student_status,phone,email,guardian_name,guardian_phone,notes").order("student_number"),
+   supabase.from("students").select("id,auth_user_id,program_code,student_number,full_name_my,full_name_en,gender,date_of_birth,admission_year,program,cohort,student_status,phone,email,guardian_name,guardian_phone,notes").order("student_number"),
    supabase.from("student_academic_records").select("id,student_id,academic_year,term,course_code,course_name,credits,score,grade,remarks").order("academic_year",{ascending:false}),
    supabase.rpc("mrpst_student_scholarship_history")
   ]);
@@ -38,9 +38,9 @@ export default function StudentModule(){
  const setP=(k:string,v:string)=>setProfile((old:any)=>({...old,[k]:v}));
  const setR=(k:string,v:string)=>setRecord((old:any)=>({...old,[k]:v}));
  const newProfile=()=>{setEditingStudent("");setProfile({...emptyProfile});setProfileOpen(true);};
- const editProfile=(s:Student)=>{setEditingStudent(s.id);setProfile({student_number:s.student_number,full_name:s.full_name,full_name_en:s.full_name_en??"",full_name_my:s.full_name_my??"",gender:s.gender??"unspecified",date_of_birth:s.date_of_birth??"",admission_year:s.admission_year?String(s.admission_year):"",program:s.program??"",cohort:s.cohort??"",student_status:s.student_status,phone:s.phone??"",email:s.email??"",guardian_name:s.guardian_name??"",guardian_phone:s.guardian_phone??"",notes:s.notes??""});setProfileOpen(true);};
+ const editProfile=(s:Student)=>{setEditingStudent(s.id);setProfile({student_number:s.student_number,full_name:s.full_name,full_name_en:s.full_name_en??"",full_name_my:s.full_name_my??"",gender:s.gender??"unspecified",date_of_birth:s.date_of_birth??"",admission_year:s.admission_year?String(s.admission_year):"",program:s.program??(s.program_code==="ece"?"Early Childhood Education":s.program_code==="theology"?"Theology":""),cohort:s.cohort??"",student_status:s.student_status,phone:s.phone??"",email:s.email??"",guardian_name:s.guardian_name??"",guardian_phone:s.guardian_phone??"",notes:s.notes??""});setProfileOpen(true);};
  const saveProfile=async()=>{if(!supabase)return;setSaving(true);setError("");try{
-  const payload={student_number:profile.student_number.trim(),full_name:profile.full_name.trim(),full_name_en:profile.full_name_en.trim()||null,full_name_my:profile.full_name_my.trim()||null,gender:profile.gender,date_of_birth:profile.date_of_birth||null,admission_year:profile.admission_year?Number(profile.admission_year):null,program:profile.program.trim()||null,cohort:profile.cohort.trim()||null,student_status:profile.student_status,phone:profile.phone.trim()||null,email:profile.email.trim()||null,guardian_name:profile.guardian_name.trim()||null,guardian_phone:profile.guardian_phone.trim()||null,notes:profile.notes.trim()||null};
+  const payload={student_number:profile.student_number.trim(),full_name:profile.full_name.trim(),full_name_en:profile.full_name_en.trim()||null,full_name_my:profile.full_name_my.trim()||null,gender:profile.gender,date_of_birth:profile.date_of_birth||null,admission_year:profile.admission_year?Number(profile.admission_year):null,program:profile.program.trim()||null,program_code:/early childhood|ece/i.test(profile.program)?"ece":/theology|신학/i.test(profile.program)?"theology":null,cohort:profile.cohort.trim()||null,student_status:profile.student_status,phone:profile.phone.trim()||null,email:profile.email.trim()||null,guardian_name:profile.guardian_name.trim()||null,guardian_phone:profile.guardian_phone.trim()||null,notes:profile.notes.trim()||null};
   if(editingStudent){const x=await supabase.from("students").update(payload).eq("id",editingStudent);if(x.error)throw x.error;setSelectedId(editingStudent);setNotice("학생 정보를 수정했습니다.");}
   else{const {data:u}=await supabase.auth.getUser();const x=await supabase.from("students").insert({...payload,created_by:u.user?.id}).select("id").single();if(x.error)throw x.error;setSelectedId(x.data.id);setNotice("학생을 등록했습니다.");}
   setProfileOpen(false);await load();

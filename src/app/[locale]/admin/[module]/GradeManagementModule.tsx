@@ -57,7 +57,7 @@ export default function GradeManagementModule(){
    const nextDepartments=(d.data??[]) as Department[];
    setDepartments(nextDepartments);setTerms(nextTerms);setStudents((s.data??[]) as Student[]);setCourses((c.data??[]) as Course[]);setGrades((g.data??[]) as Grade[]);
    if(!termId&&nextTerms.length){setTermId((nextTerms.find(x=>x.status==="active")??nextTerms[0]).id);}
-   if(!departmentId&&nextDepartments.length){setDepartmentId(nextDepartments[0].id);}
+   
   }catch(err:any){setError(err?.message||"성적 데이터를 불러오지 못했습니다.");}
   finally{setLoading(false);}
  },[db,termId,departmentId]);
@@ -65,15 +65,15 @@ export default function GradeManagementModule(){
  useEffect(()=>{void load();},[load]);
 
  const department=departments.find(x=>x.id===departmentId);
- const programCode=department?.code?.toUpperCase().includes("ECE")?"ece":"theology";
+ const programCode=departmentId?(department?.code?.toUpperCase().includes("ECE")?"ece":"theology"):null;
  const levels=useMemo(()=>Array.from(new Set([
-  ...courses.filter(x=>x.department_id===departmentId).map(x=>x.level),
-  ...students.filter(x=>x.program_code===programCode).map(x=>x.cohort)
+  ...courses.filter(x=>!departmentId||x.department_id===departmentId).map(x=>x.level),
+  ...students.filter(x=>!programCode||x.program_code===programCode).map(x=>x.cohort)
  ].filter((x):x is string=>Boolean(x)))).sort((a,b)=>a.localeCompare(b)),[courses,students,departmentId,programCode]);
- useEffect(()=>{if(levels.length&&!levels.includes(level))setLevel(levels[0]);},[levels,level]);
- const visibleCourses=useMemo(()=>courses.filter(x=>x.department_id===departmentId&&(!level||x.level===level)),[courses,departmentId,level]);
+ useEffect(()=>{if(level&&!levels.includes(level))setLevel("");},[levels,level]);
+ const visibleCourses=useMemo(()=>courses.filter(x=>(!departmentId||x.department_id===departmentId)&&(!level||x.level===level)),[courses,departmentId,level]);
  useEffect(()=>{if(!visibleCourses.some(x=>x.id===courseId))setCourseId(visibleCourses[0]?.id??"");},[visibleCourses,courseId]);
- const visibleStudents=useMemo(()=>students.filter(x=>x.program_code===programCode&&(!level||x.cohort===level)&&(!search.trim()||x.full_name.toLowerCase().includes(search.toLowerCase())||x.student_number.toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>Number.isFinite(Number(a.student_number))&&Number.isFinite(Number(b.student_number))?Number(a.student_number)-Number(b.student_number):a.student_number.localeCompare(b.student_number)),[students,programCode,level,search]);
+ const visibleStudents=useMemo(()=>students.filter(x=>(!programCode||x.program_code===programCode)&&(!level||x.cohort===level)&&(!search.trim()||x.full_name.toLowerCase().includes(search.toLowerCase())||x.student_number.toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>Number.isFinite(Number(a.student_number))&&Number.isFinite(Number(b.student_number))?Number(a.student_number)-Number(b.student_number):a.student_number.localeCompare(b.student_number)),[students,programCode,level,search]);
  const termGrades=useMemo(()=>grades.filter(x=>x.term_id===termId),[grades,termId]);
  const gradeByKey=useMemo(()=>new Map(termGrades.map(x=>[x.student_id+"|"+x.course_id,x])),[termGrades]);
  const selectedStudent=students.find(x=>x.id===selectedStudentId);
@@ -130,7 +130,7 @@ export default function GradeManagementModule(){
   </div>
   <div className={styles.filters}>
    <label>학년도 / 학기<select value={termId} onChange={e=>setTermId(e.target.value)}><option value="">학기 선택</option>{terms.map(x=><option key={x.id} value={x.id}>{x.name} ({x.academic_year})</option>)}</select></label>
-   <label>학과<select value={departmentId} onChange={e=>{setDepartmentId(e.target.value);setSelectedStudentId("");}}><option value="">학과 선택</option>{departments.map(x=><option key={x.id} value={x.id}>{x.name_ko||x.name_en||x.code}</option>)}</select></label>
+   <label>학과<select value={departmentId} onChange={e=>{setDepartmentId(e.target.value);setSelectedStudentId("");}}><option value="">전체 학과</option>{departments.map(x=><option key={x.id} value={x.id}>{x.name_ko||x.name_en||x.code}</option>)}</select></label>
    <label>학년<select value={level} onChange={e=>{setLevel(e.target.value);setSelectedStudentId("");}}><option value="">전체 학년</option>{levels.map(x=><option key={x} value={x}>{x}</option>)}</select></label>
   </div>
   <div className={styles.stats}>

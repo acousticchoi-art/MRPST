@@ -116,9 +116,9 @@ export default function AdministrationModule(){
   });
   await run(()=>db.from("user_module_permissions").upsert(rows,{onConflict:"user_id,module_key"}),"페이지 표시 설정을 저장했습니다.");
  }
- const tabs=[["users","회원·권한 관리"],["departments","부서 관리"],["audit","변경 이력"]];
+ const tabs=[["users","계정 관리"],["departments","부서 관리"],["audit","변경 이력"]];
  return <div className="settings-workspace">
-  <div className="settings-heading"><span className="eyebrow">SYSTEM GOVERNANCE</span><h2>회원 관리</h2><p>회원 상태와 소속, 관리자 권한을 한 화면에서 확인하고 관리합니다.</p></div>
+  <div className="settings-heading"><span className="eyebrow">SYSTEM GOVERNANCE</span><h2>계정·권한 관리</h2><p>로그인 계정, 소속 및 시스템 접근 권한을 관리합니다.</p></div>
   <div className="settings-stats">
    <article><span>전체 회원</span><strong>{users.length}</strong></article>
    <article><span>활성 회원</span><strong>{users.filter(x=>x.is_active).length}</strong></article>

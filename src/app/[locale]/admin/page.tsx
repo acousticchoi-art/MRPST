@@ -93,7 +93,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
         <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{t.admin}</small></span></Link>
         <div className="side-label">WORKSPACE</div>
         <Link className="side-link active" href={`/${locale}/admin`}>{t.dashboard}</Link>
-        {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([key,item])=><Link className="side-link" href={`/${locale}/admin/${key}`} key={key}>{t[key as keyof typeof t]?.[0]??item.title}</Link>)}</div>:null;})}
+        {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([key,item])=><Link className="side-link" href={`/${locale}/admin/${key}`} key={key}>{(t as any)[key]?.[0]??item.title}</Link>)}</div>:null;})}
       </div>
       <div className="sidebar-mobile-tools">
         <nav className="admin-language" aria-label="Language">

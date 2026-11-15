@@ -80,7 +80,7 @@ export default function TimetableBuilder(){
   <div className="timetable-filters"><label>학기<select value={termId} onChange={e=>setTermId(e.target.value)}>{terms.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><label>학과<select value={departmentId} onChange={e=>setDepartmentId(e.target.value)}>{departments.map(x=><option key={x.id} value={x.id}>{x.name_ko||x.name_en||x.code}</option>)}</select></label></div>
   {error&&<div className="academics-alert error">{error}</div>}{notice&&<div className="academics-alert">{notice}</div>}
   <div className="timetable-paper">
-   <header className="timetable-paper-title"><h1>MRPST LECTURE SCHEDULE ({selectedDepartment?.code==="ECE"?"E.C.E":"Theology"})</h1><strong>THE FIRST SEMESTER OF 2026/2027 SCHOOL YEAR</strong><span>Bible writing with E or M (Choice) and QT in everyday (Check)</span></header>
+   <header className="timetable-paper-title"><h1>MRPST LECTURE SCHEDULE ({selectedDepartment?.code==="ECE"?"E.C.E":"Theology"})</h1><strong>{selectedTerm?.name||"First Semester 2026/2027 School Year"}</strong><span>Bible writing with E or M (Choice) and QT in everyday (Check)</span></header>
    {loading?<p className="academics-empty">시간표를 불러오는 중입니다.</p>:<div className="timetable-scroll"><table className="timetable-grid"><thead><tr><th>TIME / DAY</th>{days.map(d=><th key={d.value}>{d.label}</th>)}</tr></thead><tbody>
     {periods.map(p=><tr key={p.key}><th className="timetable-time">{p.time}</th>{p.key==="morning"||p.key==="prayer"?<td colSpan={6} className="timetable-fixed">{p.label}</td>:days.map(d=>{
       const f=fixed(p.key,d.value),items=cellEntries(p.key,d.value);
@@ -90,7 +90,7 @@ export default function TimetableBuilder(){
         <strong>{courseLabel(x.course_id)}</strong><span>{instructorLabel(x.instructor_id)||"Self Study"}</span><small>{x.class_group}</small>
         {canManage&&<div className="timetable-entry-actions"><button onClick={()=>startEdit(x)}>수정</button><button onClick={()=>void remove(x.id)}>삭제</button></div>}
        </article>)}
-       {p.key==="evening"&&d.value===4&&f&&<div className="timetable-fixed-label">{f}</div>}
+       
       </td>;
     })}</tr>)}
    </tbody></table></div>}
@@ -99,8 +99,7 @@ export default function TimetableBuilder(){
   {canManage&&<section className="timetable-course-library"><div><h3>등록된 과목 및 담당 교수</h3><p>시간표에 배치할 수 있는 학과 과목입니다. 과목·교수 정보는 과목 관리와 교수·강의 배정 탭에서 수정할 수 있습니다.</p></div><div className="timetable-course-list">{deptCourses.map(c=><article key={c.id}><strong>{c.title}</strong><span>{c.course_code}</span></article>)}</div></section>}
   {modal&&<div className="academics-modal-backdrop"><section className="academics-modal timetable-modal"><header><h3>{editing?"시간표 항목 수정":"시간표 항목 등록"}</h3><button onClick={()=>setModal(false)}>×</button></header><div className="academics-form-grid">
    <label>요일<select value={form.day_of_week} onChange={e=>setForm({...form,day_of_week:e.target.value})}>{days.map(d=><option key={d.value} value={d.value}>{({MON:"월요일",TUE:"화요일",WED:"수요일",THU:"목요일",FRI:"금요일",SAT:"토요일"} as any)[d.label]}</option>)}</select></label>
-   <label>시작 시간<input type="time" value={form.start_time} onChange={e=>setForm({...form,start_time:e.target.value})}/></label>
-   <label>종료 시간<input type="time" value={form.end_time} onChange={e=>setForm({...form,end_time:e.target.value})}/></label>
+   <label>시간대<select value={form.start_time+"|"+form.end_time} onChange={e=>{const [start_time,end_time]=e.target.value.split("|");setForm({...form,start_time,end_time});}}><option value="08:00|09:30">08:00–09:30</option><option value="10:30|12:00">10:30–12:00</option><option value="13:00|14:30">13:00–14:30</option></select></label>
    <label>과목<select value={form.course_id} onChange={e=>setForm({...form,course_id:e.target.value})}><option value="">과목 선택</option>{deptCourses.map(c=><option key={c.id} value={c.id}>{c.course_code} · {c.title}</option>)}</select></label>
    <label>담당 교수<select value={form.instructor_id} onChange={e=>setForm({...form,instructor_id:e.target.value})}><option value="">담당 교수 미정 / 자율학습</option>{instructors.filter(i=>i.department_id===departmentId).map(i=><option key={i.id} value={i.id}>{i.full_name}</option>)}</select></label>
    <label>학년 / 반 구분<input value={form.class_group} onChange={e=>setForm({...form,class_group:e.target.value})} placeholder="예: First Year, Level 1, All Students"/></label>

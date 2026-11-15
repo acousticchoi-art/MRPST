@@ -13,7 +13,7 @@ const copy = {
     eyebrow:"INTEGRATED SCHOOL MANAGEMENT", title:"Administration Dashboard",
     subtitle:"Academic and school operations at a glance.",
     graduateTotal:"Total Graduates", currentStudents:"Current Students", schedule:"Schedule Management",
-    modules:"Management Modules", open:"Open module →",
+    modules:"Management Modules", open:"Open module →", groups:{academic:"Academic & Students",finance:"Finance",operations:"School Operations",system:"System & Website"},
     finance:["Financial Management","General finance, special funds, scholarship fund, budgets and approvals."],
     students:["Student Management","Student profiles, academic records and student scholarships."],
     academics:["Academic Management","Departments, courses, semesters, class schedules and academic results."],
@@ -30,7 +30,7 @@ const copy = {
     eyebrow:"통합 학교 관리 시스템", title:"행정 대시보드",
     subtitle:"학사 및 학교 운영 현황을 한눈에 확인합니다.",
     graduateTotal:"총 졸업생", currentStudents:"재학생", schedule:"일정 관리",
-    modules:"관리 모듈", open:"모듈 열기 →",
+    modules:"관리 모듈", open:"모듈 열기 →", groups:{academic:"학사·학생",finance:"재정",operations:"학교 운영",system:"시스템·홈페이지"},
     finance:["재정 관리","일반 회계, 특별 기금, 장학 기금, 예산 및 지출 승인을 관리합니다."],
     students:["학생 관리","학생 인적 사항, 학적 기록 및 장학 내역을 관리합니다."],
     academics:["학사 관리","학과, 과목, 학기, 수업 시간표 및 학업 성적을 관리합니다."],
@@ -47,7 +47,7 @@ const copy = {
     eyebrow:"ပေါင်းစည်းထားသော ကျောင်းစီမံခန့်ခွဲမှု", title:"အုပ်ချုပ်ရေး ဒက်ရှ်ဘုတ်",
     subtitle:"ပညာရေးနှင့် ကျောင်းလုပ်ငန်းဆောင်ရွက်မှု အခြေအနေများ။",
     graduateTotal:"ဘွဲ့ရကျောင်းသား စုစုပေါင်း", currentStudents:"လက်ရှိကျောင်းသား", schedule:"အချိန်ဇယား စီမံခန့်ခွဲမှု",
-    modules:"စီမံခန့်ခွဲမှုကဏ္ဍများ", open:"ဖွင့်ရန် →",
+    modules:"စီမံခန့်ခွဲမှုကဏ္ဍများ", open:"ဖွင့်ရန် →", groups:{academic:"ပညာရေးနှင့် ကျောင်းသား",finance:"ဘဏ္ဍာရေး",operations:"ကျောင်းလုပ်ငန်း",system:"စနစ်နှင့် ဝဘ်ဆိုက်"},
     finance:["ဘဏ္ဍာရေးစီမံခန့်ခွဲမှု","အထွေထွေဘဏ္ဍာရေး၊ အထူးရန်ပုံငွေ၊ ပညာသင်ဆုရန်ပုံငွေ၊ ဘတ်ဂျက်နှင့် အတည်ပြုချက်များ။"],
     students:["ကျောင်းသားစီမံခန့်ခွဲမှု","ကျောင်းသားကိုယ်ရေးအချက်အလက်၊ ပညာရေးမှတ်တမ်းနှင့် ပညာသင်ဆုများ။"],
     academics:["ပညာရေးစီမံခန့်ခွဲမှု","ဌာန၊ သင်ခန်းစာ၊ စာသင်နှစ်၊ အချိန်ဇယားနှင့် ရလဒ်များ။"],
@@ -85,13 +85,15 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   }
   if(accessDenied) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>{t.denied}</h1><p className="login-intro">{t.deniedText}</p><Link className="btn secondary" href={`/${locale}`}>{t.back}</Link></section></main>;
   const visible=Object.entries(MODULES).filter(([key])=>!supabase||canAccessModule(roles,key as keyof typeof MODULES,moduleOverrides));
+  const moduleGroups=[["academic",["students","academics"]],["finance",["finance"]],["operations",["facilities","library","meetings"]],["system",["administration","website"]]] as const;
+  const visibleInGroup=(keys:readonly string[])=>visible.filter(([key])=>keys.includes(key));
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
     <aside className="sidebar">
       <div className="sidebar-nav">
         <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{t.admin}</small></span></Link>
         <div className="side-label">WORKSPACE</div>
         <Link className="side-link active" href={`/${locale}/admin`}>{t.dashboard}</Link>
-        {visible.map(([key,item])=><Link className="side-link" href={`/${locale}/admin/${key}`} key={key}>{t[key as keyof typeof t]?.[0]??item.title}</Link>)}
+        {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([key,item])=><Link className="side-link" href={`/${locale}/admin/${key}`} key={key}>{t[key as keyof typeof t]?.[0]??item.title}</Link>)}</div>:null;})}
       </div>
       <div className="sidebar-mobile-tools">
         <nav className="admin-language" aria-label="Language">
@@ -115,10 +117,10 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
         <div className="stats dashboard-overview">
           <div className="stat"><span>{t.graduateTotal}</span><strong>—</strong></div>
           <div className="stat"><span>{t.currentStudents}</span><strong>—</strong></div>
-          <Link className="stat schedule-stat" href={`/${locale}/admin/academics`}><span>{t.schedule}</span><strong>{t.open}</strong></Link>
+          
         </div>
         <div className="module-heading"><h2>{t.modules}</h2><span>{visible.length}{lang==="ko"?"개 모듈 사용 가능":lang==="my"?" ကဏ္ဍ အသုံးပြုနိုင်သည်": " available modules"}</span></div>
-        <div className="modules">{visible.map(([key,item])=>{const words=t[key as keyof typeof t] as readonly string[];return <Link href={`/${locale}/admin/${key}`} className="module" key={key}><strong>{words?.[0]??item.title}</strong><p>{words?.[1]??item.description}</p><span className="module-open">{t.open}</span></Link>})}</div>
+        <div className="module-groups">{moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<section className="module-group" key={group}><h3>{t.groups[group]}</h3><div className="modules">{items.map(([key,item])=>{const words=t[key as keyof typeof t] as readonly string[];return <Link href={`/${locale}/admin/${key}`} className="module" key={key}><strong>{words?.[0]??item.title}</strong><p>{words?.[1]??item.description}</p><span className="module-open">{t.open}</span></Link>})}</div></section>:null;})}</div>
       </div>
     </main>
   </div></>;

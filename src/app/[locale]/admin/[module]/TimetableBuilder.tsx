@@ -102,7 +102,7 @@ export default function TimetableBuilder(){
    const courseKeys=new Set((currentA.data||[]).map(x=>[x.day_of_week,time(x.start_time),time(x.end_time),x.course_id,x.class_group].join("|")));
    const eventKeys=new Set((currentB.data||[]).map(x=>[x.day_of_week,time(x.start_time),time(x.end_time),x.title].join("|")));
    const courseRows=(a.data||[]).filter(x=>!courseKeys.has([x.day_of_week,time(x.start_time),time(x.end_time),x.course_id,x.class_group].join("|"))).map(({id,created_at,updated_at,...x})=>({...x,term_id:termId,created_by:user.id}));
-   const eventRows=(b.data||[]).filter(x=>!eventKeys.has([x.day_of_week,time(x.start_time),time(x.end_time),x.title].join("|"))).map(({id,created_at,updated_at,...x})=>({...x,term_id:termId,created_by:null}));
+   const eventRows=(b.data||[]).filter(x=>!eventKeys.has([x.day_of_week,time(x.start_time),time(x.end_time),x.title].join("|"))).map(({id,created_at,updated_at,...x})=>({...x,term_id:termId,created_by:user.id}));
    if(courseRows.length){const {error:e}=await db.from("academic_timetable_entries").insert(courseRows);if(e)throw e;}
    if(eventRows.length){const {error:e}=await db.from("academic_timetable_events").insert(eventRows);if(e)throw e;}
    setNotice("이전 학기 시간표 복사가 완료되었습니다. 새 학기 일정에 맞게 자유롭게 수정하세요.");await load();

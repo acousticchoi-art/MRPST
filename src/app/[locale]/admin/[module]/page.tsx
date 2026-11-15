@@ -55,7 +55,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
     }
   }
   const visible=Object.entries(MODULES).filter(([moduleKey])=>!supabase||canAccessModule(roles,moduleKey as keyof typeof MODULES,overrides));
-  const moduleNames:Record<string,string>={finance:t.finance,students:t.students,academics:t.academics,grades:t.grades,facilities:t.facilities,library:t.library,meetings:t.meetings,administration:t.administration,website:t.website};
+  const moduleNames:Record<string,string>={finance:t.finance,students:t.students,academics:t.academics,facilities:t.facilities,library:t.library,meetings:t.meetings,administration:t.administration,website:t.website};
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
     <aside className="sidebar">
       <div className="sidebar-nav">

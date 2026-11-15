@@ -721,3 +721,5 @@ button,a,input,select,textarea{transition-color:.16s}
  .timetable-course{padding:4px 2px;min-height:38px}
  @page{size:A4 landscape;margin:8mm}
 }
+
+.timetable-fixed-label{white-space:pre-line}

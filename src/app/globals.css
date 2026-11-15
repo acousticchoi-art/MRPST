@@ -628,3 +628,15 @@ button,a,input,select,textarea{transition-color:.16s}
 .contact-page-back{margin-top:32px;text-align:center}
 .contact-page-back a{color:var(--navy);font-size:13px;font-weight:750}
 @media(max-width:760px){.contact-page{padding:50px 18px 62px}.contact-page-heading{margin-bottom:28px}.contact-page-heading>p{font-size:13px}.contact-page-grid{grid-template-columns:1fr;gap:14px}.contact-info-card,.contact-form-card{padding:24px 20px}.contact-info-card h2,.contact-form-card h2{font-size:20px}}
+
+
+/* Grouped administration navigation */
+.module-groups{display:grid;gap:22px}
+.module-group{min-width:0}
+.module-group>h3{margin:0 0 12px;color:var(--navy);font-size:14px;font-weight:750;letter-spacing:.01em}
+.module-group .modules{margin:0}
+@media(max-width:650px){
+  .sidebar-nav{display:flex;align-items:center;gap:6px;flex:0 0 auto;min-width:max-content}
+  .sidebar-group{display:flex;align-items:center;gap:4px;flex:0 0 auto}
+  .sidebar-mobile-tools{display:none}
+}

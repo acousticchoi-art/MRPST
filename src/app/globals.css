@@ -784,3 +784,19 @@ button,a,input,select,textarea{transition-color:.16s}
 .public-announcement h3{margin:0 0 5px;color:var(--navy);font-size:15px}
 .public-announcement p{margin:0;color:var(--muted);font-size:13px;line-height:1.7;white-space:pre-wrap}
 @media(max-width:760px){.website-notice-layout{grid-template-columns:1fr}.website-field{grid-template-columns:1fr}.website-field>div{grid-row:auto}.public-announcements{grid-template-columns:1fr;gap:14px;padding:28px 6%}.website-panel{padding:15px}.website-panel-head{align-items:flex-start;flex-direction:column}.website-panel-head select{width:100%}}
+
+
+/* Academic calendar */
+.schedule-calendar-head{display:flex;align-items:center;justify-content:center;gap:24px;margin:22px 0 14px}
+.schedule-calendar-head button{border:1px solid var(--line,#ddd);background:white;border-radius:9px;padding:7px 14px;font-size:20px}
+.schedule-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line,#e5e5e5);border-left:1px solid var(--line,#e5e5e5)}
+.schedule-weekday,.schedule-day{min-width:0;border-right:1px solid var(--line,#e5e5e5);border-bottom:1px solid var(--line,#e5e5e5);padding:8px}
+.schedule-weekday{text-align:center;font-weight:700;background:#f8f7f5}
+.schedule-day{min-height:92px;font-size:13px;overflow:hidden}
+.schedule-day b{display:block;margin-bottom:6px}.schedule-day.empty{background:#fafafa}
+.schedule-dot{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-radius:4px;padding:3px 5px;margin:3px 0;background:#f1e7d7;color:#59452e;font-size:11px}
+.schedule-dot.exam{background:#fce5e5;color:#8b3030}.schedule-dot.holiday{background:#e5eee5;color:#315b38}.schedule-dot.admission{background:#e6eafa;color:#394c83}
+.schedule-event-list{margin-top:24px}.schedule-event-list h4{margin-bottom:10px}.schedule-event-list article{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line,#e5e5e5)}
+.schedule-event-list article time,.schedule-event-list article small{display:block;color:var(--muted,#777);font-size:12px}.schedule-event-list article strong{display:block;margin:4px 0}.schedule-event-list article p{margin:3px 0;font-size:14px;white-space:pre-wrap}
+.schedule-actions{display:flex;gap:6px;align-items:center}.schedule-actions button{border:1px solid #ddd;background:white;border-radius:7px;padding:6px 10px}
+@media(max-width:640px){.schedule-day{min-height:66px;padding:4px;font-size:11px}.schedule-dot{font-size:9px;padding:2px}.schedule-calendar-head{margin:14px 0}.schedule-event-list article{align-items:flex-start}.schedule-actions{flex-direction:column}}

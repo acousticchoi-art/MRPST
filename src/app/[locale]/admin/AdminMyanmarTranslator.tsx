@@ -981,6 +981,24 @@ const MY:Record<string,string>={
   "회원 다시 활성화": "အသင်းဝင်ကို ပြန်လည်အသုံးပြုခွင့်ပြုရန်",
   "비활성화": "အသုံးပြုခွင့်ပိတ်ရန်",
   "활성화": "အသုံးပြုခွင့်ဖွင့်ရန်",
+  "이름을 입력하세요": "အမည်ထည့်ပါ",
+  "검색어를 입력하세요": "ရှာဖွေလိုသည့် စကားလုံးကို ထည့်ပါ",
+  "검색어 입력": "ရှာဖွေလိုသည့် စကားလုံးထည့်ပါ",
+  "검색...": "ရှာဖွေရန်...",
+  "검색어": "ရှာဖွေရန်",
+  "선택하세요": "ရွေးချယ်ပါ",
+  "선택해 주세요": "ရွေးချယ်ပါ",
+  "내용을 입력하세요": "အကြောင်းအရာကို ထည့်ပါ",
+  "상세 내용을 입력하세요": "အသေးစိတ်အကြောင်းအရာကို ထည့်ပါ",
+  "비고를 입력하세요": "မှတ်ချက်ကို ထည့်ပါ",
+  "설명을 입력하세요": "ဖော်ပြချက်ကို ထည့်ပါ",
+  "이메일을 입력하세요": "အီးမေးလ်ထည့်ပါ",
+  "전화번호를 입력하세요": "ဖုန်းနံပါတ်ထည့်ပါ",
+  "제목을 입력하세요": "ခေါင်းစဉ်ထည့်ပါ",
+  "이름 또는 이메일 검색": "အမည် သို့မဟုတ် အီးမေးလ်ဖြင့် ရှာဖွေပါ",
+  "학생 이름 검색": "ကျောင်းသားအမည်ဖြင့် ရှာဖွေပါ",
+  "도서 검색": "စာအုပ်ရှာဖွေရန်",
+  "회원 검색": "အသင်းဝင်ရှာဖွေရန်",
 };;
 
 
@@ -1011,7 +1029,6 @@ function translateNode(node:Node){
   if(node.nodeType===Node.ELEMENT_NODE) translateElement(node as Element);
 }
 
-
 export default function AdminMyanmarTranslator({locale}:{locale:string}){
   useEffect(()=>{
     if(locale!=="my") return;
@@ -1026,47 +1043,17 @@ export default function AdminMyanmarTranslator({locale}:{locale:string}){
     };
     const observer=new MutationObserver(records=>{
       for(const record of records){
-        if(record.type==="childList"){
-          record.addedNodes.forEach(node=>pending.add(node));
-        }else if(record.type==="characterData"){
-          pending.add(record.target);
-        }else if(record.type==="attributes"){
-          pending.add(record.target);
-        }
+        if(record.type==="childList") record.addedNodes.forEach(node=>pending.add(node));
+        else if(record.type==="characterData"||record.type==="attributes") pending.add(record.target);
       }
       if(!frame&&pending.size) frame=requestAnimationFrame(flush);
     });
-    observer.observe(root,{
-      subtree:true,
-      childList:true,
-      characterData:true,
-      attributes:true,
-      attributeFilter:["placeholder","title","aria-label"]
-    });
+    observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["placeholder","title","aria-label"]});
     return ()=>{
       observer.disconnect();
       if(frame) cancelAnimationFrame(frame);
       pending.clear();
-   
-  "이름을 입력하세요": "အမည်ထည့်ပါ",
-  "검색어를 입력하세요": "ရှာဖွေလိုသည့် စကားလုံးကို ထည့်ပါ",
-  "검색어 입력": "ရှာဖွေလိုသည့် စကားလုံးထည့်ပါ",
-  "검색...": "ရှာဖွေရန်...",
-  "검색어": "ရှာဖွေရန်",
-  "선택하세요": "ရွေးချယ်ပါ",
-  "선택해 주세요": "ရွေးချယ်ပါ",
-  "내용을 입력하세요": "အကြောင်းအရာကို ထည့်ပါ",
-  "상세 내용을 입력하세요": "အသေးစိတ်အကြောင်းအရာကို ထည့်ပါ",
-  "비고를 입력하세요": "မှတ်ချက်ကို ထည့်ပါ",
-  "설명을 입력하세요": "ဖော်ပြချက်ကို ထည့်ပါ",
-  "이메일을 입력하세요": "အီးမေးလ်ထည့်ပါ",
-  "전화번호를 입력하세요": "ဖုန်းနံပါတ်ထည့်ပါ",
-  "제목을 입력하세요": "ခေါင်းစဉ်ထည့်ပါ",
-  "이름 또는 이메일 검색": "အမည် သို့မဟုတ် အီးမေးလ်ဖြင့် ရှာဖွေပါ",
-  "학생 이름 검색": "ကျောင်းသားအမည်ဖြင့် ရှာဖွေပါ",
-  "도서 검색": "စာအုပ်ရှာဖွေရန်",
-  "회원 검색": "အသင်းဝင်ရှာဖွေရန်",
- };
+    };
   },[locale]);
   return null;
 }

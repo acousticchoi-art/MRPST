@@ -36,7 +36,7 @@ export default function TimetableBuilder(){
   setTermId(nextTerm);setDepartmentId(nextDept);
   if(nextTerm&&nextDept){
    const [a,b]=await Promise.all([
-    db.from("academic_timetable_entries").select("*").eq("term_id",nextTerm).eq("department_id",nextDept).order("day_of_week").order("start_time").order("display_order"),
+    db.from("academic_timetable_entries").select("*").eq("term_id",nextTerm).eq("department_id",nextDept).eq("is_active",true).order("day_of_week").order("start_time").order("display_order"),
     db.from("academic_timetable_events").select("*").eq("term_id",nextTerm).eq("department_id",nextDept).order("day_of_week").order("start_time").order("display_order")
    ]);
    if(a.error||b.error)setError([a.error?.message,b.error?.message].filter(Boolean).join(" · "));
@@ -92,7 +92,7 @@ export default function TimetableBuilder(){
    const {data:{user}}=await db.auth.getUser();
    if(!user)throw new Error("로그인이 필요합니다.");
    const [a,b]=await Promise.all([
-    db.from("academic_timetable_entries").select("*").eq("term_id",copyFrom).eq("department_id",departmentId),
+    db.from("academic_timetable_entries").select("*").eq("term_id",copyFrom).eq("department_id",departmentId).eq("is_active",true),
     db.from("academic_timetable_events").select("*").eq("term_id",copyFrom).eq("department_id",departmentId)
    ]);
    if(a.error||b.error)throw a.error||b.error;

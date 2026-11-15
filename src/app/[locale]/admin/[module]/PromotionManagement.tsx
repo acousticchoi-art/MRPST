@@ -40,8 +40,13 @@ export default function PromotionManagement(){
  const createBatch=async()=>{
   if(!db)return;setSaving(true);setError("");setNotice("");
   const {data,error:e}=await db.rpc("mrpst_create_student_promotion_batch",{p_academic_year:Number(year)});
-  if(e)setError(e.message);else{setBatchId(data);setNotice(year+"학년도 진급 명단을 만들었습니다.");}
-  setSaving(false);await load();
+  if(e)setError(e.message);else{
+   setBatchId(data);setNotice(year+"학년도 진급 명단을 만들었습니다.");
+   const [b,rows]=await Promise.all([db.from("student_promotion_batches").select("*").order("academic_year",{ascending:false}),db.from("student_promotion_items").select("*").eq("batch_id",data).order("student_number")]);
+   if(b.error||rows.error)setError(b.error?.message||rows.error?.message||"명단을 불러오지 못했습니다.");
+   else{setBatches(b.data||[]);setItems(rows.data||[]);}
+  }
+  setSaving(false);
  };
  const approve=async()=>{
   if(!db||!selectedBatch||!window.confirm(selectedBatch.academic_year+"학년도 진급 명단을 최종 승인할까요? 승인하면 진급 대상 학생의 학년 정보가 변경됩니다."))return;
@@ -66,7 +71,7 @@ export default function PromotionManagement(){
     <article><span>확인 필요</span><strong>{counts.needs_review||0}</strong></article>
     <article><span>진급 제외</span><strong>{counts.excluded||0}</strong></article>
    </div>
-   <div className="academics-table-wrap"><table className="academics-table"><thead><tr><th>학번</th><th>학생</th><th>현재 학년</th><th>처리 결과</th></tr></thead><tbody>{items.map(x=><tr key={x.id}><td>{x.student_number}</td><td>{x.student_name}</td><td>{x.from_cohort||"미등록"}</td><td>{selectedBatch.status==="approved"?decisionLabel[x.decision]:<select disabled={!canManage||saving} value={x.decision} onChange={e=>void changeDecision(x,e.target.value)}><option value="promote">진급 예정</option><option value="graduation_review">졸업 검토</option><option value="needs_review">확인 필요</option><option value="excluded">진급 제외</option></select>}</td></tr>)}</tbody></table></div>
+   <div className="academics-table-wrap"><table className="academics-table"><thead><tr><th>학번</th><th>학생</th><th>현재 학년</th><th>처리 결과</th></tr></thead><tbody>{items.map(x=><tr key={x.id}><td>{x.student_number}</td><td>{x.student_name}</td><td>{x.from_cohort||"미등록"}</td><td>{selectedBatch.status==="approved"?decisionLabel[x.decision]:<select disabled={!canManage||saving} value={x.decision} onChange={e=>void changeDecision(x,e.target.value)}>{x.to_cohort&&<option value="promote">진급 예정</option>}{x.from_cohort==="Fourth Year"&&<option value="graduation_review">졸업 검토</option>}<option value="needs_review">확인 필요</option><option value="excluded">진급 제외</option></select>}</td></tr>)}</tbody></table></div>
    {selectedBatch.status==="review"?<div className="promotion-approve"><p className="academics-form-hint">4학년은 자동 졸업시키지 않고 졸업 검토로 남깁니다. 확인 필요 항목을 모두 처리해야 승인할 수 있습니다.</p><button className="academics-primary" disabled={!canManage||saving||!ready} onClick={()=>void approve()}>{saving?"처리 중…":"진급 최종 승인"}</button></div>:<p className="academics-form-hint">승인 완료 · {selectedBatch.approved_at?new Date(selectedBatch.approved_at).toLocaleString("ko-KR"):""}</p>}
   </>}
   {!loading&&!selectedBatch&&<div className="academics-empty">아직 생성된 진급 명단이 없습니다. 두 학기가 모두 종료되면 자동 생성할 수 있습니다.</div>}

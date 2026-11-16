@@ -129,7 +129,7 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
         </div>
       </section>
 
-      {announcements.length>0&&<section className="public-announcements"><div className="public-announcements-heading"><span className="eyebrow">{locale==="ko"?"MRPST 소식":"MRPST NEWS"}</span><h2>{locale==="ko"?"공지사항":"ကြေညာချက်များ"}</h2></div><div className="public-announcements-list">{announcements.map(item=><article className="public-announcement" key={item.content_key}><h3>{item.title}</h3><p>{item.body}</p></article>)}</div></section>}
+      <section className="public-announcements"><div className="public-announcements-heading"><span className="eyebrow">{locale==="ko"?"MRPST 소식":"MRPST NEWS"}</span><h2>{locale==="ko"?"공지사항":"ကြေညာချက်များ"}</h2></div><div className="public-announcements-list">{announcements.length>0?announcements.map(item=><article className="public-announcement" key={item.content_key}><h3>{item.title}</h3><p>{item.body}</p></article>):<p className="public-announcements-empty">{locale==="ko"?"등록된 공지사항이 없습니다.":"ကြေညာချက် မရှိသေးပါ။"}</p>}</div></section>
 
       <section id="about" className="section intro-section">
         <div className="intro-heading">

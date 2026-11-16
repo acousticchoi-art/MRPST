@@ -5,7 +5,7 @@ const copy = {
   ko: {
     eyebrow:"CONTACT MRPST",
     title:"문의하기",
-    intro:"입학과 교육과정 등 학교에 궁금한 점을 문의해 주세요. 작성하신 내용은 이메일로 전달됩니다.",
+    intro:"입학과 교육과정 등 학교에 관한 문의를 남겨 주세요. 작성한 내용은 이메일 앱을 통해 전달할 수 있습니다.",
     address:"No.286, 10th Kaya St, Thingangyungyi, Mingladon Township, Yangon, Myanmar",
     map:"구글 지도에서 위치 확인하기",
     email:"이메일",

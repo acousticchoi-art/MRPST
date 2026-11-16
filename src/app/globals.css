@@ -838,3 +838,12 @@ button,a,input,select,textarea{transition-color:.16s}
 .dashboard-announcement-list .published{background:#e8f2eb;color:#286344}
 .dashboard-announcement-list .draft{background:#f6efdf;color:#8a6725}
 @media(max-width:900px){.dashboard-columns{grid-template-columns:1fr}}
+
+
+/* Balance desktop homepage header alignment */
+@media(min-width:761px){
+  .header{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;column-gap:28px}
+  .header>.brand{grid-column:1;justify-self:start}
+  .header>.nav{grid-column:2;justify-self:center;flex:none;width:max-content;gap:clamp(18px,2vw,30px)}
+  .header>.header-tools{grid-column:3;justify-self:end}
+}

@@ -100,9 +100,9 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
   return <>
     <header className="header">
       <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{officialName.toUpperCase()}</small></span></Link>
-      <nav className="nav"><a href="#about">{t.about}</a><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><Link href={`/${locale}/calendar`}>{locale==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</Link><Link href={`/${locale}/contact`}>{t.contact}</Link></nav>
+      <nav className="nav"><Link href={`/${locale}/about`}>{t.about}</Link><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><Link href={`/${locale}/calendar`}>{locale==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</Link><Link href={`/${locale}/contact`}>{t.contact}</Link></nav>
       <div className="header-tools"><div className="langs"><Link href="/my" aria-label="မြန်မာဘာသာ">မြန်မာ</Link><Link href="/ko" aria-label="한국어">한국어</Link></div><Link className="admin-link" href={`/${locale}/admin`}>{locale==="ko"?"관리자":"အုပ်ချုပ်ရေး"}</Link></div>
-      <details className="mobile-menu"><summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary><nav className="mobile-nav"><a href="#about">{t.about}</a><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><Link href={`/${locale}/calendar`}>{locale==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</Link><Link href={`/${locale}/contact`}>{t.contact}</Link><Link href={`/${locale}/admin`}>Admin</Link><div className="mobile-langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div></nav></details>
+      <details className="mobile-menu"><summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary><nav className="mobile-nav"><Link href={`/${locale}/about`}>{t.about}</Link><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><Link href={`/${locale}/calendar`}>{locale==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</Link><Link href={`/${locale}/contact`}>{t.contact}</Link><Link href={`/${locale}/admin`}>Admin</Link><div className="mobile-langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div></nav></details>
     </header>
     <main className="homepage">
       <section className="hero hero-redesign">
@@ -131,14 +131,17 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
 
       <section className="public-announcements"><div className="public-announcements-heading"><span className="eyebrow">{locale==="ko"?"MRPST 소식":"MRPST NEWS"}</span><h2>{locale==="ko"?"공지사항":"ကြေညာချက်များ"}</h2></div><div className="public-announcements-list">{announcements.length>0?announcements.map(item=><article className="public-announcement" key={item.content_key}><h3>{item.title}</h3><p>{item.body}</p></article>):<p className="public-announcements-empty">{locale==="ko"?"등록된 공지사항이 없습니다.":"ကြေညာချက် မရှိသေးပါ။"}</p>}</div></section>
 
-      <section id="about" className="section intro-section">
+      <section id="about" className="section intro-section home-intro-summary">
         <div className="intro-heading">
-          <span className="eyebrow">{locale==="ko"?"01 — OUR FOUNDATION":"01 — OUR FOUNDATION"}</span>
-          <h2>{t.aboutTitle}</h2>
+          <span className="eyebrow">{locale==="ko"?"01 — ABOUT MRPST":"01 — MRPST အကြောင်း"}</span>
+          <h2>{locale==="ko"?"성경과 개혁신학 위에 세워진 신학교":"သမ္မာကျမ်းစာနှင့် ပြုပြင်ပြောင်းလဲရေး ဓမ္မပညာအပေါ် အခြေခံသော ကျောင်း"}</h2>
           <div className="gold-rule" />
-          <p className="intro-note">{locale==="ko"?"말씀 위에 세우고, 믿음으로 가르치며, 삶과 사역으로 이어지는 교육":"သမ္မာကျမ်းစာပေါ်တွင် တည်ဆောက်၍ ယုံကြည်ခြင်းဖြင့် သင်ကြားကာ အသက်တာနှင့် အမှုတော်တွင် အသုံးချခြင်း"}</p>
+          <p className="intro-note">{locale==="ko"?"올바른 신학, 올바른 신앙, 올바른 교회개척":"မှန်ကန်သော ဓမ္မပညာ၊ ယုံကြည်ခြင်းနှင့် အသင်းတော်တည်ထောင်ခြင်း"}</p>
         </div>
-        <div className="intro-body"><p>{t.aboutText}</p><a className="text-link" href="#history">{t.history}<span aria-hidden="true"> ↗</span></a></div>
+        <div className="intro-body">
+          <p>{locale==="ko"?"MRPST는 2006년 설립된 학교법인 미얀마예수교장로회총회신학원이 운영하는 신학교입니다. 성경과 개혁주의 신학을 바탕으로 미얀마 교회와 사회를 섬길 영적 지도자를 양성합니다. 신학 교육과 유아교육을 통해 복음의 확장과 다음 세대의 건강한 성장을 함께 섬깁니다.":"MRPST ကို ၂၀၀၆ ခုနှစ်တွင် တည်ထောင်ခဲ့ပြီး သမ္မာကျမ်းစာနှင့် ပြုပြင်ပြောင်းလဲရေး ဓမ္မပညာကို အခြေခံ၍ မြန်မာနိုင်ငံရှိ အသင်းတော်နှင့် လူ့အဖွဲ့အစည်းကို အစေခံမည့် ဝိညာဉ်ရေးခေါင်းဆောင်များကို ပြုစုပျိုးထောင်ပါသည်။"}</p>
+          <Link className="text-link" href={`/${locale}/about`}>{locale==="ko"?"학교 소개 자세히 보기":"ကျောင်းအကြောင်း အသေးစိတ်ကြည့်ရန်"}<span aria-hidden="true"> ↗</span></Link>
+        </div>
       </section>
 
       <section className="principles-band">

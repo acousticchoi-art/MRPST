@@ -1,4 +1,4 @@
-import SiteHeader from "./SiteHeader";
+import SiteHeader from "../SiteHeader";
 import Link from "next/link";
 
 const text = {

@@ -26,9 +26,20 @@ export default function StudentModule(){
    supabase.from("academic_grades").select("id,student_id,score,grade,remarks,academic_courses(course_code,title,credits),academic_terms(academic_year,name,term_code)").order("updated_at",{ascending:false}),
    supabase.rpc("mrpst_student_scholarship_history")
   ]);
-  const errors=[s.error,r.error,a.error].filter(Boolean).map(x=>x!.message);
-  if(errors.length)setError(errors.join(" · "));
-  else{const rows=(s.data??[]) as Student[];setStudents(rows);setRecords(((r.data??[]) as any[]).map(x=>({id:x.id,student_id:x.student_id,academic_year:x.academic_terms?.academic_year??0,term:x.academic_terms?.name??x.academic_terms?.term_code??"",course_code:x.academic_courses?.course_code??null,course_name:x.academic_courses?.title??"",credits:x.academic_courses?.credits??null,score:x.score,grade:x.grade,remarks:x.remarks})));setAwards((a.data??[]) as Award[]);if(!selectedId&&rows.length)setSelectedId(rows[0].id);if(selectedId&&!rows.some(x=>x.id===selectedId))setSelectedId(rows[0]?.id??"");}
+  // 각 데이터 영역은 독립적으로 반영합니다. 성적/장학금 조회 실패가 학생 명부 표시를 막지 않습니다.
+  const errors:string[]=[];
+  if(s.error){errors.push("학생 명부: "+s.error.message);}
+  else{
+   const rows=(s.data??[]) as Student[];
+   setStudents(rows);
+   if(!selectedId&&rows.length)setSelectedId(rows[0].id);
+   if(selectedId&&!rows.some(x=>x.id===selectedId))setSelectedId(rows[0]?.id??"");
+  }
+  if(r.error){errors.push("성적 조회: "+r.error.message);}
+  else setRecords(((r.data??[]) as any[]).map(x=>({id:x.id,student_id:x.student_id,academic_year:x.academic_terms?.academic_year??0,term:x.academic_terms?.name??x.academic_terms?.term_code??"",course_code:x.academic_courses?.course_code??null,course_name:x.academic_courses?.title??"",credits:x.academic_courses?.credits??null,score:x.score,grade:x.grade,remarks:x.remarks})));
+  if(a.error){errors.push("장학금 조회: "+a.error.message);}
+  else setAwards((a.data??[]) as Award[]);
+  setError(errors.join(" · "));
   setLoading(false);
  },[supabase,selectedId]);
  useEffect(()=>{void load();},[load]);

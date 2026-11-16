@@ -101,7 +101,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
     <aside className="sidebar">
       <div className="sidebar-nav">
-        <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{t.admin}</small></span></Link>
+        <Link href={`/${locale}`} className="brand"><span className="brand-logo"><img src="/mrpst-logo.svg" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
         <div className="side-label">WORKSPACE</div>
         <Link className="side-link active" href={`/${locale}/admin`}>{t.dashboard}</Link>
         {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([key,item])=><Link className="side-link" href={`/${locale}/admin/${key}`} key={key}>{(t as any)[key]?.[0]??item.title}</Link>)}</div>:null;})}

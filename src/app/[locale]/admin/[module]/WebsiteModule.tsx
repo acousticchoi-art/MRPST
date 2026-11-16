@@ -10,7 +10,7 @@ const pageFields=[
  {key:"contact",label:"연락처 영역",hint:"문의 섹션 제목과 안내 문구"},
  {key:"address",label:"학교 주소",hint:"메인 화면 하단에 표시할 주소"}
 ] as const;
-const locales=[{value:"ko",label:"한국어"},{value:"my",label:"မြန်မာ"},{value:"en",label:"English"}];
+const locales=[{value:"ko",label:"한국어"},{value:"my",label:"မြန်မာ"}];
 export default function WebsiteModule(){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [items,setItems]=useState<Entry[]>([]);

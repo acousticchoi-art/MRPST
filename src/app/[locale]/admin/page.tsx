@@ -126,7 +126,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
       <div className="content"><span className="eyebrow">{t.eyebrow}</span><h1 className="admin-heading">{t.title}</h1><p className="admin-subtitle">{t.subtitle}</p>
         {!isSupabaseConfigured&&<div className="notice">{t.preview}</div>}
         <section className="dashboard-welcome">
-          <div><span className="dashboard-date">{today}</span><h2>{lang==="ko"?"오늘도 MRPST의 사역과 교육을 함께 세워갑니다": "Welcome to MRPST Administration"}</h2><p>{lang==="ko"?"학교의 주요 현황과 다가오는 일정을 확인하세요.":"Review school information and upcoming schedules."}</p></div>
+          <div><span className="dashboard-date">{today}</span><h2>{lang==="ko"?"무슨 일을 하든지 마음을 다하여 주께 하듯 하고 사람에게 하듯 하지 말라.":"သင်တို့သည် ပြုလေသမျှသော အမှုတို့ကို သခင်ဘုရားအား ပြုသည်ဟု စိတ်နှလုံးအကြွင်းမဲ့ ပြုကြလော့။"}</h2><p>{lang==="ko"?"골로새서 3:23":"ကောလောသဲ ၃:၂၃"}</p></div>
           <div className="dashboard-welcome-mark">MRPST</div>
         </section>
         <section className="dashboard-stats">

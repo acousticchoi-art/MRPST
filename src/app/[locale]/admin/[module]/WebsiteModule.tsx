@@ -21,16 +21,16 @@ export default function WebsiteModule(){
  const [pageValues,setPageValues]=useState<Record<string,{title:string;body:string}>>({});
  const [editingId,setEditingId]=useState("");
  const [noticeTitle,setNoticeTitle]=useState(""),[noticeBody,setNoticeBody]=useState(""),[noticeLocale,setNoticeLocale]=useState("ko"),[noticePublished,setNoticePublished]=useState(true);
- const load=useCallback(async()=>{try{
-  if(!db){setError("데이터베이스 연결을 확인해 주세요.");setLoading(false);return;}
-  setLoading(true);setError("");
-  const {data,error}=await db.from("website_contents").select("*").order("sort_order").order("updated_at",{ascending:false});
-  if(error){setError("홈페이지 콘텐츠를 불러오지 못했습니다: "+error.message);setLoading(false);return;}
-  const rows=(data||[]) as Entry[];setItems(rows);
+ const load=useCallback(async()=>{setLoading(true);setError("");try{
+  const response=await fetch("/api/admin/data/website",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
+  const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
+  if(!response.ok)throw new Error(data.error||`홈페이지 콘텐츠 조회 실패 (HTTP ${response.status})`);
+  if(data.items?.error)throw new Error("홈페이지 콘텐츠를 불러오지 못했습니다: "+data.items.error);
+  const rows=(data.items?.data||[]) as Entry[];setItems(rows);
   const values:Record<string,{title:string;body:string}>={};
   for(const field of pageFields){const row=rows.find(x=>x.content_type==="page"&&x.content_key===field.key&&x.locale===locale);values[field.key]={title:row?.title||"",body:row?.body||""};}
-  setPageValues(values);setLoading(false);
- }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다. 다시 시도해 주세요.");}finally{setLoading(false);}},[db,locale]);
+  setPageValues(values);
+ }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[locale]);
  useEffect(()=>{void load();},[load]);
  async function savePages(){
   if(!db)return;setSaving(true);setError("");setNotice("");

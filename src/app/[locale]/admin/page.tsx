@@ -101,7 +101,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
     <aside className="sidebar">
       <div className="sidebar-nav">
-        <Link href={`/${locale}`} className="brand"><span className="brand-logo"><img src="/mrpst-logo.svg" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
+        <Link href={`/${locale}`} className="brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
         <div className="side-label">WORKSPACE</div>
         <Link className="side-link active" href={`/${locale}/admin`}>{t.dashboard}</Link>
         {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([key,item])=><Link className="side-link" href={`/${locale}/admin/${key}`} key={key}>{(t as any)[key]?.[0]??item.title}</Link>)}</div>:null;})}
@@ -130,18 +130,18 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
           <div className="dashboard-welcome-mark">MRPST</div>
         </section>
         <section className="dashboard-stats">
-          <article className="dashboard-stat"><span>{t.currentStudents}</span><strong>{hasStudentStats?activeStudentCount.count?.toLocaleString("en-US"):"—"}</strong><small>{lang==="ko"?"현재 재학 상태":"Active enrollment"}</small></article>
-          <article className="dashboard-stat"><span>{t.graduateTotal}</span><strong>{hasStudentStats?graduateCount.count?.toLocaleString("en-US"):"—"}</strong><small>{lang==="ko"?"졸업 처리된 학생":"Graduated students"}</small></article>
-          <article className="dashboard-stat"><span>{lang==="ko"?"이번 주 일정":"Upcoming this week"}</span><strong>{upcomingEvents.length}</strong><small>{lang==="ko"?"등록된 향후 일정":"Upcoming calendar entries"}</small></article>
+          <article className="dashboard-stat"><span>{t.currentStudents}</span><strong>{hasStudentStats?activeStudentCount.count?.toLocaleString("en-US"):"—"}</strong><small>{lang==="ko"?"현재 재학 상태":"လက်ရှိတက်ရောက်နေသော ကျောင်းသား"}</small></article>
+          <article className="dashboard-stat"><span>{t.graduateTotal}</span><strong>{hasStudentStats?graduateCount.count?.toLocaleString("en-US"):"—"}</strong><small>{lang==="ko"?"졸업 처리된 학생":"ဘွဲ့ရပြီးသော ကျောင်းသားများ"}</small></article>
+          <article className="dashboard-stat"><span>{lang==="ko"?"이번 주 일정":"ယခုအပတ်အတွင်း"}</span><strong>{upcomingEvents.length}</strong><small>{lang==="ko"?"등록된 향후 일정":"လာမည့် အစီအစဉ်များ"}</small></article>
         </section>
         <div className="dashboard-columns">
           <section className="dashboard-panel dashboard-schedule">
-            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"ACADEMIC CALENDAR":"ACADEMIC CALENDAR"}</span><h2>{lang==="ko"?"다가오는 일정":"Upcoming Schedule"}</h2></div><Link href={`/${locale}/admin/academics`}>{lang==="ko"?"일정 관리 →":"Manage →"}</Link></div>
-            {upcomingEvents.length? <div className="dashboard-event-list">{upcomingEvents.map((event:any)=><article key={event.id}><time>{event.start_date}{event.start_time?" · "+String(event.start_time).slice(0,5):""}</time><div><strong>{event.title}</strong>{event.location&&<small>{event.location}</small>}</div></article>)}</div>:<p className="dashboard-empty">{lang==="ko"?"예정된 일정이 없습니다.":"No upcoming events have been registered."}</p>}
+            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</span><h2>{lang==="ko"?"다가오는 일정":"လာမည့် အစီအစဉ်များ"}</h2></div><Link href={`/${locale}/admin/academics`}>{lang==="ko"?"일정 관리 →":"စီမံခန့်ခွဲရန် →"}</Link></div>
+            {upcomingEvents.length? <div className="dashboard-event-list">{upcomingEvents.map((event:any)=><article key={event.id}><time>{event.start_date}{event.start_time?" · "+String(event.start_time).slice(0,5):""}</time><div><strong>{event.title}</strong>{event.location&&<small>{event.location}</small>}</div></article>)}</div>:<p className="dashboard-empty">{lang==="ko"?"예정된 일정이 없습니다.":"မှတ်ပုံတင်ထားသော အစီအစဉ် မရှိသေးပါ။"}</p>}
           </section>
           <section className="dashboard-panel dashboard-announcements">
-            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"MRPST NEWS":"MRPST NEWS"}</span><h2>{lang==="ko"?"최근 공지사항":"Recent Announcements"}</h2></div><Link href={`/${locale}/admin/website`}>{lang==="ko"?"공지사항 관리 →":"Manage →"}</Link></div>
-            {recentAnnouncements.length?<div className="dashboard-announcement-list">{recentAnnouncements.map((item:any)=><article key={item.content_key}><div><strong>{item.title}</strong><p>{item.body}</p></div><span className={item.is_published?"published":"draft"}>{item.is_published?(lang==="ko"?"게시":"Published"):(lang==="ko"?"임시저장":"Draft")}</span></article>)}</div>:<p className="dashboard-empty">{lang==="ko"?"등록된 공지사항이 없습니다.":"No announcements have been registered."}</p>}
+            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"MRPST NEWS":"MRPST NEWS"}</span><h2>{lang==="ko"?"최근 공지사항":"နောက်ဆုံး ကြေညာချက်များ"}</h2></div><Link href={`/${locale}/admin/website`}>{lang==="ko"?"공지사항 관리 →":"စီမံခန့်ခွဲရန် →"}</Link></div>
+            {recentAnnouncements.length?<div className="dashboard-announcement-list">{recentAnnouncements.map((item:any)=><article key={item.content_key}><div><strong>{item.title}</strong><p>{item.body}</p></div><span className={item.is_published?"published":"draft"}>{item.is_published?(lang==="ko"?"게시":"Published"):(lang==="ko"?"임시저장":"Draft")}</span></article>)}</div>:<p className="dashboard-empty">{lang==="ko"?"등록된 공지사항이 없습니다.":"ကြေညာချက် မရှိသေးပါ။"}</p>}
           </section>
         </div>
       </div>

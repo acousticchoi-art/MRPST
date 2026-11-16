@@ -27,33 +27,17 @@ export default function AdministrationModule(){
  const [createOpen,setCreateOpen]=useState(false),[newUser,setNewUser]=useState({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""}),[newPassword,setNewPassword]=useState("");
  const [selectedPageKeys,setSelectedPageKeys]=useState<string[]>([]);
  const selected=users.find(x=>x.user_id===selectedId)||null;
- const load=useCallback(async()=>{try{
-  if(!db){setLoading(false);setError("데이터베이스 연결을 확인해 주세요.");return;}
-  setLoading(true);setError("");
-  const [p,d,l]=await Promise.all([
-   db.from("user_profiles").select("user_id,full_name,email,preferred_locale,is_active,created_at").order("created_at",{ascending:false}),
-   db.from("departments").select("*").order("code"),
-   db.from("admin_audit_log").select("*").order("created_at",{ascending:false}).limit(100)
-  ]);
-  const errs=[p,d,l].filter(x=>x.error).map(x=>x.error!.message);
-  if(errs.length){setError(errs.join(" · "));setLoading(false);return;}
-  const rows=(p.data||[]) as Omit<P,"roles">[],ids=rows.map(x=>x.user_id);
-  let rr:UserRole[]=[];
-  let pp:(UserModulePermission & {user_id:string})[]=[];
-  if(ids.length){
-   const [r,permissions]=await Promise.all([
-    db.from("user_roles").select("id,user_id,role,department_id").in("user_id",ids),
-    db.from("user_module_permissions").select("user_id,module_key,can_view,can_manage").in("user_id",ids)
-   ]);
-   if(r.error||permissions.error){setError(r.error?.message||permissions.error?.message||"권한 정보를 불러오지 못했습니다.");setLoading(false);return;}
-   rr=(r.data||[]) as UserRole[];
-   pp=(permissions.data||[]) as (UserModulePermission & {user_id:string})[];
-  }
+ const load=useCallback(async()=>{setLoading(true);setError("");try{
+  const response=await fetch("/api/admin/data/administration",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
+  const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
+  if(!response.ok)throw new Error(data.error||`회원·권한 데이터 조회 실패 (HTTP ${response.status})`);
+  const errors=[data.profiles,data.departments,data.auditLogs,data.roles,data.permissions].map(x=>x?.error).filter(Boolean);
+  if(errors.length)throw new Error(errors.join(" · "));
+  const rows=(data.profiles?.data||[]) as Omit<P,"roles">[],rr=(data.roles?.data||[]) as UserRole[],pp=(data.permissions?.data||[]) as (UserModulePermission & {user_id:string})[];
   const mapped=rows.map(x=>({...x,roles:rr.filter(y=>(y as any).user_id===x.user_id),permissions:pp.filter(y=>y.user_id===x.user_id)})) as P[];
-  setUsers(mapped);setDeps((d.data||[]) as D[]);setLogs(l.data||[]);
+  setUsers(mapped);setDeps((data.departments?.data||[]) as D[]);setLogs(data.auditLogs?.data||[]);
   setSelectedId(current=>current&&mapped.some(x=>x.user_id===current)?current:"");
-  setLoading(false);
- }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다. 다시 시도해 주세요.");}finally{setLoading(false);}},[db]);
+ }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[]);
  useEffect(()=>{void load();},[load]);
  async function invokeAdmin(body:Record<string,unknown>){if(!db)throw new Error("데이터베이스 연결을 확인해 주세요.");const {data,error}=await db.functions.invoke("admin-manage-user",{body});if(error)throw error;if(data?.error)throw new Error(data.error);return data;}
  async function createAccount(){if(!newUser.full_name.trim()||!newUser.email.trim()||newUser.password.length<8){setError("이름, 이메일, 8자 이상의 비밀번호를 입력해 주세요.");return;}const ok=await run(()=>invokeAdmin({action:"create",...newUser,full_name:newUser.full_name.trim(),email:newUser.email.trim()}),"새 계정을 생성했습니다.");if(!ok)return;setCreateOpen(false);setNewUser({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""});}

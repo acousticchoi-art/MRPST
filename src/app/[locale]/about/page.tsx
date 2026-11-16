@@ -116,7 +116,7 @@ export default async function AboutPage({params}:{params:Promise<{locale:string}
   const t=text[locale==="my"?"my":"ko"];
   return <>
     <header className="header">
-      <Link href={`/${locale}`} className="brand"><span className="brand-logo"><img src="/mrpst-logo.svg" alt="MRPST 공식 로고"/></span><span>MRPST<small>MYANMAR REFORMED PRESBYTERIAN SCHOOL OF THEOLOGY</small></span></Link>
+      <Link href={`/${locale}`} className="brand"><span className="brand-logo"><img src="/mrpst-logo.svg?v=2" width="48" height="48" loading="eager" decoding="async" alt="MRPST 공식 로고"/></span><span>MRPST<small>MYANMAR REFORMED PRESBYTERIAN SCHOOL OF THEOLOGY</small></span></Link>
       <nav className="nav"><Link href={`/${locale}/about`}>{t.about}</Link><Link href={`/${locale}/academics`}>{t.academics}</Link><Link href={`/${locale}/calendar`}>{t.calendar}</Link><Link href={`/${locale}/contact`}>{t.contact}</Link></nav>
       <div className="header-tools"><div className="langs"><Link href="/my/about">မြန်မာ</Link><Link href="/ko/about">한국어</Link></div><Link className="admin-link" href={`/${locale}/admin`}>{t.admin}</Link></div>
       <details className="mobile-menu"><summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary><nav className="mobile-nav"><Link href={`/${locale}`}>{t.home}</Link><Link href={`/${locale}/about`}>{t.about}</Link><Link href={`/${locale}/academics`}>{t.academics}</Link><Link href={`/${locale}/calendar`}>{t.calendar}</Link><Link href={`/${locale}/contact`}>{t.contact}</Link><Link href={`/${locale}/admin`}>{t.admin}</Link><div className="mobile-langs"><Link href="/my/about">မြန်မာ</Link><Link href="/ko/about">한국어</Link></div></nav></details>

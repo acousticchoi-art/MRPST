@@ -1020,3 +1020,45 @@ select,
 textarea {
   font-family: "Noto Sans KR", "Noto Sans Myanmar", sans-serif !important;
 }
+
+/* Dedicated academic programs page */
+.academics-page{color:var(--ink);background:#fff}
+.academics-hero{padding:clamp(58px,8vw,104px) clamp(22px,9vw,140px) 68px;background:linear-gradient(115deg,#f0f4f6 0%,#fff 68%,#f6f2e9 100%)}
+.academics-hero h1{max-width:900px;margin:20px 0 18px;color:var(--navy);font-size:clamp(34px,5vw,58px);font-weight:750;line-height:1.25;letter-spacing:-.045em;word-break:keep-all}
+.academics-hero>p{max-width:820px;margin:0;color:#5f707b;font-size:16px;line-height:2;word-break:keep-all}
+.academics-programs,.academics-approach,.academics-calendar,.academics-admission{padding:clamp(52px,7vw,88px) clamp(20px,8vw,120px)}
+.academics-programs .about-section-head,.academics-approach .about-section-head,.academics-calendar .about-section-head,.academics-admission .about-section-head{max-width:850px;margin:0 auto 32px}
+.academics-programs .about-section-head p{color:var(--muted);line-height:1.9}
+.program-detail-grid{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.program-detail-card{display:flex;flex-direction:column;min-width:0;padding:clamp(22px,3vw,32px);border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 4px 16px rgba(16,45,66,.045)}
+.program-card-top{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#9b8050;font-size:10px;font-weight:800;letter-spacing:.12em}
+.program-card-top strong{padding:7px 10px;border-radius:20px;background:#f4f1e9;color:#806a43;font-size:11px;letter-spacing:0;white-space:nowrap}
+.program-detail-card h3{margin:24px 0 8px;color:var(--navy);font-size:clamp(20px,2.5vw,25px);font-weight:750;line-height:1.45;word-break:keep-all}
+.program-degree{color:#9b8050;font-size:13px;letter-spacing:.02em}
+.program-detail-card p{margin:18px 0 0;color:#586872;font-size:14px;line-height:1.95;word-break:keep-all}
+.program-detail-card p.program-detail-copy{margin-top:10px;color:#71808a;font-size:13px}
+.program-detail-card small{margin-top:auto;padding-top:24px;color:#8b969d;font-size:11px}
+.academics-approach{background:var(--paper)}
+.academics-approach-grid{max-width:1050px;margin:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 34px}
+.academics-approach-grid article{display:grid;grid-template-columns:34px minmax(0,1fr);gap:13px;padding:22px 0;border-top:1px solid #dfe6ea}
+.academics-approach-grid article>span{color:#a58a5b;font-size:11px;font-weight:800}
+.academics-approach-grid h3{margin:0 0 8px;color:var(--navy);font-size:16px;line-height:1.5;word-break:keep-all}
+.academics-approach-grid p{margin:0;color:var(--muted);font-size:13px;line-height:1.9;word-break:keep-all}
+.academics-calendar .semester-grid{max-width:1100px;margin:auto}
+.academics-note{max-width:1100px;margin:18px auto 0;color:#7a878d;font-size:12px;line-height:1.8}
+.academics-admission{background:#fafaf8}
+.academics-admission ol{max-width:1050px;margin:0 auto;padding:0;list-style:none;counter-reset:admission;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 22px}
+.academics-admission li{position:relative;min-height:60px;padding:14px 16px 14px 44px;border:1px solid #e7ebe8;border-radius:9px;background:#fff;color:#586872;font-size:13px;line-height:1.85;counter-increment:admission;word-break:keep-all}
+.academics-admission li:before{content:counter(admission,decimal-leading-zero);position:absolute;left:15px;top:16px;color:#a58a5b;font-size:10px;font-weight:800}
+.academics-contact{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:clamp(32px,5vw,58px) clamp(22px,9vw,140px);background:var(--navy);color:#fff}
+.academics-contact h2{margin:10px 0;color:#fff;font-size:clamp(24px,3vw,34px);line-height:1.4;word-break:keep-all}
+.academics-contact p{max-width:700px;color:#d5e0e5;font-size:14px;line-height:1.9;word-break:keep-all}
+.academics-contact .btn{flex:none}
+@media(max-width:700px){
+ .academics-hero{padding:54px 6% 48px}
+ .academics-programs,.academics-approach,.academics-calendar,.academics-admission{padding:48px 6%}
+ .program-detail-grid,.academics-approach-grid,.academics-admission ol{grid-template-columns:1fr}
+ .program-detail-card{padding:22px}
+ .academics-contact{display:grid;gap:12px;padding:42px 6%}
+ .academics-contact .btn{justify-self:start}
+}

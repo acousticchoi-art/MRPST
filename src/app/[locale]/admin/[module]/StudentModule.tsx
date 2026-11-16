@@ -19,29 +19,26 @@ export default function StudentModule(){
  const [profileOpen,setProfileOpen]=useState(false),[editingStudent,setEditingStudent]=useState(""),[profile,setProfile]=useState<any>(emptyProfile);
  const [recordOpen,setRecordOpen]=useState(false),[editingRecord,setEditingRecord]=useState(""),[record,setRecord]=useState<any>(emptyRecord);
  const [accountOpen,setAccountOpen]=useState(false),[accountEmail,setAccountEmail]=useState(""),[accountPassword,setAccountPassword]=useState(""),[accountBusy,setAccountBusy]=useState(false);
- const load=useCallback(async()=>{try{
-  if(!supabase){setLoading(false);return;} setLoading(true);setError("");
-  const [s,r,a]=await Promise.all([
-   supabase.from("students").select("id,auth_user_id,program_code,student_number,full_name,full_name_my,full_name_en,gender,date_of_birth,admission_year,program,cohort,student_status,phone,email,guardian_name,guardian_phone,notes").order("student_number"),
-   supabase.from("academic_grades").select("id,student_id,score,grade,remarks,academic_courses(course_code,title,credits),academic_terms(academic_year,name,term_code)").order("updated_at",{ascending:false}),
-   supabase.rpc("mrpst_student_scholarship_history")
-  ]);
-  // 각 데이터 영역은 독립적으로 반영합니다. 성적/장학금 조회 실패가 학생 명부 표시를 막지 않습니다.
+ const load=useCallback(async()=>{setLoading(true);setError("");try{
+  // 브라우저에서 Supabase로 직접 요청하지 않고 동일 출처의 Vercel API를 통해 조회합니다.
+  const response=await fetch("/api/admin/students",{method:"GET",cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
+  const payload=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
+  if(!response.ok)throw new Error(payload.error||`학생 데이터 조회 실패 (HTTP ${response.status})`);
   const errors:string[]=[];
-  if(s.error){errors.push("학생 명부: "+s.error.message);}
+  const s=payload.students,r=payload.grades,a=payload.scholarships;
+  if(s?.error)errors.push("학생 명부: "+s.error);
   else{
-   const rows=(s.data??[]) as Student[];
+   const rows=(s?.data??[]) as Student[];
    setStudents(rows);
    if(!selectedId&&rows.length)setSelectedId(rows[0].id);
    if(selectedId&&!rows.some(x=>x.id===selectedId))setSelectedId(rows[0]?.id??"");
   }
-  if(r.error){errors.push("성적 조회: "+r.error.message);}
-  else setRecords(((r.data??[]) as any[]).map(x=>({id:x.id,student_id:x.student_id,academic_year:x.academic_terms?.academic_year??0,term:x.academic_terms?.name??x.academic_terms?.term_code??"",course_code:x.academic_courses?.course_code??null,course_name:x.academic_courses?.title??"",credits:x.academic_courses?.credits??null,score:x.score,grade:x.grade,remarks:x.remarks})));
-  if(a.error){errors.push("장학금 조회: "+a.error.message);}
-  else setAwards((a.data??[]) as Award[]);
+  if(r?.error)errors.push("성적 조회: "+r.error);
+  else setRecords(((r?.data??[]) as any[]).map(x=>({id:x.id,student_id:x.student_id,academic_year:x.academic_terms?.academic_year??0,term:x.academic_terms?.name??x.academic_terms?.term_code??"",course_code:x.academic_courses?.course_code??null,course_name:x.academic_courses?.title??"",credits:x.academic_courses?.credits??null,score:x.score,grade:x.grade,remarks:x.remarks})));
+  if(a?.error)errors.push("장학금 조회: "+a.error);
+  else setAwards((a?.data??[]) as Award[]);
   setError(errors.join(" · "));
-  setLoading(false);
- }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다. 다시 시도해 주세요.");}finally{setLoading(false);}},[supabase,selectedId]);
+ }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다. 다시 시도해 주세요.");}finally{setLoading(false);}},[selectedId]);
  useEffect(()=>{void load();},[load]);
  const selected=students.find(s=>s.id===selectedId)??null;
  const visible=students.filter(s=>(filter==="all"||s.student_status===filter)&&(!search.trim()||[s.student_number,s.full_name,s.full_name_en,s.full_name_my,s.program,s.cohort].some(v=>(v??"").toLowerCase().includes(search.toLowerCase()))));

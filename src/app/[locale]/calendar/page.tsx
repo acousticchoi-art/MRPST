@@ -1,3 +1,4 @@
+import SiteHeader from "./SiteHeader";
 import Link from "next/link";
 import ScheduleCalendar from "../admin/[module]/ScheduleCalendar";
 
@@ -8,35 +9,7 @@ export default async function CalendarPage({ params }: { params: Promise<{ local
 
   return (
     <>
-      <header className="header">
-        <Link href={`/${locale}`} className="brand">
-          <span className="brand-logo"><img src="/mrpst-logo.svg" alt="MRPST 공식 로고"/></span>
-          <span>MRPST<small>MYANMAR REFORMED PRESBYTERIAN SCHOOL OF THEOLOGY</small></span>
-        </Link>
-        <nav className="nav">
-          <Link href={`/${locale}#about`}>{isMyanmar ? "ကျောင်းအကြောင်း" : "학교 소개"}</Link>
-          <Link href={`/${locale}#academics`}>{isMyanmar ? "ပညာရေး" : "학과 안내"}</Link>
-          <Link href={`/${locale}#history`}>{isMyanmar ? "သမိုင်း" : "연혁"}</Link>
-          <Link href={`/${locale}/calendar`}>{isMyanmar ? "ပညာရေးပြက္ခဒိန်" : "학사 일정"}</Link>
-          <Link href={`/${locale}/contact`}>{isMyanmar ? "ဆက်သွယ်ရန်" : "연락처"}</Link>
-        </nav>
-        <div className="header-tools">
-          <div className="langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div>
-          <Link className="admin-link" href={`/${locale}/admin`}>{isMyanmar ? "အုပ်ချုပ်ရေး" : "관리자"}</Link>
-        </div>
-        <details className="mobile-menu">
-          <summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary>
-          <nav className="mobile-nav">
-            <Link href={`/${locale}#about`}>{isMyanmar ? "ကျောင်းအကြောင်း" : "학교 소개"}</Link>
-            <Link href={`/${locale}#academics`}>{isMyanmar ? "ပညာရေး" : "학과 안내"}</Link>
-            <Link href={`/${locale}#history`}>{isMyanmar ? "သမိုင်း" : "연혁"}</Link>
-            <Link href={`/${locale}/calendar`}>{isMyanmar ? "ပညာရေးပြက္ခဒိန်" : "학사 일정"}</Link>
-            <Link href={`/${locale}/contact`}>{isMyanmar ? "ဆက်သွယ်ရန်" : "연락처"}</Link>
-            <Link href={`/${locale}/admin`}>{isMyanmar ? "အုပ်ချုပ်ရေး" : "관리자"}</Link>
-            <div className="mobile-langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div>
-          </nav>
-        </details>
-      </header>
+      <SiteHeader locale={locale} active="calendar" />
       <main className="academics-workspace" style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 20px" }}>
         <div className="academics-heading" style={{ marginTop: 36 }}>
           <span className="eyebrow">MRPST ACADEMIC CALENDAR</span>

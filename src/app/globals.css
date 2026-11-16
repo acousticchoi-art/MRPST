@@ -989,3 +989,23 @@ button,a,input,select,textarea{transition-color:.16s}
  .about-history-list article{grid-template-columns:1fr;gap:4px}
  .about-contact{grid-template-columns:1fr;gap:14px;padding:45px 6%}
 }
+
+
+/* Official MRPST identity and Korean line wrapping */
+.brand-logo{display:grid;place-items:center;flex:none;width:48px;height:48px;overflow:hidden;border-radius:50%;background:#fff}
+.brand-logo img{display:block;width:100%;height:100%;object-fit:contain}
+@media(max-width:760px){.header .brand-logo{width:44px;height:44px}}
+:lang(ko) .homepage h1,
+:lang(ko) .homepage h2,
+:lang(ko) .homepage h3,
+:lang(ko) .homepage p,
+:lang(ko) .homepage a,
+:lang(ko) .about-page h1,
+:lang(ko) .about-page h2,
+:lang(ko) .about-page h3,
+:lang(ko) .about-page p,
+:lang(ko) .about-page li,
+:lang(ko) .about-page blockquote{
+  word-break:keep-all;
+  overflow-wrap:break-word;
+}

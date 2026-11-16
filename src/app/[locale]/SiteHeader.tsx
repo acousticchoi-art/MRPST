@@ -1,0 +1,42 @@
+import Link from "next/link";
+import LanguageSwitcher from "./LanguageSwitcher";
+
+const labels = {
+  my: { home: "ပင်မစာမျက်နှာ", about: "ကျောင်းအကြောင်း", academics: "ပညာရေးအစီအစဉ်", calendar: "ပညာရေးပြက္ခဒိန်", contact: "ဆက်သွယ်ရန်", admin: "အုပ်ချုပ်ရေး" },
+  ko: { home: "홈", about: "학교 소개", academics: "학과 안내", calendar: "학사 일정", contact: "연락처", admin: "관리자" }
+} as const;
+
+export default function SiteHeader({ locale, active }: { locale: string; active: "home" | "about" | "academics" | "calendar" | "contact" }) {
+  const lang = locale === "ko" ? "ko" : "my";
+  const t = labels[lang];
+  const links = [
+    { key: "home", href: `/${lang}`, label: t.home },
+    { key: "about", href: `/${lang}/about`, label: t.about },
+    { key: "academics", href: `/${lang}/academics`, label: t.academics },
+    { key: "calendar", href: `/${lang}/calendar`, label: t.calendar },
+    { key: "contact", href: `/${lang}/contact`, label: t.contact }
+  ] as const;
+  return (
+    <header className="header">
+      <Link href={`/${lang}`} className="brand">
+        <span className="brand-logo"><img src="data:image/jpeg;base64,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" alt="MRPST official logo"/></span>
+        <span>MRPST<small>MYANMAR REFORMED PRESBYTERIAN SCHOOL OF THEOLOGY</small></span>
+      </Link>
+      <nav className="nav">
+        {links.map(link => <Link key={link.key} href={link.href} className={active === link.key ? "active" : undefined} aria-current={active === link.key ? "page" : undefined}>{link.label}</Link>)}
+      </nav>
+      <div className="header-tools">
+        <LanguageSwitcher locale={lang} />
+        <Link className="admin-link" href={`/${lang}/admin`}>{t.admin}</Link>
+      </div>
+      <details className="mobile-menu">
+        <summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary>
+        <nav className="mobile-nav">
+          {links.map(link => <Link key={link.key} href={link.href} className={active === link.key ? "active" : undefined} aria-current={active === link.key ? "page" : undefined}>{link.label}</Link>)}
+          <Link href={`/${lang}/admin`}>{t.admin}</Link>
+          <LanguageSwitcher locale={lang} mobile />
+        </nav>
+      </details>
+    </header>
+  );
+}

@@ -1109,3 +1109,29 @@ textarea {
  .academics-programs,.academics-approach,.academics-calendar,.academics-admission{padding-inline:17px}
  .program-detail-card{padding:20px}
 }
+
+
+/* Burmese homepage typography: comfortable line rhythm on small screens */
+@media(max-width:760px){
+  :lang(my) .homepage .hero.hero-redesign h1{
+    line-height:1.48!important;
+    letter-spacing:0!important;
+    margin-top:22px;
+    margin-bottom:22px;
+    overflow-wrap:break-word;
+  }
+  :lang(my) .homepage .hero.hero-redesign p{
+    line-height:2.25!important;
+    letter-spacing:0!important;
+    margin-top:0;
+    margin-bottom:0;
+  }
+  :lang(my) .homepage .hero-principles{
+    line-height:2.05!important;
+    row-gap:8px;
+  }
+}
+@media(max-width:390px){
+  :lang(my) .homepage .hero.hero-redesign h1{line-height:1.52!important}
+  :lang(my) .homepage .hero.hero-redesign p{line-height:2.3!important}
+}

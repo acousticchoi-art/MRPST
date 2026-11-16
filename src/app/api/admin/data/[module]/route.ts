@@ -39,6 +39,18 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
 
   try{
     let data:any={};
+    if(moduleKey==="finance"&&search.get("scope")==="award-purpose"){
+      const awardId=search.get("id");
+      if(!awardId)return NextResponse.json({error:"장학금 ID가 필요합니다."},{status:400});
+      const purpose=await result(supabase.from("scholarship_awards").select("purpose").eq("id",awardId).single());
+      return NextResponse.json({purpose},{headers:{"Cache-Control":"no-store, max-age=0"}});
+    }
+    if(moduleKey==="facilities"&&search.get("scope")==="vehicle-latest"){
+      const vehicleId=search.get("vehicle_id");
+      if(!vehicleId)return NextResponse.json({error:"차량 ID가 필요합니다."},{status:400});
+      const latest=await result(supabase.from("facility_vehicle_logs").select("ending_odometer").eq("vehicle_id",vehicleId).order("trip_date",{ascending:false}).order("created_at",{ascending:false}).limit(1));
+      return NextResponse.json({latest},{headers:{"Cache-Control":"no-store, max-age=0"}});
+    }
     if(moduleKey==="finance"){
       const keys=["funds","accounts","entries","donors","budgets","actuals","donations","students","awards","disbursements"] as const;
       const queries=[

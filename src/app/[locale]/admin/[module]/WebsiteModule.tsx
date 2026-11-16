@@ -61,21 +61,52 @@ export default function WebsiteModule(){
  async function toggleNotice(item:Entry){if(!db)return;setSaving(true);setError("");try{const {error}=await db.from("website_contents").update({is_published:!item.is_published}).eq("id",item.id);if(error)throw error;setNotice(item.is_published?"공지사항 게시를 중단했습니다.":"공지사항을 게시했습니다.");await load();}catch(e:any){setError(e?.message||"상태를 변경하지 못했습니다.");}finally{setSaving(false);}}
  async function deleteNotice(item:Entry){if(!db||!window.confirm("이 공지사항을 삭제할까요?"))return;setSaving(true);setError("");try{const {error}=await db.from("website_contents").delete().eq("id",item.id);if(error)throw error;setNotice("공지사항을 삭제했습니다.");await load();}catch(e:any){setError(e?.message||"삭제하지 못했습니다.");}finally{setSaving(false);}}
  const notices=items.filter(x=>x.content_type==="announcement").sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
- return <div className="website-workspace">
-  <div className="website-heading"><span className="eyebrow">PUBLIC WEBSITE CMS</span><h2>홈페이지 관리</h2><p>방문자에게 공개되는 학교 소개 문구와 공지사항을 관리합니다.</p></div>
-  {error&&<div className="website-alert error">{error}</div>}{notice&&<div className="website-alert success">{notice}</div>}
-  <nav className="website-tabs"><button className={tab==="pages"?"active":""} onClick={()=>setTab("pages")}>페이지 콘텐츠</button><button className={tab==="notices"?"active":""} onClick={()=>setTab("notices")}>공지사항 ({notices.length})</button></nav>
-  {tab==="pages"&&<section className="website-panel">
-   <div className="website-panel-head"><div><h3>홈페이지 문구 편집</h3><p>언어별 콘텐츠를 수정하면 저장 즉시 해당 언어 홈페이지에 게시됩니다.</p></div><select value={locale} onChange={e=>setLocale(e.target.value)}>{locales.map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select></div>
-   {loading?<p>콘텐츠를 불러오는 중입니다.</p>:<div className="website-fields">{pageFields.map(field=><article className="website-field" key={field.key}><div><h4>{field.label}</h4><p>{field.hint}</p></div>{field.key!=="address"&&<label>제목<input value={pageValues[field.key]?.title||""} onChange={e=>setPageValues(v=>({...v,[field.key]:{...v[field.key],title:e.target.value}}))}/></label>}<label>본문 또는 표시 내용<textarea rows={field.key==="about"?5:3} value={pageValues[field.key]?.body||""} onChange={e=>setPageValues(v=>({...v,[field.key]:{...v[field.key],body:e.target.value}}))}/></label></article>)}</div>}
-   <div className="website-actions"><button className="website-primary" disabled={saving||loading} onClick={()=>void savePages()}>{saving?"저장 중…":"변경 내용 저장 및 게시"}</button></div>
+ return <div className="website-workspace website-workspace-v2">
+  <div className="website-heading website-heading-v2">
+   <div><span className="eyebrow">PUBLIC WEBSITE CMS</span><h2>홈페이지 관리</h2><p>홈페이지에 공개되는 학교 소개와 공지사항을 한곳에서 관리합니다.</p></div>
+   <a className="website-preview-link" href={`/${locale}`} target="_blank" rel="noreferrer">홈페이지 미리보기 ↗</a>
+  </div>
+  <div className="website-overview">
+   <article><span>페이지 콘텐츠</span><strong>{pageFields.length}</strong><small>관리 항목</small></article>
+   <article><span>전체 공지사항</span><strong>{notices.length}</strong><small>등록된 글</small></article>
+   <article><span>게시 중</span><strong>{notices.filter(x=>x.is_published).length}</strong><small>홈페이지 공개</small></article>
+   <article><span>비공개</span><strong>{notices.filter(x=>!x.is_published).length}</strong><small>임시 보관</small></article>
+  </div>
+  {error&&<div className="website-alert error" role="alert">{error}</div>}
+  {notice&&<div className="website-alert success" role="status">{notice}</div>}
+  <nav className="website-tabs website-tabs-v2" aria-label="홈페이지 콘텐츠 종류">
+   <button className={tab==="pages"?"active":""} onClick={()=>setTab("pages")}><span>01</span> 페이지 콘텐츠</button>
+   <button className={tab==="notices"?"active":""} onClick={()=>setTab("notices")}><span>02</span> 공지사항 <b>{notices.length}</b></button>
+  </nav>
+  {tab==="pages"&&<section className="website-panel website-panel-v2">
+   <div className="website-section-intro"><div><span className="website-kicker">PAGE EDITOR</span><h3>홈페이지 문구 편집</h3><p>수정할 언어를 선택하고 내용을 변경한 뒤 저장해 주세요. 저장된 내용은 해당 언어 홈페이지에 반영됩니다.</p></div>
+    <label className="website-language-select"><span>편집 언어</span><select value={locale} onChange={e=>setLocale(e.target.value)}>{locales.map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select></label>
+   </div>
+   {loading?<div className="website-loading">콘텐츠를 불러오는 중입니다…</div>:<div className="website-fields website-fields-v2">{pageFields.map((field,index)=><article className="website-field website-field-v2" key={field.key}>
+    <div className="website-field-title"><span>{String(index+1).padStart(2,"0")}</span><div><h4>{field.label}</h4><p>{field.hint}</p></div></div>
+    <div className="website-field-inputs">{field.key!=="address"&&<label>제목<input value={pageValues[field.key]?.title||""} onChange={e=>setPageValues(v=>({...v,[field.key]:{...v[field.key],title:e.target.value}}))} placeholder={field.label+" 제목"}/></label>}
+     <label>{field.key==="address"?"주소":"본문 및 소개 문구"}<textarea rows={field.key==="about"?5:3} value={pageValues[field.key]?.body||""} onChange={e=>setPageValues(v=>({...v,[field.key]:{...v[field.key],body:e.target.value}}))} placeholder="홈페이지에 표시할 내용을 입력하세요."/></label></div>
+   </article>)}</div>}
+   <div className="website-footer-actions"><span>변경한 내용은 저장 후 홈페이지에 게시됩니다.</span><button className="website-primary" disabled={saving||loading} onClick={()=>void savePages()}>{saving?"저장 중…":"변경 내용 저장 및 게시"}</button></div>
   </section>}
-  {tab==="notices"&&<div className="website-notice-layout">
-   <section className="website-panel"><div className="website-panel-head"><div><h3>{editingId?"공지사항 수정":"새 공지사항 등록"}</h3><p>게시된 공지사항은 홈페이지 방문자에게 공개됩니다.</p></div></div>
-    <div className="website-form"><label>언어<select value={noticeLocale} onChange={e=>setNoticeLocale(e.target.value)}>{locales.map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select></label><label>제목<input value={noticeTitle} onChange={e=>setNoticeTitle(e.target.value)} placeholder="공지사항 제목"/></label><label>내용<textarea rows={6} value={noticeBody} onChange={e=>setNoticeBody(e.target.value)} placeholder="공지사항 내용을 입력하세요."/></label><label className="website-publish-check"><input type="checkbox" checked={noticePublished} onChange={e=>setNoticePublished(e.target.checked)}/> 저장 후 바로 게시</label><div className="website-actions"><button className="website-primary" disabled={saving||!noticeTitle.trim()||!noticeBody.trim()} onClick={()=>void saveNotice()}>{saving?"저장 중…":editingId?"수정 저장":"공지사항 등록"}</button>{editingId&&<button className="website-secondary" onClick={resetNotice}>취소</button>}</div></div>
+  {tab==="notices"&&<div className="website-notice-layout website-notice-layout-v2">
+   <section className="website-panel website-panel-v2 website-notice-editor">
+    <div className="website-section-intro"><div><span className="website-kicker">ANNOUNCEMENT EDITOR</span><h3>{editingId?"공지사항 수정":"새 공지사항 작성"}</h3><p>게시 상태로 저장하면 선택한 언어의 홈페이지에 공개됩니다.</p></div></div>
+    <div className="website-form website-form-v2">
+     <label>게시 언어<select value={noticeLocale} onChange={e=>setNoticeLocale(e.target.value)}>{locales.map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select></label>
+     <label>공지사항 제목<input value={noticeTitle} onChange={e=>setNoticeTitle(e.target.value)} placeholder="예: 2026학년도 2학기 개강 안내"/></label>
+     <label>공지사항 내용<textarea rows={9} value={noticeBody} onChange={e=>setNoticeBody(e.target.value)} placeholder="공지할 내용을 입력하세요."/></label>
+     <label className="website-publish-check website-publish-check-v2"><input type="checkbox" checked={noticePublished} onChange={e=>setNoticePublished(e.target.checked)}/><span><strong>저장 후 홈페이지에 게시</strong><small>체크를 해제하면 비공개 상태로 저장됩니다.</small></span></label>
+     <div className="website-actions website-actions-v2"><button className="website-primary" disabled={saving||!noticeTitle.trim()||!noticeBody.trim()} onClick={()=>void saveNotice()}>{saving?"저장 중…":editingId?"수정 내용 저장":"공지사항 등록"}</button>{editingId&&<button className="website-secondary" onClick={resetNotice}>수정 취소</button>}</div>
+    </div>
    </section>
-   <section className="website-panel"><div className="website-panel-head"><div><h3>등록된 공지사항</h3><p>{notices.length}건</p></div></div>
-    <div className="website-notice-list">{notices.map(item=><article className="website-notice-item" key={item.id}><div className="website-notice-meta"><span>{locales.find(x=>x.value===item.locale)?.label||item.locale}</span><span className={item.is_published?"published":"draft"}>{item.is_published?"게시 중":"비공개"}</span></div><h4>{item.title}</h4><p>{item.body}</p><div className="website-notice-actions"><button onClick={()=>editNotice(item)}>수정</button><button onClick={()=>void toggleNotice(item)} disabled={saving}>{item.is_published?"게시 중단":"게시"}</button><button className="danger" onClick={()=>void deleteNotice(item)} disabled={saving}>삭제</button></div></article>)}{!notices.length&&!loading&&<p className="website-empty">등록된 공지사항이 없습니다.</p>}</div>
+   <section className="website-panel website-panel-v2 website-notice-list-panel">
+    <div className="website-section-intro website-list-intro"><div><span className="website-kicker">PUBLISHED CONTENT</span><h3>등록된 공지사항</h3><p>게시·비공개 상태를 확인하고 내용을 관리합니다.</p></div><strong className="website-count">{notices.length}건</strong></div>
+    <div className="website-notice-list website-notice-list-v2">{notices.map(item=><article className="website-notice-item website-notice-item-v2" key={item.id}>
+     <div className="website-notice-meta"><span className="website-locale-tag">{locales.find(x=>x.value===item.locale)?.label||item.locale}</span><span className={item.is_published?"published":"draft"}>{item.is_published?"게시 중":"비공개"}</span></div>
+     <h4>{item.title}</h4><p>{item.body}</p><small className="website-updated">{new Date(item.updated_at).toLocaleDateString("ko-KR",{year:"numeric",month:"short",day:"numeric"})}</small>
+     <div className="website-notice-actions"><button onClick={()=>editNotice(item)}>수정</button><button onClick={()=>void toggleNotice(item)} disabled={saving}>{item.is_published?"게시 중단":"게시하기"}</button><button className="danger" onClick={()=>void deleteNotice(item)} disabled={saving}>삭제</button></div>
+    </article>)}{!notices.length&&!loading&&<div className="website-empty website-empty-v2"><strong>아직 등록된 공지사항이 없습니다.</strong><span>왼쪽 작성 영역에서 첫 공지사항을 등록해 보세요.</span></div>}</div>
    </section>
   </div>}
  </div>;

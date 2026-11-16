@@ -137,13 +137,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
             <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"ACADEMIC CALENDAR":"ACADEMIC CALENDAR"}</span><h2>{lang==="ko"?"다가오는 일정":"Upcoming Schedule"}</h2></div><Link href={`/${locale}/admin/academics`}>{lang==="ko"?"일정 관리 →":"Manage →"}</Link></div>
             {upcomingEvents.length? <div className="dashboard-event-list">{upcomingEvents.map((event:any)=><article key={event.id}><time>{event.start_date}{event.start_time?" · "+String(event.start_time).slice(0,5):""}</time><div><strong>{event.title}</strong>{event.location&&<small>{event.location}</small>}</div></article>)}</div>:<p className="dashboard-empty">{lang==="ko"?"예정된 일정이 없습니다.":"No upcoming events have been registered."}</p>}
           </section>
-          <section className="dashboard-panel dashboard-shortcuts">
-            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"QUICK ACCESS":"QUICK ACCESS"}</span><h2>{lang==="ko"?"주요 업무 바로가기":"Quick Access"}</h2></div></div>
-            <div className="dashboard-shortcut-list">{visible.filter(([key])=>["students","academics","facilities","library","meetings","administration","website"].includes(key)).map(([key,item])=><Link href={`/${locale}/admin/${key}`} key={key}><span>{(t as any)[key]?.[0]??item.title}</span><b>→</b></Link>)}</div>
-          </section>
         </div>
-        <div className="module-heading"><h2>{t.modules}</h2><span>{visible.length}{lang==="ko"?"개 모듈 사용 가능":lang==="my"?" ကဏ္ဍ အသုံးပြုနိုင်သည်": " available modules"}</span></div>
-        <div className="module-groups">{moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<section className="module-group" key={group}><h3>{t.groups[group]}</h3><div className="modules">{items.map(([key,item])=>{const words=(t as any)[key] as readonly string[];return <Link href={`/${locale}/admin/${key}`} className="module" key={key}><strong>{words?.[0]??item.title}</strong><p>{words?.[1]??item.description}</p><span className="module-open">{t.open}</span></Link>})}</div></section>:null;})}</div>
       </div>
     </main>
   </div></>;

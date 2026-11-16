@@ -50,10 +50,10 @@ const text = {
       ["2014년 12월 2일","유아교육과정 개설"],
       ["2022년 8월 23일","3년제 M.Div. 과정 개설"]
     ],
-    contactTitle:"학교에 문의하기", contactText:"입학과 교육과정에 관한 문의는 아래 연락처로 연락해 주세요.",
+    contactTitle:"학교에 문의하기", contactText:"입학과 교육과정에 관한 문의는 아래 전화번호로 연락해 주세요.",
     phone:"전화", phoneText:"09 516 3652 · 09 503 5316 · 09 431 9144",
     address:"학교 주소", addressText:"No.286, 10th Kaya St, Thingangyungyi, Mingladon Township, Yangon, Myanmar",
-    more:"문의 남기기", map:"구글 지도에서 위치 보기"
+    more:"문의 남기기", map:"구글 지도에서 위치 확인하기"
   },
   my: {
     home:"ပင်မစာမျက်နှာ", about:"ကျောင်းအကြောင်း", academics:"ပညာရေး", calendar:"ပညာရေးပြက္ခဒိန်", contact:"ဆက်သွယ်ရန်", admin:"အုပ်ချုပ်ရေး",

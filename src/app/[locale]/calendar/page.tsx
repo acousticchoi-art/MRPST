@@ -10,7 +10,7 @@ export default async function CalendarPage({ params }: { params: Promise<{ local
     <>
       <header className="header">
         <Link href={`/${locale}`} className="brand">
-          <span className="mark">M</span>
+          <span className="brand-logo"><img src="/mrpst-logo.svg" alt="MRPST 공식 로고"/></span>
           <span>MRPST<small>MYANMAR REFORMED PRESBYTERIAN SCHOOL OF THEOLOGY</small></span>
         </Link>
         <nav className="nav">

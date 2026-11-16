@@ -19,13 +19,13 @@ const copy = {
     admin:"MRPST 관리자",dashboard:"대시보드",view:"홈페이지 보기 ↗",
     finance:"재정 관리",students:"학생 관리",academics:"학사 관리",facilities:"시설 관리",
     library:"도서관 관리",meetings:"회의 관리",administration:"계정·권한 관리",website:"홈페이지 관리",
-    workspace:"관리 메뉴",back:"대시보드로 돌아가기",module:"관리 모듈",groups:{academic:"학사·학생",finance:"재정",operations:"학교 운영",system:"시스템·홈페이지"}
+    workspace:"업무 메뉴",back:"대시보드로 돌아가기",groups:{academic:"학사·학생",finance:"재정",operations:"학교 운영",system:"시스템·홈페이지"}
   },
   my:{
     admin:"MRPST အုပ်ချုပ်ရေး",dashboard:"ဒက်ရှ်ဘုတ်",view:"ဝဘ်ဆိုက်ကြည့်ရန် ↗",
     finance:"ဘဏ္ဍာရေး",students:"ကျောင်းသား",academics:"ပညာရေး",facilities:"အဆောက်အအုံ",
     library:"စာကြည့်တိုက်",meetings:"အစည်းအဝေး",administration:"အကောင့်နှင့် ခွင့်ပြုချက်",website:"ဝဘ်ဆိုက်",
-    workspace:"စီမံခန့်ခွဲမှု",back:"ဒက်ရှ်ဘုတ်သို့ ပြန်သွားရန်",module:"စီမံခန့်ခွဲမှုကဏ္ဍ",groups:{academic:"ပညာရေးနှင့် ကျောင်းသား",finance:"ဘဏ္ဍာရေး",operations:"ကျောင်းလုပ်ငန်း",system:"စနစ်နှင့် ဝဘ်ဆိုက်"}
+    workspace:"လုပ်ငန်းမီနူး",back:"ဒက်ရှ်ဘုတ်သို့ ပြန်သွားရန်",groups:{academic:"ပညာရေးနှင့် ကျောင်းသား",finance:"ဘဏ္ဍာရေး",operations:"ကျောင်းလုပ်ငန်း",system:"စနစ်နှင့် ဝဘ်ဆိုက်"}
   }
 } as const;
 
@@ -37,7 +37,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
   if(!key)notFound();
   const item=MODULES[key];
   const supabase=await createSupabaseServerClient();
-  if(!supabase) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>관리자 서비스에 연결할 수 없습니다</h1><p className="login-intro">로그인 서비스 설정이 확인되지 않아 관리 모듈을 열 수 없습니다. 서비스 설정을 확인한 뒤 다시 시도해 주세요.</p><Link className="btn secondary" href={`/${locale}`}>홈페이지로 돌아가기</Link></section></main>;
+  if(!supabase) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>관리자 서비스에 연결할 수 없습니다</h1><p className="login-intro">로그인 서비스 설정이 확인되지 않아 관리 기능을 열 수 없습니다. 서비스 설정을 확인한 뒤 다시 시도해 주세요.</p><Link className="btn secondary" href={`/${locale}`}>홈페이지로 돌아가기</Link></section></main>;
   let userEmail="";
   let roles:MrpstRole[]=[];
   let overrides:{module_key:string;can_view:boolean}[]=[];
@@ -53,7 +53,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
     roles=(roleRows??[]).map(row=>row.role as MrpstRole);
     overrides=permissions??[];
     if(error||!roleRows?.length||profile?.is_active!==true||!canAccessModule(roles,key,overrides)){
-      return <main className="login-wrap"><section className="login-card"><span className="eyebrow">PERMISSION REQUIRED</span><h1>Module access restricted</h1><p className="login-intro">Your assigned role does not include access to {item.title}. Contact the Super Administrator if this access is required for your work.</p></section></main>;
+      return <main className="login-wrap"><section className="login-card"><span className="eyebrow">PERMISSION REQUIRED</span><h1>Access restricted</h1><p className="login-intro">Your assigned role does not include access to {item.title}. Contact the Super Administrator if this access is required for your work.</p></section></main>;
     }
   }
   const visible=Object.entries(MODULES).filter(([moduleKey])=>!supabase||canAccessModule(roles,moduleKey as keyof typeof MODULES,overrides));
@@ -88,8 +88,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
         {supabase&&<AdminActions locale={locale}/>}
       </div></header>
       <div className="content">
-        <span className="eyebrow">{t.module}</span>
-        {key==="finance"?<FinanceModule/>:key==="students"?<StudentModule/>:key==="library"?<LibraryModule/>:key==="facilities"?<FacilitiesModule/>:key==="meetings"?<MeetingsModule/>:key==="academics"?<AcademicsModule/>:key==="administration"?<AdministrationModule/>:key==="website"?<WebsiteModule/>:<><h1 className="admin-heading">{moduleNames[key]??item.title}</h1><p className="admin-subtitle">{item.description}</p><div className="module-placeholder"><strong>Module foundation</strong><p>This section is reserved for the {item.title.toLowerCase()} workflow. Data entry, approval steps, reporting and department-level database policies will be added in the next implementation phase.</p><span>Not connected to live records</span></div></>}
+        {key==="finance"?<FinanceModule/>:key==="students"?<StudentModule/>:key==="library"?<LibraryModule/>:key==="facilities"?<FacilitiesModule/>:key==="meetings"?<MeetingsModule/>:key==="academics"?<AcademicsModule/>:key==="administration"?<AdministrationModule/>:key==="website"?<WebsiteModule/>:<><h1 className="admin-heading">{moduleNames[key]??item.title}</h1><p className="admin-subtitle">{item.description}</p><div className="module-placeholder"><strong>Module foundation</strong><p>This area is reserved for the {item.title.toLowerCase()} workflow. Data entry, approval steps, reporting and department-level database policies will be added in the next implementation phase.</p><span>Not connected to live records</span></div></>}
           </div>
     </main>
   </div></>;

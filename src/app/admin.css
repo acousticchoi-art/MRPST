@@ -1396,3 +1396,79 @@ input,select,textarea,button{max-width:100%}
   .admin>.sidebar .sidebar-nav>.brand{grid-column:1/-1!important}
   .admin>.sidebar .sidebar-nav .side-link{font-size:10px!important}
 }
+
+
+/* Facilities: restrained, consistent action controls and responsive fleet cards */
+.facility-workspace{gap:20px}
+.facility-panel{border-radius:12px;padding:20px;box-shadow:0 3px 14px rgba(20,42,58,.035)}
+.facility-stats article{border-radius:10px;padding:16px}
+.facility-tabs{gap:7px;border-bottom:1px solid #e5e9ec}
+.facility-tabs button{padding:13px 16px;font-size:13px}
+.facility-tabs button.selected{border-bottom-width:3px}
+.facility-table{font-size:12px;white-space:normal}
+.facility-table th{padding:12px 10px;font-size:11px;white-space:nowrap}
+.facility-table td{padding:12px 10px;vertical-align:middle}
+.facility-row-actions{white-space:nowrap}
+.facility-row-actions button,.facility-vehicle-card-actions button{
+  min-height:36px;padding:8px 13px;border:1px solid #d9e0e5;border-radius:7px;
+  background:#fff;color:#24445a;font-size:12px;font-weight:650;cursor:pointer
+}
+.facility-row-actions .facility-edit-action,.facility-vehicle-card-actions .facility-edit-action{
+  background:#eef4f7;border-color:#dce7ed;color:#1d435b
+}
+.facility-row-actions .facility-delete-action,.facility-vehicle-card-actions .facility-delete-action{
+  background:#fff7f6;border-color:#f0d9d6;color:#a34a42
+}
+.facility-row-actions button:disabled,.facility-vehicle-card-actions button:disabled{opacity:.45;cursor:wait}
+.facility-vehicle-cards,.facility-log-cards{display:none}
+.facility-vehicle-card,.facility-log-card{
+  min-width:0;padding:16px;border:1px solid #e1e7eb;border-radius:12px;background:#fff;
+  box-shadow:0 3px 12px rgba(24,52,70,.035)
+}
+.facility-vehicle-card-head,.facility-log-card-head{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+  padding-bottom:12px;border-bottom:1px solid #edf0f2
+}
+.facility-vehicle-card-head>div,.facility-log-card-head>div{min-width:0}
+.facility-vehicle-card-head span:first-child,.facility-log-card-head span{
+  color:#9b875e;font-size:10px;font-weight:700;letter-spacing:.06em
+}
+.facility-vehicle-card h4,.facility-log-card h4{margin:5px 0 3px;color:#1d4057;font-size:17px;line-height:1.35}
+.facility-vehicle-card-head strong{font-size:13px;color:#5f6e79}
+.facility-vehicle-card-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 10px;padding:14px 0
+}
+.facility-vehicle-card-grid>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.facility-vehicle-card-grid small{font-size:10px;color:#82909a}
+.facility-vehicle-card-grid b{font-size:12px;color:#29485d;overflow-wrap:anywhere}
+.facility-vehicle-card-actions{display:flex;gap:8px;padding-top:12px;border-top:1px solid #edf0f2}
+.facility-vehicle-card-actions button{flex:1;min-width:0}
+.facility-log-card{margin-bottom:10px}
+.facility-log-card-head>b{font-size:15px;color:#1d435b;white-space:nowrap}
+.facility-log-card p{margin:10px 0 0;font-size:12px;line-height:1.55;color:#566773}
+.facility-log-card-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:12px;color:#6e7c86;font-size:11px}
+@media(max-width:650px){
+  .facility-workspace{gap:14px}
+  .facility-intro h2{font-size:23px}
+  .facility-panel{padding:15px;border-radius:11px}
+  .facility-panel-head{flex-direction:row;align-items:center;gap:8px}
+  .facility-panel-head>button{flex:0 0 auto;min-height:40px;padding:9px 11px}
+  .facility-tabs{gap:2px}
+  .facility-tabs button{padding:11px 12px;font-size:12px}
+  .facility-vehicle-desktop,.facility-log-desktop{display:none!important}
+  .facility-vehicle-cards,.facility-log-cards{display:block}
+  .facility-stats article{padding:12px;border-radius:9px}
+  .facility-stats strong{font-size:19px}
+  .facility-search input{width:100%;min-height:42px;font-size:14px}
+  .facility-modal-backdrop{align-items:flex-end!important;padding:0!important}
+  .facility-modal{width:100%!important;max-width:none!important;max-height:92dvh!important;
+    border-radius:18px 18px 0 0!important;padding:19px 16px calc(18px + env(safe-area-inset-bottom))!important}
+  .facility-form-grid{gap:13px}
+  .facility-form-grid label{font-size:12px}
+  .facility-form-grid input,.facility-form-grid select,.facility-form-grid textarea{
+    min-height:43px;font-size:14px;border-radius:8px;padding:10px 12px
+  }
+  .facility-form-grid textarea{min-height:88px}
+  .facility-modal-actions{position:sticky;bottom:-19px;background:#fff;padding:12px 0 2px;z-index:2}
+  .facility-modal-actions button{min-height:44px;flex:1}
+}

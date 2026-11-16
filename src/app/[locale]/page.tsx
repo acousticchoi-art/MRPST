@@ -100,9 +100,9 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
   return <>
     <header className="header">
       <Link href={`/${locale}`} className="brand"><span className="brand-logo"><img src="/mrpst-logo.svg" alt="MRPST 공식 로고"/></span><span>MRPST<small>{officialName.toUpperCase()}</small></span></Link>
-      <nav className="nav"><Link href={`/${locale}/about`}>{t.about}</Link><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><Link href={`/${locale}/calendar`}>{locale==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</Link><Link href={`/${locale}/contact`}>{t.contact}</Link></nav>
+      <nav className="nav"><Link href={`/${locale}/about`}>{t.about}</Link><Link href={`/${locale}/academics`}>{t.academics}</Link><a href="#history">{t.history}</a><Link href={`/${locale}/calendar`}>{locale==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</Link><Link href={`/${locale}/contact`}>{t.contact}</Link></nav>
       <div className="header-tools"><div className="langs"><Link href="/my" aria-label="မြန်မာဘာသာ">မြန်မာ</Link><Link href="/ko" aria-label="한국어">한국어</Link></div><Link className="admin-link" href={`/${locale}/admin`}>{locale==="ko"?"관리자":"အုပ်ချုပ်ရေး"}</Link></div>
-      <details className="mobile-menu"><summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary><nav className="mobile-nav"><Link href={`/${locale}/about`}>{t.about}</Link><a href="#academics">{t.academics}</a><a href="#history">{t.history}</a><Link href={`/${locale}/calendar`}>{locale==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</Link><Link href={`/${locale}/contact`}>{t.contact}</Link><Link href={`/${locale}/admin`}>Admin</Link><div className="mobile-langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div></nav></details>
+      <details className="mobile-menu"><summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary><nav className="mobile-nav"><Link href={`/${locale}/about`}>{t.about}</Link><Link href={`/${locale}/academics`}>{t.academics}</Link><a href="#history">{t.history}</a><Link href={`/${locale}/calendar`}>{locale==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</Link><Link href={`/${locale}/contact`}>{t.contact}</Link><Link href={`/${locale}/admin`}>Admin</Link><div className="mobile-langs"><Link href="/my">မြန်မာ</Link><Link href="/ko">한국어</Link></div></nav></details>
     </header>
     <main className="homepage">
       <section className="hero hero-redesign">
@@ -153,8 +153,8 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
       <section id="academics" className="section academics-section">
         <div className="section-heading-row"><div><span className="eyebrow">{locale==="ko"?"02 — ACADEMICS":"02 — ACADEMICS"}</span><h2>{t.departments}</h2></div><p>{locale==="ko"?"배움이 소명으로 이어지도록, 각 분야의 전문성과 기독교적 가치관을 함께 세웁니다.":"ပညာသင်ယူမှုမှ ခေါ်တော်မူခြင်းသို့ ရောက်ရှိစေရန် ပညာရပ်ဆိုင်ရာ ကျွမ်းကျင်မှုနှင့် ခရစ်ယာန်တန်ဖိုးများကို အတူတကွ ပျိုးထောင်ပါသည်။"}</p></div>
         <div className="cards academic-cards">
-          <article className="card academic-card theology-card"><div className="academic-card-top"><span>01 / THEOLOGY</span><span className="academic-symbol">✦</span></div><div><h3>{t.theology}</h3><p>{t.theologyText}</p></div><a href="#contact" aria-label={t.theology}> <span aria-hidden="true">↗</span></a></article>
-          <article className="card academic-card education-card"><div className="academic-card-top"><span>02 / EDUCATION</span><span className="academic-symbol">✳</span></div><div><h3>{t.ece}</h3><p>{t.eceText}</p></div><a href="#contact" aria-label={t.ece}><span aria-hidden="true">↗</span></a></article>
+          <article className="card academic-card theology-card"><div className="academic-card-top"><span>01 / THEOLOGY</span><span className="academic-symbol">✦</span></div><div><h3>{t.theology}</h3><p>{t.theologyText}</p></div><Link href={`/${locale}/academics`} aria-label={t.theology}> <span aria-hidden="true">↗</span></Link></article>
+          <article className="card academic-card education-card"><div className="academic-card-top"><span>02 / EDUCATION</span><span className="academic-symbol">✳</span></div><div><h3>{t.ece}</h3><p>{t.eceText}</p></div><Link href={`/${locale}/academics`} aria-label={t.ece}><span aria-hidden="true">↗</span></Link></article>
         </div>
       </section>
 

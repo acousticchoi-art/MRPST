@@ -16,7 +16,7 @@ export default function LibraryModule(){
  const [bookForm,setBookForm]=useState<any>(emptyBook),[memberForm,setMemberForm]=useState<any>(emptyMember);
  const [editingBookId,setEditingBookId]=useState(""),[editingMemberId,setEditingMemberId]=useState("");
  const [loanForm,setLoanForm]=useState({book_id:"",member_id:"",checkout_date:today(),due_date:""});
- const load=useCallback(async()=>{
+ const load=useCallback(async()=>{try{
   if(!supabase){setLoading(false);return;}setLoading(true);setError("");
   const [b,m,l]=await Promise.all([
    supabase.from("library_books").select("id,isbn,title,author,publisher,publication_year,category,language,shelf_location,total_copies,description,created_at").order("title"),
@@ -27,7 +27,7 @@ export default function LibraryModule(){
   if(errors.length)setError(errors.join(" · "));
   else{setBooks((b.data??[]) as Book[]);setMembers((m.data??[]) as Member[]);setLoans((l.data??[]) as unknown as Loan[]);}
   setLoading(false);
- },[supabase]);
+ }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다. 다시 시도해 주세요.");}finally{setLoading(false);}},[supabase]);
  useEffect(()=>{void load();},[load]);
  const setB=(k:string,v:string)=>setBookForm((x:any)=>({...x,[k]:v}));
  const setM=(k:string,v:string)=>setMemberForm((x:any)=>({...x,[k]:v}));

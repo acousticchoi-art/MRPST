@@ -19,7 +19,7 @@ export default function StudentModule(){
  const [profileOpen,setProfileOpen]=useState(false),[editingStudent,setEditingStudent]=useState(""),[profile,setProfile]=useState<any>(emptyProfile);
  const [recordOpen,setRecordOpen]=useState(false),[editingRecord,setEditingRecord]=useState(""),[record,setRecord]=useState<any>(emptyRecord);
  const [accountOpen,setAccountOpen]=useState(false),[accountEmail,setAccountEmail]=useState(""),[accountPassword,setAccountPassword]=useState(""),[accountBusy,setAccountBusy]=useState(false);
- const load=useCallback(async()=>{
+ const load=useCallback(async()=>{try{
   if(!supabase){setLoading(false);return;} setLoading(true);setError("");
   const [s,r,a]=await Promise.all([
    supabase.from("students").select("id,auth_user_id,program_code,student_number,full_name,full_name_my,full_name_en,gender,date_of_birth,admission_year,program,cohort,student_status,phone,email,guardian_name,guardian_phone,notes").order("student_number"),
@@ -41,7 +41,7 @@ export default function StudentModule(){
   else setAwards((a.data??[]) as Award[]);
   setError(errors.join(" · "));
   setLoading(false);
- },[supabase,selectedId]);
+ }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다. 다시 시도해 주세요.");}finally{setLoading(false);}},[supabase,selectedId]);
  useEffect(()=>{void load();},[load]);
  const selected=students.find(s=>s.id===selectedId)??null;
  const visible=students.filter(s=>(filter==="all"||s.student_status===filter)&&(!search.trim()||[s.student_number,s.full_name,s.full_name_en,s.full_name_my,s.program,s.cohort].some(v=>(v??"").toLowerCase().includes(search.toLowerCase()))));

@@ -21,7 +21,7 @@ export default function WebsiteModule(){
  const [pageValues,setPageValues]=useState<Record<string,{title:string;body:string}>>({});
  const [editingId,setEditingId]=useState("");
  const [noticeTitle,setNoticeTitle]=useState(""),[noticeBody,setNoticeBody]=useState(""),[noticeLocale,setNoticeLocale]=useState("ko"),[noticePublished,setNoticePublished]=useState(true);
- const load=useCallback(async()=>{
+ const load=useCallback(async()=>{try{
   if(!db){setError("데이터베이스 연결을 확인해 주세요.");setLoading(false);return;}
   setLoading(true);setError("");
   const {data,error}=await db.from("website_contents").select("*").order("sort_order").order("updated_at",{ascending:false});
@@ -30,7 +30,7 @@ export default function WebsiteModule(){
   const values:Record<string,{title:string;body:string}>={};
   for(const field of pageFields){const row=rows.find(x=>x.content_type==="page"&&x.content_key===field.key&&x.locale===locale);values[field.key]={title:row?.title||"",body:row?.body||""};}
   setPageValues(values);setLoading(false);
- },[db,locale]);
+ }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다. 다시 시도해 주세요.");}finally{setLoading(false);}},[db,locale]);
  useEffect(()=>{void load();},[load]);
  async function savePages(){
   if(!db)return;setSaving(true);setError("");setNotice("");

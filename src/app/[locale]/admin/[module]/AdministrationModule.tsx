@@ -27,7 +27,7 @@ export default function AdministrationModule(){
  const [createOpen,setCreateOpen]=useState(false),[newUser,setNewUser]=useState({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""}),[newPassword,setNewPassword]=useState("");
  const [selectedPageKeys,setSelectedPageKeys]=useState<string[]>([]);
  const selected=users.find(x=>x.user_id===selectedId)||null;
- const load=useCallback(async()=>{
+ const load=useCallback(async()=>{try{
   if(!db){setLoading(false);setError("데이터베이스 연결을 확인해 주세요.");return;}
   setLoading(true);setError("");
   const [p,d,l]=await Promise.all([
@@ -53,7 +53,7 @@ export default function AdministrationModule(){
   setUsers(mapped);setDeps((d.data||[]) as D[]);setLogs(l.data||[]);
   setSelectedId(current=>current&&mapped.some(x=>x.user_id===current)?current:"");
   setLoading(false);
- },[db]);
+ }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다. 다시 시도해 주세요.");}finally{setLoading(false);}},[db]);
  useEffect(()=>{void load();},[load]);
  async function invokeAdmin(body:Record<string,unknown>){if(!db)throw new Error("데이터베이스 연결을 확인해 주세요.");const {data,error}=await db.functions.invoke("admin-manage-user",{body});if(error)throw error;if(data?.error)throw new Error(data.error);return data;}
  async function createAccount(){if(!newUser.full_name.trim()||!newUser.email.trim()||newUser.password.length<8){setError("이름, 이메일, 8자 이상의 비밀번호를 입력해 주세요.");return;}const ok=await run(()=>invokeAdmin({action:"create",...newUser,full_name:newUser.full_name.trim(),email:newUser.email.trim()}),"새 계정을 생성했습니다.");if(!ok)return;setCreateOpen(false);setNewUser({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""});}

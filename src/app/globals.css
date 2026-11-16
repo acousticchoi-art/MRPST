@@ -1009,3 +1009,14 @@ button,a,input,select,textarea{transition-color:.16s}
   word-break:keep-all;
   overflow-wrap:break-word;
 }
+
+/* Unified typography across the entire MRPST website and administration */
+html,
+body,
+body *,
+button,
+input,
+select,
+textarea {
+  font-family: "Noto Sans KR", "Noto Sans Myanmar", sans-serif !important;
+}

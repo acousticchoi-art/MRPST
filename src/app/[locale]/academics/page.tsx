@@ -8,7 +8,7 @@ const contentByLocale = {
     title: "배움으로 준비하고, 섬김으로 나아갑니다.",
     lead: "MRPST는 성경과 개혁주의 신학을 바탕으로 교회와 지역사회를 섬길 지도자를 양성합니다. 신학과 목회학, 유아교육 분야의 교육과정을 운영하며 배운 내용을 교회와 교육 현장에서 실천하도록 돕습니다.",
     programsTitle: "교육과정 안내",
-    programsLead: "현재 운영하는 세 가지 교육과정의 학제와 학위 정보를 안내합니다.",
+    programsLead: "현재 운영하는 네 가지 교육과정의 학제와 학위 정보를 안내합니다.",
     programs: [
       { no: "01", category: "THEOLOGY", name: "신학대학 과정", degree: "B.Th. · 4년제", period: "4년", intro: "성경과 개혁주의 신학을 기초로 교회와 선교 현장을 섬길 사역자를 양성하는 학부 과정입니다.", detail: "첫 2년은 기초 교육과 신학의 기본 내용을 배우고, 후반 2년은 보다 집중적인 신학 훈련을 받습니다. 설교와 전도 등 실제 사역 훈련도 함께 강조합니다.", opened: "2007년 12월 4일 개교" },
       { no: "02", category: "PASTORAL MINISTRY", name: "편목과정", degree: "Diploma · 2년제", period: "2년", intro: "다른 신학교에서 신학을 공부하고 현재 목회 현장에서 섬기는 사역자를 위한 과정입니다.", detail: "타 신학교에서 최소 B.Th. 과정을 이수하고 현재 목회 중인 사역자를 대상으로 하며, 목회 사역에 필요한 신학 교육을 이어갈 수 있도록 운영합니다.", opened: "2011년 12월 6일 개설" },
@@ -44,7 +44,7 @@ const contentByLocale = {
     title: "ပညာသင်ယူ၍ အမှုတော်ဆောင်ရန် ပြင်ဆင်ခြင်း",
     lead: "MRPST သည် သမ္မာကျမ်းစာနှင့် ပြုပြင်ပြောင်းလဲရေး ဓမ္မပညာကို အခြေခံ၍ အသင်းတော်နှင့် လူမှုအသိုင်းအဝိုင်းကို အစေခံမည့် ခေါင်းဆောင်များကို ပြုစုပျိုးထောင်ပါသည်။ ဓမ္မပညာ၊ သင်းအုပ်ဆရာသင်တန်းနှင့် ကလေးသူငယ်ပညာရေး သင်တန်းများကို ဖွင့်လှစ်ထားပါသည်။",
     programsTitle: "သင်တန်းအစီအစဉ်များ",
-    programsLead: "လက်ရှိဖွင့်လှစ်ထားသော သင်တန်းသုံးမျိုး၏ ကြာမြင့်ချိန်နှင့် ဘွဲ့အချက်အလက်များ။",
+    programsLead: "လက်ရှိဖွင့်လှစ်ထားသော သင်တန်းလေးမျိုး၏ ကြာမြင့်ချိန်နှင့် ဘွဲ့အချက်အလက်များ။",
     programs: [
       { no: "01", category: "THEOLOGY", name: "ဓမ္မပညာဘွဲ့သင်တန်း", degree: "B.Th. · ၄ နှစ်", period: "၄ နှစ်", intro: "သမ္မာကျမ်းစာနှင့် ပြုပြင်ပြောင်းလဲရေး ဓမ္မပညာကို အခြေခံ၍ အသင်းတော်နှင့် သာသနာလုပ်ငန်းတွင် အစေခံမည့်သူများကို ပြင်ဆင်ပေးသော ဘွဲ့ကြိုသင်တန်းဖြစ်ပါသည်။", detail: "ပထမ ၂ နှစ်တွင် အခြေခံပညာနှင့် ဓမ္မပညာအခြေခံများကို သင်ယူပြီး နောက် ၂ နှစ်တွင် ပိုမိုအထူးပြုသော ဓမ္မပညာသင်ကြားမှုကို ခံယူရပါသည်။ တရားဟောခြင်းနှင့် ဧဝံဂေလိဟောပြောခြင်း လက်တွေ့လေ့ကျင့်မှုကိုလည်း အလေးထားပါသည်။", opened: "၂၀၀၇ ဒီဇင်ဘာ ၄ ရက်တွင် ဖွင့်လှစ်" },
       { no: "02", category: "PASTORAL MINISTRY", name: "သင်းအုပ်ဆရာသင်တန်း", degree: "Diploma · ၂ နှစ်", period: "၂ နှစ်", intro: "အခြားကျမ်းစာသင်ကျောင်းတွင် ဓမ္မပညာသင်ယူပြီး လက်ရှိအသင်းတော်တွင် အမှုဆောင်နေသူများအတွက် ဖြစ်ပါသည်။", detail: "အခြားကျမ်းစာသင်ကျောင်းတွင် B.Th. အနည်းဆုံး ပြီးမြောက်ပြီး လက်ရှိသင်းအုပ်ဆရာအဖြစ် အမှုဆောင်နေသူများကို လက်ခံပါသည်။", opened: "၂၀၁၁ ဒီဇင်ဘာ ၆ ရက်တွင် ဖွင့်လှစ်" },
@@ -84,7 +84,7 @@ export default async function AcademicsPage({params}:{params:Promise<{locale:str
     <SiteHeader locale={locale} active="academics" />
     <main className="academics-page">
       <section className="academics-hero"><span className="eyebrow">{t.eyebrow}</span><h1>{t.title}</h1><p>{t.lead}</p></section>
-      <section className="academics-programs"><div className="about-section-head"><span className="eyebrow">01 — PROGRAMS</span><h2>{t.programsTitle}</h2><p>{t.programsLead}</p></div><div className="program-detail-grid">{t.programs.slice(1).map((program,index)=><article className="program-detail-card" key={program.no}><div className="program-card-top"><span>0{index+1} / {program.category}</span><strong>{program.period}</strong></div><h3>{program.name}</h3><b className="program-degree">{program.degree}</b><p>{program.intro}</p><p className="program-detail-copy">{program.detail}</p><small>{program.opened}</small></article>)}</div></section>
+      <section className="academics-programs"><div className="about-section-head"><span className="eyebrow">01 — PROGRAMS</span><h2>{t.programsTitle}</h2><p>{t.programsLead}</p></div><div className="program-detail-grid">{t.programs.map((program,index)=><article className="program-detail-card" key={program.no}><div className="program-card-top"><span>0{index+1} / {program.category}</span><strong>{program.period}</strong></div><h3>{program.name}</h3><b className="program-degree">{program.degree}</b><p>{program.intro}</p><p className="program-detail-copy">{program.detail}</p><small>{program.opened}</small></article>)}</div></section>
       <section className="academics-approach"><div className="about-section-head"><span className="eyebrow">02 — EDUCATIONAL APPROACH</span><h2>{t.approachTitle}</h2></div><div className="academics-approach-grid">{t.approach.map(([title,desc],i)=><article key={title}><span>0{i+1}</span><div><h3>{title}</h3><p>{desc}</p></div></article>)}</div></section>
       <section className="academics-calendar"><div className="about-section-head"><span className="eyebrow">03 — ACADEMIC CALENDAR</span><h2>{t.calendarTitle}</h2></div><div className="semester-grid">{t.semesters.map(([name,period])=><article key={name}><span>{name}</span><strong>{period}</strong></article>)}</div><p className="academics-note">{t.note}</p></section>
       <section className="academics-admission"><div className="about-section-head"><span className="eyebrow">04 — ADMISSIONS</span><h2>{t.admissionTitle}</h2></div><ol>{t.admission.map(item=><li key={item}>{item}</li>)}</ol></section>

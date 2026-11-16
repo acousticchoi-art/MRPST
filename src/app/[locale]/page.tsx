@@ -13,7 +13,7 @@ const copy = {
     theologyText:"Biblical and theological formation for Christian ministry, preaching, church leadership and mission.",
     ece:"Department of Early Childhood Education",
     eceText:"Preparing educators to nurture children through developmentally appropriate and Christ-centered education.",
-    contactTitle:"Connect with MRPST",
+    contactTitle:"Contact MRPST",
     historyIntro:"From its founding in Yangon to the development of theological degree programs, MRPST has continued to prepare leaders for the church in Myanmar.",
     milestones:[
       ["December 2007","MRPST was founded in Mingalardon, Yangon, through the united efforts of Korean missionaries, with an initial board of six members."],
@@ -51,16 +51,16 @@ const copy = {
   ko: {
     about:"학교 소개", academics:"학과 안내", history:"연혁", contact:"연락처",
     title:"교회와 세상을 섬기는 신실한 일꾼을 세웁니다.",
-    intro:"성경에 뿌리를 두고 개혁주의 전통을 따라 MRPST는 미얀마 교회와 지역사회를 섬기며 복음을 전할 신실한 지도자를 양성합니다.",
-    aboutTitle:"신실한 섬김을 위한 신학교육",
+    intro:"MRPST는 성경과 개혁주의 신학을 바탕으로 미얀마 교회와 지역사회를 섬기고 복음을 전할 신실한 지도자를 양성합니다.",
+    aboutTitle:"교회와 세상을 섬기는 신학교육",
     aboutText:"Myanmar Reformed Presbyterian School of Theology(MRPST)는 미얀마 교회의 사명에 동참할 신실한 기독교 지도자를 양성하기 위해 설립되었습니다. 교육의 기초는 성경의 권위와 웨스트민스터 신앙고백, 장로교 정치 원리입니다. 종교개혁과 청교도 전통에 뿌리를 둔 개혁주의 신학을 가르치며, 성경에 대한 확고한 신앙과 경건한 인격, 바른 신학적 이해, 실제 사역에 필요한 역량을 함께 세우는 것을 목표로 합니다. 특히 복음의 접촉이 제한된 미얀마의 여러 지역과 종족 공동체를 섬길 사역자를 준비하는 데 마음을 두고 있습니다.",
-    departments:"교육 학과",
+    departments:"학과 안내",
     theology:"신학과",
-    theologyText:"기독교 사역과 설교, 교회 지도력 및 선교를 위한 성경·신학 교육을 제공합니다.",
+    theologyText:"목회와 설교, 교회 지도력 및 선교 사역에 필요한 성경·신학 교육을 제공합니다.",
     ece:"유아교육과",
-    eceText:"아동 발달과 기독교적 교육 가치에 기초하여 유아교육 전문인을 양성합니다.",
-    contactTitle:"MRPST와 연결되세요",
-    historyIntro:"양곤에서 시작된 MRPST는 미얀마 교회를 섬길 지도자를 세우기 위해 신학교육과 사역 훈련을 이어가고 있습니다.",
+    eceText:"아동 발달과 기독교 교육의 가치를 바탕으로 유아교육 전문가를 양성합니다.",
+    contactTitle:"학교에 문의하기",
+    historyIntro:"양곤에서 시작된 MRPST는 미얀마 교회를 섬길 지도자를 양성하며 신학교육과 현장 사역 훈련을 이어가고 있습니다.",
     milestones:[
       ["2007년 12월","한국 선교사들의 연합으로 양곤 밍글라돈(Mingalardon)에 MRPST가 설립되었습니다. 초기 이사회는 6명으로 구성되었습니다."],
       ["설립 이념과 교육 방향","성경의 권위와 웨스트민스터 신앙고백, 장로교 정치 원리를 교육의 기초로 삼고 종교개혁과 청교도 전통에 뿌리를 둔 개혁주의 신학을 따릅니다."],
@@ -68,7 +68,7 @@ const copy = {
       ["2022년","버마어로 진행하는 4년제 신학과 과정과 함께 영어로 진행하는 3년제 목회학 석사(M.Div.) 과정을 개설했습니다."],
       ["2024년","현재 MRPST 졸업생들은 미얀마개혁장로교교회(MRPCC) 산하 약 50개 교회에서 목회자와 사역자로 섬기고 있습니다."],
     ],
-    contactText:"교육과정, 입학 및 학교 관련 문의는 아래 연락처를 통해 해주시기 바랍니다.",
+    contactText:"입학과 교육과정 등 학교에 관한 문의는 연락처 페이지에서 접수해 주세요.",
     addressText:"No.286, 10th Kaya St, Thingangyungyi, Mingladon Township, Yangon, Myanmar"
   }
 } as const;

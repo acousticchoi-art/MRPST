@@ -20,7 +20,7 @@ const copy = {
       ["Foundational vision","The school established its theological foundation on the authority of Scripture, the Westminster Confession of Faith and Presbyterian church order, following the Reformed tradition."],
       ["2020","MRPST began cooperation with Evangelia University in the United States and expanded its library to more than 10,000 volumes."],
       ["2022","A three-year Master of Divinity (M.Div.) program taught in English was introduced alongside the four-year theology program taught in Burmese."],
-      ["2024","A report by the MRPST Student Affairs Director noted that graduates were serving in approximately 50 churches connected with the Myanmar Reformed Presbyterian Community Church (MRPCC)."],
+      ["2024","MRPST graduates currently serve as pastors and ministry workers in approximately 50 churches under the Myanmar Reformed Presbyterian Church (MRPCC)."],
     ],
     contactText:"Contact the seminary for program information, admissions and institutional enquiries.",
     addressText:"No.286, 10th Kaya St, Thingangyungyi, Mingladon Township, Yangon, Myanmar"
@@ -43,7 +43,7 @@ const copy = {
       ["တည်ထောင်မှုအခြေခံမူများ","သမ္မာကျမ်းစာ၏ လှုံ့ဆော်မှု၊ Westminster ယုံကြည်ခြင်းဝန်ခံချက်နှင့် Presbyterian အသင်းတော်အုပ်ချုပ်မှုစနစ်တို့ကို အခြေခံ၍ ပြုပြင်ပြောင်းလဲရေးနှင့် Puritan ဓမ္မပညာအစဉ်အလာကို သင်ကြားရန် ရည်ရွယ်ခဲ့ပါသည်။"],
       ["၂၀၂၀","အမေရိကန်နိုင်ငံရှိ Evangelia University နှင့် ပူးပေါင်းကာ ဓမ္မပညာဆိုင်ရာ ပိုမိုမြင့်မားသော ပညာရေးကို ဆက်လက်ဖော်ဆောင်ခဲ့ပါသည်။ ထိုကာလတွင် စာကြည့်တိုက်စာအုပ်ပေါင်း ၁၀,၀၀၀ ကျော် စုဆောင်းထားနိုင်ခဲ့ကြောင်း ဖော်ပြထားပါသည်။"],
       ["၂၀၂၂","မြန်မာဘာသာဖြင့် သင်ကြားသော ၄ နှစ်တာ ဓမ္မပညာသင်တန်းနှင့်အတူ အင်္ဂလိပ်ဘာသာဖြင့် သင်ကြားသော ၃ နှစ်တာ Master of Divinity (M.Div.) သင်တန်းကို ဖွင့်လှစ်ခဲ့ပါသည်။ ဂီတ၊ တူရိယာလက်တွေ့၊ ကွန်ပျူတာနှင့် အင်္ဂလိပ်စာကဲ့သို့ လက်တွေ့အမှုတော်အတွက် လိုအပ်သော ဘာသာရပ်များကိုလည်း ထည့်သွင်းသင်ကြားခဲ့ပါသည်။"],
-      ["၂၀၂၄","MRPST ကျောင်းသားရေးရာတာဝန်ခံ၏ အစီရင်ခံစာတွင် ကျောင်းဆင်းများသည် Myanmar Reformed Presbyterian Community Church နှင့် ဆက်စပ်သော အသင်းတော် ၅၀ ခန့်တွင် အမှုတော်ဆောင်နေကြောင်း ဖော်ပြထားပြီး ဓမ္မပညာသင်ကြားရေး၊ ဆရာအင်အားပြုစုပျိုးထောင်ရေးနှင့် အသင်းတော်တည်ထောင်ရေးလုပ်ငန်းများကို ဆက်လက်အလေးထားကြောင်း ဖော်ပြထားပါသည်။"]
+      ["၂၀၂၄","MRPST ကျောင်းဆင်းများသည် Myanmar Reformed Presbyterian Church (MRPCC) လက်အောက်ရှိ အသင်းတော် ၅၀ ခန့်တွင် သင်းအုပ်ဆရာများနှင့် အမှုတော်ဆောင်များအဖြစ် လက်ရှိ အမှုတော်ထမ်းဆောင်လျက်ရှိပါသည်။"]
     ],
     contactText:"သင်တန်းအစီအစဉ်၊ ဝင်ခွင့်နှင့် ကျောင်းဆိုင်ရာ အချက်အလက်များအတွက် ဆက်သွယ်နိုင်ပါသည်။",
     addressText:"No.286, 10th Kaya St, Thingangyungyi, Mingladon Township, Yangon, Myanmar"
@@ -66,7 +66,7 @@ const copy = {
       ["설립 이념과 교육 방향","성경의 권위와 웨스트민스터 신앙고백, 장로교 정치 원리를 교육의 기초로 삼고 종교개혁과 청교도 전통에 뿌리를 둔 개혁주의 신학을 따릅니다."],
       ["2020년","미국 에반겔리아대학교(Evangelia University)와 협력하고 도서관 장서를 1만 권 이상으로 확충했습니다."],
       ["2022년","버마어로 진행하는 4년제 신학과 과정과 함께 영어로 진행하는 3년제 목회학 석사(M.Div.) 과정을 개설했습니다."],
-      ["2024년","MRPST 학생처장의 사역 보고서에 따르면 졸업생들은 미얀마개혁장로교공동체교회(MRPCC)와 연결된 약 50개 교회에서 사역하고 있습니다."],
+      ["2024년","현재 MRPST 졸업생들은 미얀마개혁장로교교회(MRPCC) 산하 약 50개 교회에서 목회자와 사역자로 섬기고 있습니다."],
     ],
     contactText:"교육과정, 입학 및 학교 관련 문의는 아래 연락처를 통해 해주시기 바랍니다.",
     addressText:"No.286, 10th Kaya St, Thingangyungyi, Mingladon Township, Yangon, Myanmar"

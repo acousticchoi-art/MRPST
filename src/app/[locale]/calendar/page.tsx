@@ -41,7 +41,7 @@ export default async function CalendarPage({ params }: { params: Promise<{ local
         <div className="academics-heading" style={{ marginTop: 36 }}>
           <span className="eyebrow">MRPST ACADEMIC CALENDAR</span>
           <h1>{isMyanmar ? "ပညာရေးပြက္ခဒိန်" : "학사 일정"}</h1>
-          <p>{isMyanmar ? "ကျောင်း၏ ပညာရေးအစီအစဉ်နှင့် အရေးကြီးသော အခမ်းအနားများကို ကြည့်ရှုနိုင်ပါသည်။" : "학교의 학사 일정과 주요 행사를 확인할 수 있습니다."}</p>
+          <p>{isMyanmar ? "ကျောင်း၏ ပညာရေးအစီအစဉ်နှင့် အရေးကြီးသော အခမ်းအနားများကို ကြည့်ရှုနိုင်ပါသည်။" : "학교의 학사 일정과 주요 행사를 확인하실 수 있습니다."}</p>
         </div>
         <ScheduleCalendar publicOnly />
       </main>

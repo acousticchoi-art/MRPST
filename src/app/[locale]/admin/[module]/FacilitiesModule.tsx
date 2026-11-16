@@ -12,7 +12,13 @@ export default function FacilitiesModule(){
  const [v,setV]=useState<any>({vehicle_code:"",registration_number:"",make:"",model:"",vehicle_type:"",manufacture_year:"",capacity:"",current_mileage:"",insurance_expiry:"",inspection_expiry:"",vehicle_status:"active",notes:""});
  const [r,setR]=useState<any>({title:"",description:"",target_type:"location",place_to_repair:"",building_id:"",inventory_id:"",vehicle_id:"",priority:"normal",reported_date:dateNow(),scheduled_date:"",estimated_cost:"",currency:"MMK",vendor:"",assigned_to:"Tun Tun Aung",check_status:"pending",result:"",status:"reported"});
  const [log,setLog]=useState<any>({vehicle_id:"",trip_date:dateNow(),driver_name:"",departure_point:"MRPST",destination:"",purpose:"",departure_time:"",return_time:"",starting_odometer:"",ending_odometer:"",fuel_type:"95",fuel_liters:"",fuel_cost:"",fuel_paid_by:"school",remarks:""});
- const load=useCallback(async()=>{try{if(!db){setLoading(false);return;}setLoading(true);setError("");const results=await Promise.all([db.from("facility_buildings").select("*").order("name"),db.from("facility_inventory").select("*").order("name"),db.from("facility_vehicles").select("*").order("vehicle_code"),db.from("facility_maintenance").select("*").order("reported_date",{ascending:false}),db.from("facility_vehicle_logs").select("*").order("trip_date",{ascending:false})]);const errors=results.filter(x=>x.error).map(x=>x.error!.message);if(errors.length)setError(errors.join(" · "));else{setBuildings(results[0].data||[]);setItems(results[1].data||[]);setVehicles(results[2].data||[]);setRepairs(results[3].data||[]);setLogs(results[4].data||[]);}setLoading(false);}catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다. 다시 시도해 주세요.");}finally{setLoading(false);}},[db]);
+ const load=useCallback(async()=>{setLoading(true);setError("");try{
+ const response=await fetch("/api/admin/data/facilities",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
+ const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
+ if(!response.ok)throw new Error(data.error||`시설 데이터 조회 실패 (HTTP ${response.status})`);
+ const keys=["buildings","items","vehicles","repairs","logs"],errors=keys.map(key=>data[key]?.error).filter(Boolean);if(errors.length)throw new Error(errors.join(" · "));
+ const values=keys.map(key=>data[key]?.data??[]);setBuildings(values[0]);setItems(values[1]);setVehicles(values[2]);setRepairs(values[3]);setLogs(values[4]);
+ }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[]);
  useEffect(()=>{void load();},[load]);
  const nameOf=(id:string|null)=>buildings.find(x=>x.id===id)?.name||"—";
  const target=(x:Row)=>x.target_type==="location"?(x.place_to_repair||"—"):x.target_type==="building"?nameOf(x.building_id):x.target_type==="vehicle"?(vehicles.find(v=>v.id===x.vehicle_id)?.registration_number||"차량"):(items.find(i=>i.id===x.inventory_id)?.name||"비품");

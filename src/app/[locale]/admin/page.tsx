@@ -87,13 +87,15 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   if(accessDenied) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>{t.denied}</h1><p className="login-intro">{t.deniedText}</p><Link className="btn secondary" href={`/${locale}`}>{t.back}</Link></section></main>;
   const visible=Object.entries(MODULES).filter(([key])=>!supabase||canAccessModule(roles,key as keyof typeof MODULES,moduleOverrides));
   const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
-  const [activeStudentCount,graduateCount,upcomingResult]=await Promise.all([
+  const [activeStudentCount,graduateCount,upcomingResult,announcementResult]=await Promise.all([
     supabase?supabase.from("students").select("id",{count:"exact",head:true}).eq("student_status","active"):Promise.resolve({count:null}),
     supabase?supabase.from("students").select("id",{count:"exact",head:true}).eq("student_status","graduated"):Promise.resolve({count:null}),
-    supabase?supabase.from("academic_calendar_events").select("id,title,start_date,start_time,event_type,location").gte("start_date",today).order("start_date",{ascending:true}).limit(5):Promise.resolve({data:[]})
+    supabase?supabase.from("academic_calendar_events").select("id,title,start_date,start_time,event_type,location").gte("start_date",today).order("start_date",{ascending:true}).limit(5):Promise.resolve({data:[]}),
+    supabase?supabase.from("website_contents").select("content_key,title,body,is_published,updated_at").eq("content_type","announcement").eq("locale",locale).order("updated_at",{ascending:false}).limit(3):Promise.resolve({data:[]})
   ]);
   const hasStudentStats=activeStudentCount.count!==null&&graduateCount.count!==null;
   const upcomingEvents=upcomingResult.data??[];
+  const recentAnnouncements=announcementResult.data??[];
   const moduleGroups=[["academic",["students","academics"]],["finance",["finance"]],["operations",["facilities","library","meetings"]],["system",["administration","website"]]] as const;
   const visibleInGroup=(keys:readonly string[])=>visible.filter(([key])=>keys.includes(key));
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
@@ -136,6 +138,10 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
           <section className="dashboard-panel dashboard-schedule">
             <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"ACADEMIC CALENDAR":"ACADEMIC CALENDAR"}</span><h2>{lang==="ko"?"다가오는 일정":"Upcoming Schedule"}</h2></div><Link href={`/${locale}/admin/academics`}>{lang==="ko"?"일정 관리 →":"Manage →"}</Link></div>
             {upcomingEvents.length? <div className="dashboard-event-list">{upcomingEvents.map((event:any)=><article key={event.id}><time>{event.start_date}{event.start_time?" · "+String(event.start_time).slice(0,5):""}</time><div><strong>{event.title}</strong>{event.location&&<small>{event.location}</small>}</div></article>)}</div>:<p className="dashboard-empty">{lang==="ko"?"예정된 일정이 없습니다.":"No upcoming events have been registered."}</p>}
+          </section>
+          <section className="dashboard-panel dashboard-announcements">
+            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"MRPST NEWS":"MRPST NEWS"}</span><h2>{lang==="ko"?"최근 공지사항":"Recent Announcements"}</h2></div><Link href={`/${locale}/admin/website`}>{lang==="ko"?"공지사항 관리 →":"Manage →"}</Link></div>
+            {recentAnnouncements.length?<div className="dashboard-announcement-list">{recentAnnouncements.map((item:any)=><article key={item.content_key}><div><strong>{item.title}</strong><p>{item.body}</p></div><span className={item.is_published?"published":"draft"}>{item.is_published?(lang==="ko"?"게시":"Published"):(lang==="ko"?"임시저장":"Draft")}</span></article>)}</div>:<p className="dashboard-empty">{lang==="ko"?"등록된 공지사항이 없습니다.":"No announcements have been registered."}</p>}
           </section>
         </div>
       </div>

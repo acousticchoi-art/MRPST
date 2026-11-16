@@ -9,7 +9,7 @@ const copy = {
     address:"No.286, 10th Kaya St, Thingangyungyi, Mingladon Township, Yangon, Myanmar",
     map:"구글 지도에서 위치 확인하기",
     email:"이메일",
-    formTitle:"문의 남기기",
+    formTitle:"문의 양식",
   },
   my: {
     eyebrow:"CONTACT MRPST",

@@ -811,7 +811,7 @@ button,a,input,select,textarea{transition-color:.16s}
 .dashboard-stat{padding:20px 22px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 2px 8px #102d4208}
 .dashboard-stat span,.dashboard-stat small{display:block;color:var(--muted);font-size:12px}
 .dashboard-stat strong{display:block;margin:7px 0 3px;color:var(--navy);font-size:30px;line-height:1.2;font-variant-numeric:tabular-nums}
-.dashboard-columns{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:16px;margin:0 0 30px}
+.dashboard-columns{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin:0 0 30px}
 .dashboard-panel{min-width:0;padding:22px;background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:0 2px 8px #102d4208}
 .dashboard-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
 .dashboard-panel-head .eyebrow{font-size:9px;letter-spacing:2px}

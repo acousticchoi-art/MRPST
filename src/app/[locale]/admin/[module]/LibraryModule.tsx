@@ -16,18 +16,13 @@ export default function LibraryModule(){
  const [bookForm,setBookForm]=useState<any>(emptyBook),[memberForm,setMemberForm]=useState<any>(emptyMember);
  const [editingBookId,setEditingBookId]=useState(""),[editingMemberId,setEditingMemberId]=useState("");
  const [loanForm,setLoanForm]=useState({book_id:"",member_id:"",checkout_date:today(),due_date:""});
- const load=useCallback(async()=>{try{
-  if(!supabase){setLoading(false);return;}setLoading(true);setError("");
-  const [b,m,l]=await Promise.all([
-   supabase.from("library_books").select("id,isbn,title,author,publisher,publication_year,category,language,shelf_location,total_copies,description,created_at").order("title"),
-   supabase.from("library_members").select("id,member_number,full_name,member_type,phone,email,department,student_id,is_active").eq("is_active",true).order("full_name"),
-   supabase.from("library_loans").select("id,book_id,member_id,checkout_date,due_date,returned_at,status,book:library_books(id,title,isbn,author),member:library_members(id,member_number,full_name,member_type)").order("checkout_date",{ascending:false})
-  ]);
-  const errors=[b.error,m.error,l.error].filter(Boolean).map(x=>x!.message);
-  if(errors.length)setError(errors.join(" · "));
-  else{setBooks((b.data??[]) as Book[]);setMembers((m.data??[]) as Member[]);setLoans((l.data??[]) as unknown as Loan[]);}
-  setLoading(false);
- }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다. 다시 시도해 주세요.");}finally{setLoading(false);}},[supabase]);
+ const load=useCallback(async()=>{setLoading(true);setError("");try{
+  const response=await fetch("/api/admin/data/library",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
+  const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
+  if(!response.ok)throw new Error(data.error||`도서관 데이터 조회 실패 (HTTP ${response.status})`);
+  const keys=["books","members","loans"],errors=keys.map(key=>data[key]?.error).filter(Boolean);if(errors.length)throw new Error(errors.join(" · "));
+  setBooks((data.books?.data??[]) as Book[]);setMembers((data.members?.data??[]) as Member[]);setLoans((data.loans?.data??[]) as unknown as Loan[]);
+ }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[]);
  useEffect(()=>{void load();},[load]);
  const setB=(k:string,v:string)=>setBookForm((x:any)=>({...x,[k]:v}));
  const setM=(k:string,v:string)=>setMemberForm((x:any)=>({...x,[k]:v}));

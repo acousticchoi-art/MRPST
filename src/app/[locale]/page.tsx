@@ -68,7 +68,7 @@ const copy = {
       ["2022년","버마어로 진행하는 4년제 신학과 과정과 함께 영어로 진행하는 3년제 목회학 석사(M.Div.) 과정을 개설했습니다."],
       ["2024년","현재 MRPST 졸업생들은 미얀마개혁장로교교회(MRPCC) 산하 약 50개 교회에서 목회자와 사역자로 섬기고 있습니다."],
     ],
-    contactText:"입학과 교육과정 등 학교에 관한 문의는 연락처 페이지에서 접수해 주세요.",
+    contactText:"입학과 교육과정에 관한 문의는 아래 이메일이나 문의 페이지를 이용해 주세요.",
     addressText:"No.286, 10th Kaya St, Thingangyungyi, Mingladon Township, Yangon, Myanmar"
   }
 } as const;

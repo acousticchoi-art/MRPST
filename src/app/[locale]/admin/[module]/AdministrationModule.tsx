@@ -7,7 +7,6 @@ type P={user_id:string;full_name:string;email:string|null;preferred_locale:strin
 type D={id:string;code:string;name_en:string;name_my:string|null;name_ko:string|null;is_active:boolean};
 const roles=["super_admin","administrator","finance_officer","academic_officer","student_officer","librarian","facility_manager","faculty","staff","student"];
 const names:Record<string,string>={super_admin:"최고 관리자",administrator:"관리자",finance_officer:"재정 담당",academic_officer:"학사 담당",student_officer:"학생 담당",librarian:"도서관 담당",facility_manager:"시설 담당",faculty:"교수",staff:"직원",student:"학생"};
-const localeNames:Record<string,string>={ko:"한국어",my:"မြန်မာ"};
 const pageOptions=[
  {key:"finance",title:"재정 관리",description:"회계, 예산, 후원금 및 지출"},
  {key:"students",title:"학생 관리",description:"학생 정보, 학적 및 장학"},
@@ -41,36 +40,6 @@ export default function AdministrationModule(){
  useEffect(()=>{void load();},[load]);
  async function invokeAdmin(body:Record<string,unknown>){if(!db)throw new Error("데이터베이스 연결을 확인해 주세요.");const {data,error}=await db.functions.invoke("admin-manage-user",{body});if(error)throw error;if(data?.error)throw new Error(data.error);return data;}
  async function createAccount(){if(!newUser.full_name.trim()||!newUser.email.trim()||newUser.password.length<8){setError("이름, 이메일, 8자 이상의 비밀번호를 입력해 주세요.");return;}const ok=await run(()=>invokeAdmin({action:"create",...newUser,full_name:newUser.full_name.trim(),email:newUser.email.trim()}),"새 계정을 생성했습니다.");if(!ok)return;setCreateOpen(false);setNewUser({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""});}
- async function createTestAccounts(){
-  const testAccounts=[
-   {full_name:"테스트 재정 담당",email:"test_finance@mrpst.test",role:"finance_officer",pages:["finance"]},
-   {full_name:"테스트 학사 담당",email:"test_academic@mrpst.test",role:"academic_officer",pages:["academics","students"]},
-   {full_name:"테스트 시설 담당",email:"test_facility@mrpst.test",role:"facility_manager",pages:["facilities","library","meetings"]}
-  ];
-  const created:string[]=[];
-  const updated:string[]=[];
-  setSaving(true);setError("");setNotice("");
-  try{
-   const {data:{user:actor}}=await db!.auth.getUser();
-   for(const account of testAccounts){
-    let userId=users.find(user=>(user.email||"").toLowerCase()===account.email)?.user_id;
-    if(!userId){
-     const result=await invokeAdmin({action:"create",full_name:account.full_name,email:account.email,password:"test1234",preferred_locale:"ko",role:account.role,department_id:""});
-     userId=result?.user_id;
-     if(!userId)throw new Error(account.email+" 계정 생성 결과를 확인할 수 없습니다.");
-     created.push(account.email);
-    }else{
-     updated.push(account.email);
-    }
-    const permissions=pageOptions.map(option=>({user_id:userId,module_key:option.key,can_view:account.pages.includes(option.key),can_manage:false,assigned_by:actor?.id??null}));
-    const {error:permissionError}=await db!.from("user_module_permissions").upsert(permissions,{onConflict:"user_id,module_key"});
-    if(permissionError)throw new Error(account.email+" 페이지 권한 저장 실패: "+permissionError.message);
-   }
-   setNotice("테스트 계정 설정을 완료했습니다. 신규 생성 "+created.length+"개, 기존 계정 권한 재설정 "+updated.length+"개.");
-   await load();
-  }catch(e:any){setError((e?.message||"테스트 계정 생성에 실패했습니다.")+(created.length?" 생성된 계정: "+created.join(", "):""));}
-  finally{setSaving(false);}
- }
  async function run(fn:()=>any,msg:string){
   setSaving(true);setError("");setNotice("");
   try{const r=await fn();if(r?.error)throw r.error;setNotice(msg);await load();return true;}
@@ -88,7 +57,7 @@ export default function AdministrationModule(){
  const assign=()=>{
   if(!selected)return;
   if(selected.roles.some(r=>r.role===role&&r.department_id===(depId||null))){setError("이미 동일한 역할과 부서가 지정되어 있습니다.");return;}
-  void run(()=>db!.from("user_roles").insert({user_id:selected.user_id,role,department_id:depId||null}),"역할을 추가했습니다.");
+  void run(async()=>{const {data,error}=await db!.from("user_roles").insert({user_id:selected.user_id,role,department_id:depId||null}).select("id").single();if(error)throw error;if(!data?.id)throw new Error("역할이 저장되지 않았습니다.");return data;},"역할을 추가했습니다.");
  };
  const toggle=(p:P)=>void run(()=>db!.rpc("mrpst_set_user_active",{target_user:p.user_id,make_active:!p.is_active}),p.is_active?"계정을 비활성화했습니다.":"계정을 활성화했습니다.");
  async function savePagePermissions(){
@@ -98,7 +67,7 @@ export default function AdministrationModule(){
    const existing=selected.permissions.find(permission=>permission.module_key===option.key);
    return {user_id:selected.user_id,module_key:option.key,can_view:selectedPageKeys.includes(option.key),can_manage:existing?.can_manage??false,assigned_by:user?.id??null,updated_at:new Date().toISOString()};
   });
-  await run(()=>db.from("user_module_permissions").upsert(rows,{onConflict:"user_id,module_key"}),"페이지 표시 설정을 저장했습니다.");
+  await run(async()=>{const {data,error}=await db.from("user_module_permissions").upsert(rows,{onConflict:"user_id,module_key"}).select("module_key");if(error)throw error;if((data??[]).length!==pageOptions.length)throw new Error("일부 페이지 권한이 저장되지 않았습니다.");return data;},"페이지 표시 설정을 저장했습니다.");
  }
  const tabs=[["users","계정 관리"],["departments","부서 관리"],["audit","변경 이력"]];
  return <div className="settings-workspace">
@@ -112,7 +81,7 @@ export default function AdministrationModule(){
   {error&&<div className="settings-alert error">{error}</div>}{notice&&<div className="settings-alert success">{notice}</div>}
   <nav className="settings-tabs">{tabs.map(([k,v])=><button key={k} className={tab===k?"active":""} onClick={()=>{setTab(k);setSelectedId("");}}>{v}</button>)}</nav>
   {tab==="users"&&<section className="settings-panel">
-   <div className="settings-panel-head"><div><h3>계정 목록</h3><p>관리자가 계정을 직접 생성하고 비밀번호와 권한을 관리합니다.</p></div><div className="settings-account-actions"><button className="settings-refresh" disabled={loading} onClick={()=>void load()}>새로고침</button><button className="settings-refresh" disabled={saving||loading} onClick={()=>void createTestAccounts()}>테스트 계정 3개 생성</button><button className="settings-primary" onClick={()=>setCreateOpen(true)}>＋ 계정 등록</button></div></div>
+   <div className="settings-panel-head"><div><h3>계정 목록</h3><p>관리자가 계정을 직접 생성하고 비밀번호와 권한을 관리합니다.</p></div><div className="settings-account-actions"><button className="settings-primary" onClick={()=>setCreateOpen(true)}>＋ 계정 등록</button></div></div>
    <div className="settings-toolbar"><input className="settings-search" placeholder="이름, 이메일, 역할 검색" value={search} onChange={e=>setSearch(e.target.value)}/><select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option value="all">전체 상태</option><option value="active">활성 회원</option><option value="inactive">비활성 회원</option></select><span>{filtered.length}명 표시</span></div>
    <div className="settings-member-layout">
     <div className="settings-member-list">{loading?<Empty>회원 정보를 불러오는 중입니다.</Empty>:filtered.map(p=><button type="button" className={"settings-member-item "+(selectedId===p.user_id?"selected":"")} key={p.user_id} onClick={()=>openUser(p)}>
@@ -125,10 +94,10 @@ export default function AdministrationModule(){
        <label>회원 이름<input value={fullName} onChange={e=>setFullName(e.target.value)}/></label>
        <label>기본 언어<select value={preferredLocale} onChange={e=>setPreferredLocale(e.target.value)}><option value="ko">한국어</option><option value="my">မြန်မာ</option></select></label>
       </div>
-      <button className="settings-primary" disabled={saving||!fullName.trim()} onClick={()=>void run(()=>db!.from("user_profiles").update({full_name:fullName.trim(),preferred_locale:preferredLocale}).eq("user_id",selected.user_id),"회원 정보를 저장했습니다.")}>회원 정보 저장</button>
+      <button className="settings-primary" disabled={saving||!fullName.trim()} onClick={()=>void run(async()=>{const {data,error}=await db!.from("user_profiles").update({full_name:fullName.trim(),preferred_locale:preferredLocale,updated_at:new Date().toISOString()}).eq("user_id",selected.user_id).select("user_id").maybeSingle();if(error)throw error;if(!data?.user_id)throw new Error("회원 정보가 수정되지 않았습니다. 권한과 계정 상태를 확인해 주세요.");return data;},"회원 정보를 저장했습니다.")}>회원 정보 저장</button>
       <div className="settings-detail-section"><h4>비밀번호 변경</h4><p className="settings-form-hint">새 비밀번호를 설정하면 기존 비밀번호는 즉시 사용할 수 없게 됩니다.</p><div className="settings-password-row"><input type="password" autoComplete="new-password" minLength={8} placeholder="새 비밀번호 (8자 이상)" value={newPassword} onChange={e=>setNewPassword(e.target.value)}/><button className="settings-primary" disabled={saving||newPassword.length<8} onClick={()=>void run(()=>invokeAdmin({action:"update_password",user_id:selected.user_id,password:newPassword}),"비밀번호를 변경했습니다.")}>비밀번호 변경</button></div></div>
       <div className="settings-detail-section"><h4>현재 권한 <small>{selected.roles.length}개</small></h4>
-       {selected.roles.length?selected.roles.map(r=><div className="settings-role-row" key={r.id}><span><strong>{names[r.role]||r.role}</strong><small>{r.department_id?(deps.find(d=>d.id===r.department_id)?.name_ko||deps.find(d=>d.id===r.department_id)?.name_en||"부서"):"전체 부서"}</small></span><button disabled={saving||r.role==="super_admin"} title={r.role==="super_admin"?"최고 관리자 권한은 이 화면에서 해제할 수 없습니다.":""} onClick={()=>void run(()=>db!.from("user_roles").delete().eq("id",r.id),"권한을 해제했습니다.")}>권한 해제</button></div>):<Empty>아직 부여된 권한이 없습니다.</Empty>}
+       {selected.roles.length?selected.roles.map(r=><div className="settings-role-row" key={r.id}><span><strong>{names[r.role]||r.role}</strong><small>{r.department_id?(deps.find(d=>d.id===r.department_id)?.name_ko||deps.find(d=>d.id===r.department_id)?.name_en||"부서"):"전체 부서"}</small></span><button disabled={saving||r.role==="super_admin"} title={r.role==="super_admin"?"최고 관리자 권한은 이 화면에서 해제할 수 없습니다.":""} onClick={()=>void run(async()=>{const {data,error}=await db!.from("user_roles").delete().eq("id",r.id).select("id").maybeSingle();if(error)throw error;if(!data?.id)throw new Error("권한이 해제되지 않았습니다.");return data;},"권한을 해제했습니다.")}>권한 해제</button></div>):<Empty>아직 부여된 권한이 없습니다.</Empty>}
       </div>
       <div className="settings-detail-section"><h4>새 권한 부여</h4><div className="settings-role-form"><select value={role} onChange={e=>setRole(e.target.value)}>{roles.filter(r=>r!=="super_admin"&&r!=="student").map(r=><option key={r} value={r}>{names[r]}</option>)}</select><select value={depId} onChange={e=>setDepId(e.target.value)}><option value="">전체 부서</option>{deps.filter(d=>d.is_active).map(d=><option key={d.id} value={d.id}>{d.name_ko||d.name_en}</option>)}</select><button className="settings-primary" disabled={saving||selected.roles.some(r=>r.role===role&&r.department_id===(depId||null))} onClick={assign}>권한 추가</button></div></div>
       <div className="settings-detail-section">

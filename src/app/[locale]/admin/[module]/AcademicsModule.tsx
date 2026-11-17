@@ -1,5 +1,6 @@
 "use client";
 import {useCallback,useEffect,useMemo,useState} from "react";
+import {AdminFormActions,FormField} from "./AdminUI";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 import GradeManagementModule from "./GradeManagementModule";
 import PromotionManagement from "./PromotionManagement";
@@ -85,6 +86,6 @@ function Search({value,onChange}:{value:string;onChange:(v:string)=>void}){retur
 function Empty({children}:{children:React.ReactNode}){return <p className="academics-empty">{children}</p>}
 function Table({headers,rows,empty}:{headers:string[];rows:React.ReactNode[];empty:string}){return <div className="academics-table-wrap"><table className="academics-table"><thead><tr>{headers.map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{rows.length?rows:<tr><td colSpan={headers.length}><Empty>{empty}</Empty></td></tr>}</tbody></table></div>}
 function Grid({children}:{children:React.ReactNode}){return <div className="academics-form-grid">{children}</div>}
-function Field({label,full,children}:{label:string;full?:boolean;children:React.ReactNode}){return <label className={full?"full":""}>{label}{children}</label>}
+function Field({label,full,children}:{label:string;full?:boolean;children:React.ReactNode}){return <FormField label={label} full={full}>{children}</FormField>}
 function Modal({title,close,children}:{title:string;close:()=>void;children:React.ReactNode}){return <div className="academics-modal-backdrop"><section className="academics-modal"><header><h3>{title}</h3><button onClick={close}>×</button></header>{children}</section></div>}
-function Actions({close,saving,disabled,submit}:{close:()=>void;saving:boolean;disabled:boolean;submit:()=>void}){return <div className="academics-modal-actions"><button onClick={close}>취소</button><button className="academics-primary" disabled={saving||disabled} onClick={submit}>{saving?"저장 중…":"저장"}</button></div>}
+function Actions({close,saving,disabled,submit}:{close:()=>void;saving:boolean;disabled:boolean;submit:()=>void}){return <AdminFormActions className="academics-modal-actions" primaryClassName="academics-primary" close={close} saving={saving} disabled={disabled} submit={submit}/>}

@@ -1176,3 +1176,16 @@ textarea {
   .homepage{position:relative;z-index:0}
   .hero.hero-redesign{margin-top:0!important}
 }
+
+
+/* Fix native details menu visibility: hidden until the user opens it */
+@media(max-width:760px){
+  .header>.mobile-menu:not([open])>.mobile-nav{
+    display:none!important;
+  }
+  .header>.mobile-menu[open]>.mobile-nav{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-auto-flow:row!important;
+  }
+}

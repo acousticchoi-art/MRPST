@@ -68,7 +68,7 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
         ["monthlyReports","fundBalanceReports","donorReports","scholarshipReports","ledgerReports"].forEach((key,index)=>data[key]=reports[index]);
       }
     }else if(moduleKey==="academics"){
-      const keys=["terms","courses","departments","students","enrol","slots","grades","syllabi","instructors","teachingAssignments"] as const;
+      const keys=["terms","courses","departments","students","enrol","slots","grades","syllabi","instructors","teachingAssignments","timetableEntries","timetableEvents"] as const;
       const queries=[
         supabase.from("academic_terms").select("*").order("academic_year",{ascending:false}),
         supabase.from("academic_courses").select("*").order("course_code"),
@@ -79,7 +79,9 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
         supabase.from("academic_grades").select("*").order("updated_at",{ascending:false}),
         supabase.from("academic_course_syllabi").select("*").order("updated_at",{ascending:false}),
         supabase.from("academic_instructors").select("*").order("full_name"),
-        supabase.from("academic_teaching_assignments").select("*").order("created_at",{ascending:false})
+        supabase.from("academic_teaching_assignments").select("*").order("created_at",{ascending:false}),
+        supabase.from("academic_timetable_entries").select("*").eq("is_active",true).order("term_id").order("department_id").order("day_of_week").order("start_time"),
+        supabase.from("academic_timetable_events").select("*").order("term_id").order("department_id").order("day_of_week").order("start_time")
       ];
       const values=await Promise.all(queries.map(result));
       keys.forEach((key,index)=>data[key]=values[index]);

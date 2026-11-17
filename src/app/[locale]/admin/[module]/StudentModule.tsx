@@ -35,7 +35,7 @@ export default function StudentModule(){
    if(selectedId&&!rows.some(x=>x.id===selectedId))setSelectedId(rows[0]?.id??"");
   }
   if(r?.error)errors.push("성적 조회: "+r.error);
-  else setRecords(((r?.data??[]) as any[]).map(x=>({id:x.id,student_id:x.student_id,academic_year:x.academic_terms?.academic_year??0,term:x.academic_terms?.name??x.academic_terms?.term_code??"",course_code:x.academic_courses?.course_code??null,course_name:x.academic_courses?.title??"",credits:x.academic_courses?.credits??null,score:x.score,grade:x.grade,remarks:x.remarks})));
+  else setRecords(((r?.data??[]) as any[]).map(x=>({id:x.id,student_id:x.student_id,academic_year:x.academic_year??x.academic_terms?.academic_year??0,term:x.term??x.academic_terms?.name??x.academic_terms?.term_code??"",course_code:x.course_code??x.academic_courses?.course_code??null,course_name:x.course_name??x.academic_courses?.title??"",credits:x.credits??x.academic_courses?.credits??null,score:x.score,grade:x.grade,remarks:x.remarks})));
   if(a?.error)errors.push("장학금 조회: "+a.error);
   else setAwards((a?.data??[]) as Award[]);
   setError(errors.join(" · "));

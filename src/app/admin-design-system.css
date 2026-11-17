@@ -49,25 +49,16 @@
 .admin :is(.finance-filter button,.finance-form-actions button,.finance-add-line,.finance-actions button,.secondary){border-color:var(--mrpst-border)}
 
 /* Shared panels, headings, tables and tabs. */
-.admin :is(.finance-table,.student-table,.facility-table,.library-table,.meeting-table,.settings-table){border-color:var(--mrpst-border)}
-.admin :is(.finance-table,.student-table,.facility-table,.library-table,.meeting-table,.settings-table) :is(th,td){border-bottom-color:var(--mrpst-border)}
-.admin :is(.finance-table,.student-table,.facility-table,.library-table,.meeting-table,.settings-table) th{color:var(--mrpst-muted)}
-.admin :is(.finance-table,.student-table,.facility-table,.library-table,.meeting-table,.settings-table) td{color:var(--mrpst-text)}
+.admin :is(.finance-table,.student-table,.academics-table,.facility-table,.library-table,.meeting-table,.settings-table){border-color:var(--mrpst-border)}
+.admin :is(.finance-table,.student-table,.academics-table,.facility-table,.library-table,.meeting-table,.settings-table) :is(th,td){border-bottom-color:var(--mrpst-border)}
+.admin :is(.finance-table,.student-table,.academics-table,.facility-table,.library-table,.meeting-table,.settings-table) th{color:var(--mrpst-muted)}
+.admin :is(.finance-table,.student-table,.academics-table,.facility-table,.library-table,.meeting-table,.settings-table) td{color:var(--mrpst-text)}
 .admin :is(table,th,td){border-color:var(--mrpst-border)}
-.admin :is(.finance-table-wrap,.student-table-wrap,.facility-table-wrap,.library-table-wrap,.meeting-table-wrap,.settings-table-wrap){max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .admin :is(.admin-heading,.module-heading h2,.module-page-content h1){color:var(--mrpst-brand)}
 .admin :is(.finance-heading,.student-heading,.academics-heading,.facility-heading,.library-heading,.meeting-heading,.settings-heading,.website-heading) :is(h1,h2){color:var(--mrpst-brand)}
 .admin :is(.admin-subtitle,.module-heading span){color:var(--mrpst-muted)}
 .admin :is(.finance-alert,.student-alert,.academics-alert,.facility-alert,.library-alert,.website-alert,.settings-alert,.meetings-alert){border-radius:var(--mrpst-radius-sm)}
 .admin :is(.finance-tabs,.student-tabs,.academics-tabs,.facility-tabs,.library-tabs,.settings-tabs,.website-tabs){border-color:var(--mrpst-border)}
-
-
-/* Verified module markup aliases: retain the exact existing page geometry. */
-.admin :is(.academics-table-wrap,.meetings-table-wrap){max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.admin .academics-table{border-color:var(--mrpst-border)}
-.admin .academics-table :is(th,td){border-color:var(--mrpst-border)}
-.admin .academics-table th{color:var(--mrpst-muted)}
-.admin .academics-table td{color:var(--mrpst-text)}
 
 
 /* Shared form-field safety: preserve each module's own grid, gaps and control sizing. */

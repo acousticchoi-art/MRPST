@@ -68,14 +68,13 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
         ["monthlyReports","fundBalanceReports","donorReports","scholarshipReports","ledgerReports"].forEach((key,index)=>data[key]=reports[index]);
       }
     }else if(moduleKey==="academics"){
-      const keys=["terms","courses","departments","students","enrol","slots","grades","syllabi","instructors","teachingAssignments","timetableEntries","timetableEvents"] as const;
+      const keys=["terms","courses","departments","students","enrol","grades","syllabi","instructors","teachingAssignments","timetableEntries","timetableEvents"] as const;
       const queries=[
         supabase.from("academic_terms").select("*").order("academic_year",{ascending:false}),
         supabase.from("academic_courses").select("*").order("course_code"),
         supabase.from("departments").select("id,code,name_en,name_my,name_ko,is_active").eq("is_active",true).order("code"),
         supabase.from("students").select("id,student_number,full_name,student_status").order("full_name"),
         supabase.from("academic_enrollments").select("*").order("created_at",{ascending:false}),
-        supabase.from("academic_timetable_slots").select("*").order("day_of_week").order("period_no"),
         supabase.from("academic_grades").select("*").order("updated_at",{ascending:false}),
         supabase.from("academic_course_syllabi").select("*").order("updated_at",{ascending:false}),
         supabase.from("academic_instructors").select("*").order("full_name"),

@@ -45,9 +45,8 @@ Deno.serve(async (req: Request) => {
       await admin.from("mrpst_auth_user_creation_tokens").delete().eq("token", token);
       return result;
     }
-    await admin.auth.admin.updateUserById(result.data.user.id, {
-      user_metadata: { ...result.data.user.user_metadata, mrpst_admin_provisioning_token: null },
-    });
+    const { mrpst_admin_provisioning_token: _consumedToken, ...cleanUserMetadata } = result.data.user.user_metadata ?? {};
+    await admin.auth.admin.updateUserById(result.data.user.id, { user_metadata: cleanUserMetadata });
     return result;
   };
   const { data: profile } = await admin.from("user_profiles").select("is_active").eq("user_id", caller.id).maybeSingle();

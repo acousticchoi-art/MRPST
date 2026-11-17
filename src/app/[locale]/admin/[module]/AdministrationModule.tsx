@@ -18,6 +18,13 @@ const pageOptions=[
  {key:"meetings",title:"회의 자료",description:"교수회 및 각종 회의 자료"},
  {key:"website",title:"홈페이지 관리",description:"학교 소개, 공지 및 홈페이지 콘텐츠"}
 ] as const;
+const manageRolesByPage:Record<string,string[]>={
+ finance:["finance_officer"],students:["student_officer","academic_officer"],academics:["academic_officer"],
+ facilities:["facility_manager"],library:["librarian"],meetings:["academic_officer","faculty","staff"],website:["administrator"]
+};
+function hasRoleManageAccess(userRoles:UserRole[],moduleKey:string){
+ return userRoles.some(userRole=>userRole.role==="super_admin"||userRole.role==="administrator"||(manageRolesByPage[moduleKey]||[]).includes(userRole.role));
+}
 export default function AdministrationModule(){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [users,setUsers]=useState<P[]>([]),[deps,setDeps]=useState<D[]>([]),[logs,setLogs]=useState<any[]>([]);
@@ -68,7 +75,7 @@ export default function AdministrationModule(){
   const {data:{user}}=await db.auth.getUser();
   const rows=pageOptions.map(option=>{
    const existing=selected.permissions.find(permission=>permission.module_key===option.key);
-   return {user_id:selected.user_id,module_key:option.key,can_view:selectedPageKeys.includes(option.key),can_manage:existing?.can_manage??false,assigned_by:user?.id??null,updated_at:new Date().toISOString()};
+   return {user_id:selected.user_id,module_key:option.key,can_view:selectedPageKeys.includes(option.key),can_manage:existing?.can_manage??hasRoleManageAccess(selected.roles,option.key),assigned_by:user?.id??null,updated_at:new Date().toISOString()};
   });
   await run(async()=>{const {data,error}=await db.from("user_module_permissions").upsert(rows,{onConflict:"user_id,module_key"}).select("module_key");if(error)throw error;if((data??[]).length!==pageOptions.length)throw new Error("일부 페이지 권한이 저장되지 않았습니다.");return data;},"페이지 표시 설정을 저장했습니다.");
  }

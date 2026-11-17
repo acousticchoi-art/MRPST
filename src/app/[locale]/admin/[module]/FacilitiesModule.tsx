@@ -1,5 +1,6 @@
 "use client";
 import {useCallback,useEffect,useMemo,useState} from "react";
+import {AdminFormActions,FormField} from "./AdminUI";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 type Row={id:string;[key:string]:any};
 const dateNow=()=>new Date().toISOString().slice(0,10);
@@ -54,5 +55,5 @@ function Search({value,onChange,placeholder}:{value:string;onChange:(s:string)=>
 function Empty({children}:{children:React.ReactNode}){return <p className="facility-empty">{children}</p>}
 function Modal({title,close,children}:{title:string;close:()=>void;children:React.ReactNode}){return <div className="facility-modal-backdrop"><section className="facility-modal"><div className="facility-modal-head"><h3>{title}</h3><button onClick={close}>×</button></div>{children}</section></div>}
 function FormGrid({children}:{children:React.ReactNode}){return <div className="facility-form-grid">{children}</div>}
-function Field({label,full,children}:{label:string;full?:boolean;children:React.ReactNode}){return <label className={full?"full":""}>{label}{children}</label>}
-function Actions({close,saving,disabled,submit}:{close:()=>void;saving:boolean;disabled:boolean;submit:()=>void}){return <div className="facility-modal-actions"><button onClick={close}>취소</button><button className="facility-primary" disabled={saving||disabled} onClick={submit}>{saving?"저장 중…":"저장"}</button></div>}
+function Field({label,full,children}:{label:string;full?:boolean;children:React.ReactNode}){return <FormField label={label} full={full}>{children}</FormField>}
+function Actions({close,saving,disabled,submit}:{close:()=>void;saving:boolean;disabled:boolean;submit:()=>void}){return <AdminFormActions className="facility-modal-actions" primaryClassName="facility-primary" close={close} saving={saving} disabled={disabled} submit={submit}/>}

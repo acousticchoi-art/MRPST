@@ -39,7 +39,7 @@ export default function AdministrationModule(){
   setSelectedId(current=>current&&mapped.some(x=>x.user_id===current)?current:"");
  }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[]);
  useEffect(()=>{void load();},[load]);
- async function invokeAdmin(body:Record<string,unknown>){if(!db)throw new Error("데이터베이스 연결을 확인해 주세요.");const {data,error}=await db.functions.invoke("admin-manage-user",{body});if(error)throw error;if(data?.error)throw new Error(data.error);return data;}
+ async function invokeAdmin(body:Record<string,unknown>){if(!db)throw new Error("데이터베이스 연결을 확인해 주세요.");const {data,error}=await db.functions.invoke("admin-manage-user",{body});if(error){const name=(error as {name?:string}).name;if(name==="FunctionsFetchError")throw new Error("계정 생성 서버에 연결하지 못했습니다. 네트워크 또는 브라우저의 Supabase 연결(CORS) 문제일 수 있습니다. 같은 이메일로 반복 등록하기 전에 계정 목록을 먼저 새로고침해 주세요.");throw error;}if(data?.error)throw new Error(data.error);return data;}
  async function createAccount(){if(!newUser.full_name.trim()||!newUser.email.trim()||newUser.password.length<8){setError("이름, 이메일, 8자 이상의 비밀번호를 입력해 주세요.");return;}const ok=await run(async()=>{const result=await invokeAdmin({action:"create",...newUser,full_name:newUser.full_name.trim(),email:newUser.email.trim()});if(!result?.user_id)throw new Error("계정 생성 결과를 확인할 수 없습니다.");return result;},"새 계정을 생성했습니다.");if(!ok)return;setCreateOpen(false);setNewUser({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""});}
  async function run(fn:()=>any,msg:string){
   setSaving(true);setError("");setNotice("");

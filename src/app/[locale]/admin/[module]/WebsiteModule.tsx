@@ -85,8 +85,8 @@ export default function WebsiteModule(){
    </div>
    {loading?<div className="website-loading">콘텐츠를 불러오는 중입니다…</div>:<div className="website-fields website-fields-v2">{pageFields.map((field,index)=><article className="website-field website-field-v2" key={field.key}>
     <div className="website-field-title"><span>{String(index+1).padStart(2,"0")}</span><div><h4>{field.label}</h4><p>{field.hint}</p></div></div>
-    <div className="website-field-inputs">{field.key!=="address"&&<FormField label="제목"<input value={pageValues[field.key]?.title||""} onChange={e=>setPageValues(v=>({...v,[field.key]:{...v[field.key],title:e.target.value}}))} placeholder={field.label+" 제목"}/></FormField>}
-     <FormField label={field.key==="address"?"주소":"본문 및 소개 문구"}<textarea rows={field.key==="about"?5:3} value={pageValues[field.key]?.body||""} onChange={e=>setPageValues(v=>({...v,[field.key]:{...v[field.key],body:e.target.value}}))} placeholder="홈페이지에 표시할 내용을 입력하세요."/></FormField></div>
+    <div className="website-field-inputs">{field.key!=="address"&&<FormField label="제목"><input value={pageValues[field.key]?.title||""} onChange={e=>setPageValues(v=>({...v,[field.key]:{...v[field.key],title:e.target.value}}))} placeholder={field.label+" 제목"}/></FormField>}
+     <FormField label={field.key==="address"?"주소":"본문 및 소개 문구"}><textarea rows={field.key==="about"?5:3} value={pageValues[field.key]?.body||""} onChange={e=>setPageValues(v=>({...v,[field.key]:{...v[field.key],body:e.target.value}}))} placeholder="홈페이지에 표시할 내용을 입력하세요."/></FormField></div>
    </article>)}</div>}
    <div className="website-footer-actions"><span>변경한 내용은 저장 후 홈페이지에 게시됩니다.</span><button className="website-primary" disabled={saving||loading} onClick={()=>void savePages()}>{saving?"저장 중…":"변경 내용 저장 및 게시"}</button></div>
   </section>}
@@ -94,9 +94,9 @@ export default function WebsiteModule(){
    <section className="website-panel website-panel-v2 website-notice-editor">
     <div className="website-section-intro"><div><span className="website-kicker">ANNOUNCEMENT EDITOR</span><h3>{editingId?"공지사항 수정":"새 공지사항 작성"}</h3><p>게시 상태로 저장하면 선택한 언어의 홈페이지에 공개됩니다.</p></div></div>
     <div className="website-form website-form-v2">
-     <FormField label="게시 언어"<select value={noticeLocale} onChange={e=>setNoticeLocale(e.target.value)}>{locales.map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select></FormField>
-     <FormField label="공지사항 제목"<input value={noticeTitle} onChange={e=>setNoticeTitle(e.target.value)} placeholder="예: 2026학년도 2학기 개강 안내"/></FormField>
-     <FormField label="공지사항 내용"<textarea rows={9} value={noticeBody} onChange={e=>setNoticeBody(e.target.value)} placeholder="공지할 내용을 입력하세요."/></FormField>
+     <FormField label="게시 언어"><select value={noticeLocale} onChange={e=>setNoticeLocale(e.target.value)}>{locales.map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select></FormField>
+     <FormField label="공지사항 제목"><input value={noticeTitle} onChange={e=>setNoticeTitle(e.target.value)} placeholder="예: 2026학년도 2학기 개강 안내"/></FormField>
+     <FormField label="공지사항 내용"><textarea rows={9} value={noticeBody} onChange={e=>setNoticeBody(e.target.value)} placeholder="공지할 내용을 입력하세요."/></FormField>
      <label className="website-publish-check website-publish-check-v2"><input type="checkbox" checked={noticePublished} onChange={e=>setNoticePublished(e.target.checked)}/><span><strong>저장 후 홈페이지에 게시</strong><small>체크를 해제하면 비공개 상태로 저장됩니다.</small></span></label>
      <div className="website-actions website-actions-v2"><button className="website-primary" disabled={saving||!noticeTitle.trim()||!noticeBody.trim()} onClick={()=>void saveNotice()}>{saving?"저장 중…":editingId?"수정 내용 저장":"공지사항 등록"}</button>{editingId&&<button className="website-secondary" onClick={resetNotice}>수정 취소</button>}</div>
     </div>

@@ -18,7 +18,7 @@ export async function getServerModuleAccess(module: ModuleKey): Promise<AccessFa
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) return { ok: false, status: 401, error: "로그인이 필요합니다." };
 
-  const [{ data: roleRows, error: roleError }, { data: profile }, { data: permissions }] = await Promise.all([
+  const [{ data: roleRows, error: roleError }, { data: profile, error: profileError }, { data: permissions, error: permissionsError }] = await Promise.all([
     supabase.from("user_roles").select("role, department_id").eq("user_id", user.id),
     supabase.from("user_profiles").select("is_active").eq("user_id", user.id).maybeSingle(),
     supabase.from("user_module_permissions").select("module_key, can_view, can_manage").eq("user_id", user.id)
@@ -26,7 +26,7 @@ export async function getServerModuleAccess(module: ModuleKey): Promise<AccessFa
 
   const roles = (roleRows ?? []).map((row) => row.role as MrpstRole);
   const allowedPermissions = permissions ?? [];
-  if (roleError || !roleRows?.length || profile?.is_active !== true ||
+  if (roleError || profileError || permissionsError || !roleRows?.length || profile?.is_active !== true ||
       !canAccessModule(roles, module, allowedPermissions)) {
     return { ok: false, status: 403, error: "이 메뉴의 데이터에 접근할 권한이 없습니다." };
   }

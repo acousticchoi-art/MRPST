@@ -100,9 +100,6 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   const visibleInGroup=(keys:readonly string[])=>visible.filter(([key])=>keys.includes(key));
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
     <aside className="sidebar">
-      <div className="sidebar-header">
-        <Link href={`/${locale}`} className="brand"><span className="brand-logo"><img src="/mrpst-logo.svg" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
-        </div>
       <details className="admin-menu-details" open>
         <summary>{lang==="ko"?"관리 메뉴":"Menu"}</summary>
         <nav className="sidebar-nav">

@@ -8,7 +8,7 @@
 .admin{color:var(--mrpst-text);background:var(--mrpst-canvas)}
 .admin .content{color:var(--mrpst-text)}
 .admin :is(.finance-panel,.student-panel,.academics-panel,.facility-panel,.library-panel,.meeting-panel,.settings-panel,.website-panel,.dashboard-panel,.module-placeholder){background:var(--mrpst-surface);border-color:var(--mrpst-border);border-radius:var(--mrpst-radius-md)}
-.admin :is(.finance-primary,.student-primary,.academics-primary,.facility-primary,.library-primary,.meeting-primary,.settings-primary,.website-primary,.primary){background:var(--mrpst-brand);border-color:var(--mrpst-brand);color:#fff}
+.admin :is(.finance-primary,.student-primary,.academics-primary,.facility-primary,.library-primary,.meetings-primary,.settings-primary,.website-primary,.primary){background:var(--mrpst-brand);border-color:var(--mrpst-brand);color:#fff}
 .admin :is(button,input,select,textarea,a):focus-visible{outline:none;box-shadow:var(--mrpst-focus)}
 .admin :is(button,input,select,textarea):disabled{cursor:not-allowed;opacity:.55}
 .admin :is(input,select,textarea){border-color:var(--mrpst-border)}
@@ -33,12 +33,12 @@
   border-color:var(--mrpst-border);
   border-radius:var(--mrpst-radius-md);
 }
-.admin :is(.finance-primary,.student-primary,.academics-primary,.facility-primary,.library-primary,.meeting-primary,.settings-primary,.website-primary,.primary){
+.admin :is(.finance-primary,.student-primary,.academics-primary,.facility-primary,.library-primary,.meetings-primary,.settings-primary,.website-primary,.primary){
   background-color:var(--mrpst-brand);
   border-color:var(--mrpst-brand);
   color:#fff;
 }
-.admin :is(.finance-primary,.student-primary,.academics-primary,.facility-primary,.library-primary,.meeting-primary,.settings-primary,.website-primary,.primary):not(:disabled):hover{
+.admin :is(.finance-primary,.student-primary,.academics-primary,.facility-primary,.library-primary,.meetings-primary,.settings-primary,.website-primary,.primary):not(:disabled):hover{
   background-color:var(--mrpst-brand-deep);
   border-color:var(--mrpst-brand-deep);
 }
@@ -93,4 +93,19 @@
 }
 .admin :is(.finance-tabs,.student-tabs,.academics-tabs,.facility-tabs,.library-tabs,.settings-tabs,.website-tabs){
  border-color:var(--mrpst-border);
+}
+
+
+/* All eight administration modules use the same primary-action treatment. */
+.admin :is(.finance-primary,.student-primary,.academics-primary,.facility-primary,.library-primary,.meetings-primary,.settings-primary,.website-primary){
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  font-weight:650;
+  cursor:pointer;
+}
+.admin :is(.finance-primary,.student-primary,.academics-primary,.facility-primary,.library-primary,.meetings-primary,.settings-primary,.website-primary):focus-visible{
+  outline:none;
+  box-shadow:var(--mrpst-focus);
 }

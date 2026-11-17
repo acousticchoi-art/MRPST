@@ -9,19 +9,17 @@ const blankEvent={day_of_week:"1",start_time:"07:00",end_time:"07:30",title:"",n
 const time=(v:string)=>String(v||"").slice(0,5);
 const dayName=(n:number)=>["","월요일","화요일","수요일","목요일","금요일","토요일"][n]||"";
 
-export default function TimetableBuilder(){
+export default function TimetableBuilder({canManage}:{canManage:boolean}){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [terms,setTerms]=useState<Row[]>([]),[departments,setDepartments]=useState<Row[]>([]),[courses,setCourses]=useState<Row[]>([]),[instructors,setInstructors]=useState<Row[]>([]);
  const [entries,setEntries]=useState<Row[]>([]),[events,setEvents]=useState<Row[]>([]);
- const [termId,setTermId]=useState(""),[departmentId,setDepartmentId]=useState(""),[canManage,setCanManage]=useState(false);
+ const [termId,setTermId]=useState(""),[departmentId,setDepartmentId]=useState("");
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
  const [editing,setEditing]=useState(""),[editingType,setEditingType]=useState<"course"|"event">("course");
  const [form,setForm]=useState<any>(blankCourse),[modal,setModal]=useState(false),[copyFrom,setCopyFrom]=useState("");
 
  const load=useCallback(async()=>{
   if(!db){setLoading(false);return;} setLoading(true);setError("");
-  const {data:{user}}=await db.auth.getUser();
-  if(user){const {data}=await db.from("user_roles").select("role").eq("user_id",user.id);setCanManage((data||[]).some(x=>["super_admin","administrator","academic_officer"].includes(x.role)));}
   const [t,d,c,i]=await Promise.all([
    db.from("academic_terms").select("*").order("academic_year",{ascending:false}).order("term_code",{ascending:false}),
    db.from("departments").select("*").eq("is_active",true).order("code"),

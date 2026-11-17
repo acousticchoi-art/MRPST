@@ -9,6 +9,7 @@ export default function PromotionManagement(){
  const [terms,setTerms]=useState<Row[]>([]),[batches,setBatches]=useState<Row[]>([]),[items,setItems]=useState<Row[]>([]);
  const [batchId,setBatchId]=useState(""),[year,setYear]=useState(String(new Date().getFullYear()));
  const [canManage,setCanManage]=useState(false),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
+ const [graduationItem,setGraduationItem]=useState<Row|null>(null),[graduationForm,setGraduationForm]=useState<any>({graduation_year:String(new Date().getFullYear()),graduation_term:"2",graduation_date:"",degree_name:"",graduation_number:"",honors:"",notes:""});
  const load=useCallback(async()=>{
   if(!db){setLoading(false);return;}
   setLoading(true);setError("");
@@ -21,7 +22,7 @@ export default function PromotionManagement(){
   if(t.error||b.error){setError(t.error?.message||b.error?.message||"진급 정보를 불러오지 못했습니다.");setLoading(false);return;}
   setTerms(t.data||[]);setBatches(b.data||[]);
   const chosen=(b.data||[]).find(x=>x.id===batchId)||(b.data||[])[0];
-  if(chosen){setBatchId(chosen.id);const {data,error:e}=await db.from("student_promotion_items").select("*").eq("batch_id",chosen.id).order("student_number");if(e)setError(e.message);setItems(data||[]);}
+  if(chosen){setBatchId(chosen.id);const {data,error:e}=await db.from("student_promotion_items").select("*,student:students(program_code,program,student_status)").eq("batch_id",chosen.id).order("student_number");if(e)setError(e.message);setItems(data||[]);}
   else {setBatchId("");setItems([]);}
   const latestYear=(t.data||[])[0]?.academic_year;
   if(latestYear)setYear(String(latestYear));
@@ -42,7 +43,7 @@ export default function PromotionManagement(){
   const {data,error:e}=await db.rpc("mrpst_create_student_promotion_batch",{p_academic_year:Number(year)});
   if(e)setError(e.message);else{
    setBatchId(data);setNotice(year+"학년도 진급 명단을 만들었습니다.");
-   const [b,rows]=await Promise.all([db.from("student_promotion_batches").select("*").order("academic_year",{ascending:false}),db.from("student_promotion_items").select("*").eq("batch_id",data).order("student_number")]);
+   const [b,rows]=await Promise.all([db.from("student_promotion_batches").select("*").order("academic_year",{ascending:false}),db.from("student_promotion_items").select("*,student:students(program_code,program,student_status)").eq("batch_id",data).order("student_number")]);
    if(b.error||rows.error)setError(b.error?.message||rows.error?.message||"명단을 불러오지 못했습니다.");
    else{setBatches(b.data||[]);setItems(rows.data||[]);}
   }
@@ -53,6 +54,20 @@ export default function PromotionManagement(){
   setSaving(true);setError("");const {data,error:e}=await db.rpc("mrpst_approve_student_promotion",{p_batch_id:selectedBatch.id});
   if(e)setError(e.message);else setNotice("최종 승인 완료: "+data+"명의 학년을 변경했습니다.");
   setSaving(false);await load();
+ };
+ const openGraduation=(item:Row)=>{
+  const code=item.student?.program_code;
+  const degree=code==="mdiv"?"Master of Divinity":code==="ece"?"Early Childhood Education":/diploma/i.test(item.student?.program||"")?"Diploma in Theology":code==="theology"?"Bachelor of Theology":"";
+  setGraduationItem(item);
+  setGraduationForm({graduation_year:String(Number(selectedBatch?.academic_year||year)),graduation_term:"2",graduation_date:"",degree_name:degree,graduation_number:"",honors:"",notes:""});
+  setError("");
+ };
+ const confirmGraduation=async()=>{
+  if(!db||!graduationItem)return;
+  setSaving(true);setError("");setNotice("");
+  const {data,error:e}=await db.rpc("mrpst_confirm_student_graduation",{p_item_id:graduationItem.id,p_graduation_year:Number(graduationForm.graduation_year),p_graduation_term:Number(graduationForm.graduation_term),p_graduation_date:graduationForm.graduation_date||null,p_degree_name:graduationForm.degree_name.trim()||null,p_graduation_number:graduationForm.graduation_number.trim()||null,p_honors:graduationForm.honors.trim()||null,p_notes:graduationForm.notes.trim()||null});
+  if(e)setError(e.message);else{setNotice("졸업 확정 및 졸업 이력 등록을 완료했습니다.");setGraduationItem(null);await load();}
+  setSaving(false);
  };
  const ready=items.length>0&&items.every(x=>x.decision!=="needs_review");
  return <section className="academics-panel promotion-panel">
@@ -71,9 +86,18 @@ export default function PromotionManagement(){
     <article><span>확인 필요</span><strong>{counts.needs_review||0}</strong></article>
     <article><span>진급 제외</span><strong>{counts.excluded||0}</strong></article>
    </div>
-   <div className="academics-table-wrap"><table className="academics-table"><thead><tr><th>학번</th><th>학생</th><th>현재 학년</th><th>처리 결과</th></tr></thead><tbody>{items.map(x=><tr key={x.id}><td>{x.student_number}</td><td>{x.student_name}</td><td>{x.from_cohort||"미등록"}</td><td>{selectedBatch.status==="approved"?decisionLabel[x.decision]:<select disabled={!canManage||saving} value={x.decision} onChange={e=>void changeDecision(x,e.target.value)}>{x.to_cohort&&<option value="promote">진급 예정</option>}{x.from_cohort==="Fourth Year"&&<option value="graduation_review">졸업 검토</option>}<option value="needs_review">확인 필요</option><option value="excluded">진급 제외</option></select>}</td></tr>)}</tbody></table></div>
-   {selectedBatch.status==="review"?<div className="promotion-approve"><p className="academics-form-hint">4학년은 자동 졸업시키지 않고 졸업 검토로 남깁니다. 확인 필요 항목을 모두 처리해야 승인할 수 있습니다.</p><button className="academics-primary" disabled={!canManage||saving||!ready} onClick={()=>void approve()}>{saving?"처리 중…":"진급 최종 승인"}</button></div>:<p className="academics-form-hint">승인 완료 · {selectedBatch.approved_at?new Date(selectedBatch.approved_at).toLocaleString("ko-KR"):""}</p>}
+   <div className="academics-table-wrap"><table className="academics-table"><thead><tr><th>학번</th><th>학생</th><th>현재 학년</th><th>처리 결과</th><th>졸업 처리</th></tr></thead><tbody>{items.map(x=><tr key={x.id}><td>{x.student_number}</td><td>{x.student_name}</td><td>{x.from_cohort||"미등록"}</td><td>{selectedBatch.status==="approved"?decisionLabel[x.decision]:<select disabled={!canManage||saving} value={x.decision} onChange={e=>void changeDecision(x,e.target.value)}>{x.to_cohort&&<option value="promote">진급 예정</option>}<option value="graduation_review">졸업 검토</option><option value="needs_review">확인 필요</option><option value="excluded">진급 제외</option></select>}</td><td>{x.decision==="graduation_review"?(x.student?.student_status==="graduated"?<span className="academics-status-active">졸업 완료</span>:selectedBatch.status==="approved"?<button className="academics-secondary small" disabled={!canManage||saving} onClick={()=>openGraduation(x)}>졸업 확정</button>:"최종 승인 후 가능"):"—"}</td></tr>)}</tbody></table></div>
+   {selectedBatch.status==="review"?<div className="promotion-approve"><p className="academics-form-hint">4학년은 자동 졸업시키지 않고 졸업 검토로 남깁니다. 확인 필요 항목을 모두 처리해야 승인할 수 있습니다.</p><button className="academics-primary" disabled={!canManage||saving||!ready} onClick={()=>void approve()}>{saving?"처리 중…":"진급 최종 승인"}</button></div>:<p className="academics-form-hint">진급 승인 완료 · 졸업 검토 대상은 아래 표에서 별도로 졸업 확정해야 학적 상태가 ‘졸업’으로 변경됩니다. {selectedBatch.approved_at?new Date(selectedBatch.approved_at).toLocaleString("ko-KR"):""}</p>}
   </>}
   {!loading&&!selectedBatch&&<div className="academics-empty">아직 생성된 진급 명단이 없습니다. 두 학기가 모두 종료되면 자동 생성할 수 있습니다.</div>}
+  {graduationItem&&<div className="promotion-graduation-backdrop"><section className="promotion-graduation-modal"><div className="academics-panel-head"><div><h3>졸업 확정</h3><p>{graduationItem.student_name} · {graduationItem.student_number}</p></div><button className="academics-secondary small" onClick={()=>setGraduationItem(null)}>닫기</button></div><div className="promotion-graduation-form">
+   <label>졸업 연도 *<input type="number" min="2000" max="2200" value={graduationForm.graduation_year} onChange={e=>setGraduationForm((v:any)=>({...v,graduation_year:e.target.value}))}/></label>
+   <label>졸업 학기 *<select value={graduationForm.graduation_term} onChange={e=>setGraduationForm((v:any)=>({...v,graduation_term:e.target.value}))}><option value="1">1학기</option><option value="2">2학기</option></select></label>
+   <label>졸업일<input type="date" value={graduationForm.graduation_date} onChange={e=>setGraduationForm((v:any)=>({...v,graduation_date:e.target.value}))}/></label>
+   <label>학위명<input value={graduationForm.degree_name} onChange={e=>setGraduationForm((v:any)=>({...v,degree_name:e.target.value}))} placeholder="예: Bachelor of Theology"/></label>
+   <label>졸업 번호<input value={graduationForm.graduation_number} onChange={e=>setGraduationForm((v:any)=>({...v,graduation_number:e.target.value}))}/></label>
+   <label>우등·명예<input value={graduationForm.honors} onChange={e=>setGraduationForm((v:any)=>({...v,honors:e.target.value}))}/></label>
+   <label className="full">비고<textarea value={graduationForm.notes} onChange={e=>setGraduationForm((v:any)=>({...v,notes:e.target.value}))}/></label>
+  </div><div className="promotion-approve"><p className="academics-form-hint">확정하면 졸업 이력이 별도 보존되고 학생의 학적 상태가 ‘졸업’으로 변경됩니다.</p><button className="academics-primary" disabled={!canManage||saving||!Number(graduationForm.graduation_year)||Number(graduationForm.graduation_year)<2000||Number(graduationForm.graduation_year)>2200} onClick={()=>void confirmGraduation()}>{saving?"처리 중…":"졸업 확정 및 이력 등록"}</button></div></section></div>}
  </section>;
 }

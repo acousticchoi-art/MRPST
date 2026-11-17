@@ -68,18 +68,19 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
         ["monthlyReports","fundBalanceReports","donorReports","scholarshipReports","ledgerReports"].forEach((key,index)=>data[key]=reports[index]);
       }
     }else if(moduleKey==="academics"){
-      const keys=["terms","courses","departments","students","enrol","slots","grades","syllabi","instructors","teachingAssignments"] as const;
+      const keys=["terms","courses","departments","students","enrol","grades","syllabi","instructors","teachingAssignments","timetableEntries","timetableEvents"] as const;
       const queries=[
         supabase.from("academic_terms").select("*").order("academic_year",{ascending:false}),
         supabase.from("academic_courses").select("*").order("course_code"),
         supabase.from("departments").select("id,code,name_en,name_my,name_ko,is_active").eq("is_active",true).order("code"),
         supabase.from("students").select("id,student_number,full_name,student_status").order("full_name"),
         supabase.from("academic_enrollments").select("*").order("created_at",{ascending:false}),
-        supabase.from("academic_timetable_slots").select("*").order("day_of_week").order("period_no"),
         supabase.from("academic_grades").select("*").order("updated_at",{ascending:false}),
         supabase.from("academic_course_syllabi").select("*").order("updated_at",{ascending:false}),
         supabase.from("academic_instructors").select("*").order("full_name"),
-        supabase.from("academic_teaching_assignments").select("*").order("created_at",{ascending:false})
+        supabase.from("academic_teaching_assignments").select("*").order("created_at",{ascending:false}),
+        supabase.from("academic_timetable_entries").select("*").eq("is_active",true).order("term_id").order("department_id").order("day_of_week").order("start_time"),
+        supabase.from("academic_timetable_events").select("*").order("term_id").order("department_id").order("day_of_week").order("start_time")
       ];
       const values=await Promise.all(queries.map(result));
       keys.forEach((key,index)=>data[key]=values[index]);
@@ -111,11 +112,13 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
       const values=await Promise.all(queries.map(result));
       keys.forEach((key,index)=>data[key]=values[index]);
     }else if(moduleKey==="library"){
-      const keys=["books","members","loans"] as const;
+      const keys=["books","members","loans","students","studentLinks"] as const;
       const queries=[
         supabase.from("library_books").select("id,isbn,title,author,publisher,publication_year,category,language,shelf_location,total_copies,description,created_at").order("title"),
         supabase.from("library_members").select("id,member_number,full_name,member_type,phone,email,department,student_id,is_active").eq("is_active",true).order("full_name"),
-        supabase.from("library_loans").select("id,book_id,member_id,checkout_date,due_date,returned_at,status,book:library_books(id,title,isbn,author),member:library_members(id,member_number,full_name,member_type)").order("checkout_date",{ascending:false})
+        supabase.from("library_loans").select("id,book_id,member_id,checkout_date,due_date,returned_at,status,book:library_books(id,title,isbn,author),member:library_members(id,member_number,full_name,member_type)").order("checkout_date",{ascending:false}),
+        supabase.from("students").select("id,student_number,full_name,program,program_code,cohort,phone,email,student_status").order("student_number"),
+        supabase.from("library_members").select("id,student_id").not("student_id","is",null)
       ];
       const values=await Promise.all(queries.map(result));
       keys.forEach((key,index)=>data[key]=values[index]);

@@ -3,7 +3,6 @@ import {useCallback,useEffect,useMemo,useState} from "react";
 import {AdminFormActions,FormField} from "./AdminUI";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 import GradeManagementModule from "./GradeManagementModule";
-import PromotionManagement from "./PromotionManagement";
 import TimetableBuilder from "./TimetableBuilder";
 import ScheduleCalendar from "./ScheduleCalendar";
 type Row={id:string;[key:string]:any};
@@ -50,7 +49,7 @@ export default function AcademicsModule(){
   {key:"overview",label:"학사 대시보드",tabs:[["overview","학사 현황"]]},
   {key:"calendar",label:"학사 일정",tabs:[["calendar","학사 일정"]]},
   {key:"curriculum",label:"교육과정",tabs:[["terms","학기 관리"],["courses","과목 관리"]]},
-  {key:"enrollment",label:"수강 및 성적",tabs:[["enrolments","수강 등록"],["grades","성적 관리"],["promotion","학년 진급"]]},
+  {key:"enrollment",label:"수강 및 성적",tabs:[["enrolments","수강 등록"],["grades","성적 관리"]]},
   {key:"teaching",label:"수업 운영",tabs:[["schedule","수업 시간표"],["faculty","교수·강의 배정"],["syllabi","강의계획서"]]}
  ];
  const activeSection=sections.find(section=>section.tabs.some(([key])=>key===tab))||sections[0];
@@ -60,7 +59,6 @@ export default function AcademicsModule(){
  <div className="academics-tabs" aria-label="학사관리 주요 메뉴">{sections.map(section=><button key={section.key} className={activeSection.key===section.key?"active":""} onClick={()=>{setTab(section.tabs[0][0]);setSearch("");}}>{section.label}</button>)}</div>
  {activeSection.tabs.length>1&&<div className="academics-tabs academics-subtabs" aria-label={activeSection.label+" 하위 메뉴"}>{activeSection.tabs.map(([key,label])=><button key={key} className={tab===key?"active":""} onClick={()=>{setTab(key);setSearch("");}}>{label}</button>)}</div>}
  {tab==="calendar"&&<ScheduleCalendar canManage={canManage}/>}
- {tab==="promotion"&&<PromotionManagement/>}
  {tab==="overview"&&<div className="academics-overview"><section className="academics-panel"><h3>학기 현황</h3>{terms.slice(0,6).map(x=><div className="academics-row" key={x.id}><div><strong>{x.name}</strong><small>{x.academic_year} · {x.start_date||"시작일 미정"} ~ {x.end_date||"종료일 미정"}</small></div><span>{({planned:"예정",active:"진행 중",completed:"종료"} as any)[x.status]||x.status}</span></div>)}{!loading&&!terms.length&&<Empty>등록된 학기가 없습니다.</Empty>}</section><section className="academics-panel"><h3>과목 현황</h3>{courses.slice(0,6).map(x=><div className="academics-row" key={x.id}><div><strong>{x.course_code} · {x.title}</strong><small>{departmentName(x.department_id)||x.department||"학과 미지정"} · {x.credits}학점</small></div><span>{x.is_active?"운영":"비활성"}</span></div>)}{!loading&&!courses.length&&<Empty>등록된 과목이 없습니다.</Empty>}</section></div>}
  {tab==="terms"&&<section className="academics-panel"><div className="academics-panel-head"><h3>학기 관리</h3>{canManage&&<button className="academics-primary small" onClick={()=>open("term")}>＋ 학기 등록</button>}</div><Search value={search} onChange={setSearch}/><Table headers={["학기 코드","학기명","학년도","시작일","종료일","상태","관리"]} rows={filtered(terms,["term_code","name"]).map(x=><tr key={x.id}><td>{x.term_code}</td><td>{x.name}</td><td>{x.academic_year}</td><td>{x.start_date||"—"}</td><td>{x.end_date||"—"}</td><td>{({planned:"예정",active:"진행 중",completed:"종료"} as any)[x.status]}</td><td>{canManage&&<><button onClick={()=>{setEditingEntityId(x.id);setTerm({term_code:x.term_code,name:x.name,academic_year:String(x.academic_year),start_date:x.start_date||"",end_date:x.end_date||"",status:x.status});setModal("term");}}>수정</button> <button onClick={()=>void removeEntity("academic_terms",x.id)}>삭제</button></>}</td></tr>)} empty="등록된 학기가 없습니다."/></section>}
  {tab==="courses"&&<section className="academics-panel"><div className="academics-panel-head"><h3>과목 및 교육과정</h3>{canManage&&<button className="academics-primary small" onClick={()=>open("course")}>＋ 과목 등록</button>}</div><Search value={search} onChange={setSearch}/><Table headers={["과목 코드","과목명","학과","학점","수준","상태","관리"]} rows={filtered(courses,["course_code","title","department"]).map(x=><tr key={x.id}><td>{x.course_code}</td><td><strong>{x.title}</strong><small>{x.title_my||""}</small></td><td>{departmentName(x.department_id)||x.department||"—"}</td><td>{x.credits}</td><td>{x.level||"—"}</td><td>{x.is_active?"운영":"비활성"}</td><td>{canManage&&<><button onClick={()=>{setEditingEntityId(x.id);setCourse({course_code:x.course_code,title:x.title,title_my:x.title_my||"",description:x.description||"",credits:String(x.credits??3),department:x.department||"",department_id:x.department_id||"",level:x.level||"",is_active:x.is_active});setModal("course");}}>수정</button> <button onClick={()=>void removeEntity("academic_courses",x.id)}>삭제</button></>}</td></tr>)} empty="등록된 과목이 없습니다."/></section>}

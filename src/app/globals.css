@@ -73,7 +73,7 @@
  .mobile-menu summary{list-style:none;display:flex;width:42px;height:42px;flex-direction:column;justify-content:center;align-items:center;gap:5px;border:1px solid var(--line);border-radius:50%;cursor:pointer;background:#fff}
  .mobile-menu summary::-webkit-details-marker{display:none}
  .mobile-menu summary span{display:block;width:17px;height:2px;border-radius:2px;background:var(--navy)}
- .mobile-nav{position:absolute;right:0;top:51px;width:min(270px,calc(100vw - 36px));padding:10px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 40px #102d4220;display:grid;gap:2px}
+ .mobile-nav{position:absolute;right:0;top:51px;width:min(270px,calc(100vw - 36px));padding:10px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 40px #102d4220;gap:2px}
  .mobile-nav>a{padding:12px 13px;border-radius:7px;font-size:14px;color:var(--ink)}
  .mobile-nav>a:hover{background:var(--paper);color:var(--navy)}
  .mobile-langs{display:flex;gap:18px;padding:12px 13px;border-top:1px solid var(--line);margin-top:4px}
@@ -1158,7 +1158,6 @@ textarea {
     top:calc(100% + 9px)!important;
     right:0!important;
     z-index:1003!important;
-    display:grid!important;
     grid-template-columns:minmax(0,1fr)!important;
     grid-auto-flow:row!important;
     width:min(300px,calc(100vw - 34px))!important;

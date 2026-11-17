@@ -1,6 +1,6 @@
 import {NextRequest,NextResponse} from "next/server";
-import {createSupabaseServerClient} from "@/lib/supabase/server";
-import {canAccessModule,type ModuleKey,type MrpstRole} from "@/lib/auth/permissions";
+import {getServerModuleAccess} from "@/lib/auth/server-access";
+import type {ModuleKey} from "@/lib/auth/permissions";
 
 export const dynamic="force-dynamic";
 export const revalidate=0;
@@ -17,20 +17,9 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
   const allowed:ModuleKey[]=["finance","students","academics","facilities","library","meetings","administration","website"];
   if(!allowed.includes(moduleKey))return NextResponse.json({error:"지원하지 않는 관리 메뉴입니다."},{status:404});
 
-  const supabase=await createSupabaseServerClient();
-  if(!supabase)return NextResponse.json({error:"서버 데이터베이스 설정을 확인할 수 없습니다."},{status:503});
-  const {data:{user},error:userError}=await supabase.auth.getUser();
-  if(userError||!user)return NextResponse.json({error:"로그인이 필요합니다."},{status:401});
-
-  const [{data:roleRows,error:roleError},{data:profile},{data:permissions}] = await Promise.all([
-    supabase.from("user_roles").select("role,department_id").eq("user_id",user.id),
-    supabase.from("user_profiles").select("is_active").eq("user_id",user.id).maybeSingle(),
-    supabase.from("user_module_permissions").select("module_key,can_view").eq("user_id",user.id)
-  ]);
-  const roles=(roleRows??[]).map(row=>row.role as MrpstRole);
-  if(roleError||!roleRows?.length||profile?.is_active!==true||!canAccessModule(roles,moduleKey,permissions??[])){
-    return NextResponse.json({error:"이 메뉴의 데이터에 접근할 권한이 없습니다."},{status:403});
-  }
+  const access=await getServerModuleAccess(moduleKey);
+  if(!access.ok)return NextResponse.json({error:access.error},{status:access.status});
+  const {supabase,roles}=access;
 
   const search=request.nextUrl.searchParams;
   const from=search.get("from")||"2000-01-01";

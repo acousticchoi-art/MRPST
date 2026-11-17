@@ -11,7 +11,10 @@ export const supabaseProxyFetch:typeof fetch=async(input,init)=>{
 
   const proxyUrl=`/api/supabase-proxy${target.pathname}${target.search}`;
   const headers=new Headers(request.headers);
-  headers.delete("authorization");
+  const isAuthPath=target.pathname.startsWith("/auth/v1/");
+  // Auth requests need the SDK's anon/access bearer header to reach GoTrue.
+  // Data requests instead receive a server-verified session token in the proxy route.
+  if(!isAuthPath)headers.delete("authorization");
   headers.delete("apikey");
   const method=request.method.toUpperCase();
   const body=method==="GET"||method==="HEAD"?undefined:await request.arrayBuffer();

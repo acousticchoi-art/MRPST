@@ -63,3 +63,34 @@
 .admin :is(.finance-table-wrap,.student-table-wrap,.facility-table-wrap,.library-table-wrap,.meeting-table-wrap,.settings-table-wrap){
   -webkit-overflow-scrolling:touch;
 }
+
+
+/* Legacy theme variables now resolve from the same central tokens. */
+:root{
+ --navy:var(--mrpst-brand);
+ --deep:var(--mrpst-brand-deep);
+ --gold:var(--mrpst-accent);
+ --ink:var(--mrpst-text);
+ --muted:var(--mrpst-muted);
+ --paper:var(--mrpst-canvas);
+ --line:var(--mrpst-border);
+}
+
+/* Shared control and data-display foundation. Component-specific sizing and
+   responsive layout remain in the owning module stylesheets. */
+.admin :is(input,select,textarea){
+ background-color:var(--mrpst-surface);
+ border-color:var(--mrpst-border);
+ border-radius:var(--mrpst-radius-sm);
+ color:var(--mrpst-text);
+}
+.admin :is(input,select,textarea)::placeholder{color:var(--mrpst-muted);opacity:.8}
+.admin :is(button,[role="button"]){font-family:inherit;transition:background-color .15s,border-color .15s,color .15s,box-shadow .15s}
+.admin :is(table){border-color:var(--mrpst-border)}
+.admin :is(th,td){border-color:var(--mrpst-border)}
+.admin :is(.finance-alert,.student-alert,.academics-alert,.facility-alert,.library-alert,.website-alert,.settings-alert,.meetings-alert){
+ border-radius:var(--mrpst-radius-sm);
+}
+.admin :is(.finance-tabs,.student-tabs,.academics-tabs,.facility-tabs,.library-tabs,.settings-tabs,.website-tabs){
+ border-color:var(--mrpst-border);
+}

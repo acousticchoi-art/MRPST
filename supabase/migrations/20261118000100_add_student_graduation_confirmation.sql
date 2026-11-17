@@ -18,6 +18,9 @@ declare
   v_decision text;
   v_student_status public.mrpst_student_status;
   v_program_code text;
+  v_program text;
+  v_current_semester smallint;
+  v_max_semester smallint;
   v_graduation_id uuid;
 begin
   if not public.mrpst_can_manage_academics() then
@@ -45,8 +48,8 @@ begin
     raise exception '졸업 검토 대상으로 지정된 학생이 아닙니다.';
   end if;
 
-  select student_status, program_code
-    into v_student_status, v_program_code
+  select student_status, program_code, program, current_semester
+    into v_student_status, v_program_code, v_program, v_current_semester
   from public.students
   where id = v_student_id
   for update;
@@ -56,6 +59,16 @@ begin
   end if;
   if v_program_code not in ('theology','ece','mdiv') then
     raise exception '학생의 학위 과정 코드(theology, ece, mdiv)를 먼저 확인해 주세요.';
+  end if;
+  v_max_semester := case
+    when v_program_code='ece' then 4
+    when v_program_code='mdiv' then 6
+    when v_program_code='theology' and coalesce(v_program,'') ilike '%diploma%' then 4
+    when v_program_code='theology' then 8
+    else null
+  end;
+  if v_max_semester is null or coalesce(v_current_semester,0) < v_max_semester then
+    raise exception '최종 학년의 학사 진급 승인이 완료되지 않았습니다.';
   end if;
   if exists (select 1 from public.student_graduations where student_id = v_student_id) then
     raise exception '이미 졸업 이력이 등록된 학생입니다.';

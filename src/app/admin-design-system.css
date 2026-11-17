@@ -1,0 +1,19 @@
+/* MRPST Admin Design System: shared visual tokens and interaction primitives. */
+:root{
+ --mrpst-brand:#173c55;--mrpst-brand-deep:#102d42;--mrpst-accent:#b99a61;
+ --mrpst-text:#26343d;--mrpst-muted:#687782;--mrpst-surface:#fff;--mrpst-canvas:#f5f7f8;
+ --mrpst-border:#e5eaee;--mrpst-radius-sm:6px;--mrpst-radius-md:10px;--mrpst-radius-lg:14px;
+ --mrpst-shadow-panel:0 3px 14px rgba(20,42,58,.035);--mrpst-focus:0 0 0 3px rgba(23,60,85,.15);
+}
+.admin{color:var(--mrpst-text);background:var(--mrpst-canvas)}
+.admin .content{color:var(--mrpst-text)}
+.admin :is(.finance-panel,.student-panel,.academics-panel,.facility-panel,.library-panel,.meeting-panel,.settings-panel,.website-panel,.dashboard-panel,.module-placeholder){background:var(--mrpst-surface);border-color:var(--mrpst-border);border-radius:var(--mrpst-radius-md)}
+.admin :is(.finance-primary,.student-primary,.academics-primary,.facility-primary,.library-primary,.meeting-primary,.settings-primary,.website-primary,.primary){background:var(--mrpst-brand);border-color:var(--mrpst-brand);color:#fff}
+.admin :is(button,input,select,textarea,a):focus-visible{outline:none;box-shadow:var(--mrpst-focus)}
+.admin :is(button,input,select,textarea):disabled{cursor:not-allowed;opacity:.55}
+.admin :is(input,select,textarea){border-color:var(--mrpst-border)}
+.admin :is(.finance-table,.student-table,.facility-table,.library-table,.meeting-table,.settings-table) th{color:var(--mrpst-muted)}
+.admin :is(.finance-table,.student-table,.facility-table,.library-table,.meeting-table,.settings-table) td{color:var(--mrpst-text)}
+.admin .admin-heading,.admin :is(.finance-heading,.student-heading,.academics-heading,.facility-heading,.library-heading,.meeting-heading,.settings-heading,.website-heading) h1,.admin :is(.finance-heading,.student-heading,.academics-heading,.facility-heading,.library-heading,.meeting-heading,.settings-heading,.website-heading) h2{color:var(--mrpst-brand)}
+.admin :is(.finance-workspace,.student-workspace,.academics-workspace,.facility-workspace,.library-workspace,.meeting-workspace,.settings-workspace,.website-workspace){min-width:0;max-width:100%}
+.admin :is(.finance-table-wrap,.student-table-wrap,.facility-table-wrap,.library-table-wrap,.meeting-table-wrap,.settings-table-wrap){max-width:100%;overflow-x:auto}

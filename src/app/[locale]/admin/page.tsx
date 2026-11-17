@@ -110,7 +110,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
       </details>
     </aside>
     <main className="admin-main">
-      <header className="topbar"><Link href={`/${locale}`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.svg" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">
+      <header className="topbar"><Link href={`/${locale}`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">
         <nav className="admin-language" aria-label="Language">
           <a className={locale==="my"?"selected":""} href="/my/admin">မြန်မာ</a><a className={locale==="ko"?"selected":""} href="/ko/admin">한국어</a>
         </nav>

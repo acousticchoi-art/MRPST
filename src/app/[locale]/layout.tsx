@@ -1,6 +1,7 @@
 import "../globals.css";
 import "../auth.css";
 import "../admin.css";
+import "../admin-design-system.css";
 import "../registration.css";
 import {notFound,redirect} from "next/navigation";
 import LocalePreference from "./LocalePreference";

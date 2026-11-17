@@ -1,5 +1,6 @@
 import {NextRequest,NextResponse} from "next/server";
 import {createSupabaseServerClient} from "@/lib/supabase/server";
+import {getServerModuleAccess} from "@/lib/auth/server-access";
 import {supabaseAnonKey,supabaseUrl,isSupabaseConfigured} from "@/lib/supabase/config";
 
 export const dynamic="force-dynamic";
@@ -44,6 +45,56 @@ async function proxy(request:NextRequest,{params}:{params:Promise<{path:string[]
     const {data:{session},error:sessionError}=await supabase.auth.getSession();
     if(sessionError||!session?.access_token)return NextResponse.json({error:"로그인 세션이 만료되었습니다. 다시 로그인해 주세요."},{status:401});
     headers.set("Authorization",`Bearer ${session.access_token}`);
+
+    // Enforce module-level permissions for direct browser-side administrative writes.
+    if(request.method!=="GET"&&request.method!=="HEAD"&&pathname.startsWith("/rest/v1/")){
+      const parts=(path??[]);
+      const resource=parts[2]??"";
+      const tableModules:Record<string,string>={
+        finance_donors:"finance",
+        students:"students",
+        student_academic_records:"students",
+        academic_terms:"academics",
+        academic_courses:"academics",
+        academic_timetable_slots:"academics",
+        academic_course_syllabi:"academics",
+        academic_instructors:"academics",
+        academic_teaching_assignments:"academics",
+        academic_enrollments:"academics",
+        academic_grades:"academics",
+        facility_vehicles:"facilities",
+        facility_maintenance:"facilities",
+        facility_vehicle_logs:"facilities",
+        library_books:"library",
+        library_members:"library",
+        meetings:"meetings",
+        meeting_participants:"meetings",
+        meeting_action_items:"meetings",
+        meeting_materials:"meetings",
+        user_module_permissions:"administration",
+        departments:"administration",
+        website_contents:"website"
+      };
+      const rpcModules:Record<string,string>={
+        mrpst_create_journal:"finance",mrpst_update_journal_draft:"finance",
+        mrpst_delete_journal_draft:"finance",mrpst_submit_journal:"finance",
+        mrpst_approve_journal:"finance",mrpst_post_journal:"finance",mrpst_reject_journal:"finance",
+        mrpst_create_budget:"finance",mrpst_update_budget_draft:"finance",
+        mrpst_delete_budget_draft:"finance",mrpst_submit_budget:"finance",mrpst_approve_budget:"finance",
+        mrpst_create_donation:"finance",mrpst_create_scholarship_award:"finance",
+        mrpst_update_scholarship_award_draft:"finance",mrpst_delete_scholarship_award_draft:"finance",
+        mrpst_submit_scholarship_award:"finance",mrpst_review_scholarship_award:"finance",
+        mrpst_create_scholarship_disbursement:"finance",mrpst_refresh_scholarship_status:"finance",
+        mrpst_copy_academic_timetable:"academics",
+        mrpst_checkout_library_book:"library",mrpst_return_library_book:"library"
+      };
+      const targetModule=resource==="rpc"?(rpcModules[parts[3]??""]??null):(tableModules[resource]??null);
+      if(targetModule){
+        const access=await getServerModuleAccess(targetModule as import("@/lib/auth/permissions").ModuleKey);
+        if(!access.ok)return NextResponse.json({error:access.error},{status:access.status});
+        if(!access.canManage)return NextResponse.json({error:"이 메뉴의 등록·수정·삭제 권한이 없습니다."},{status:403});
+      }
+    }
   }
 
   try{

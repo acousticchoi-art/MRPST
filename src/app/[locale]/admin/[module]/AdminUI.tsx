@@ -3,6 +3,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 type AdminButtonProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
 /** Shared button primitive. Existing module classes preserve page-specific sizing. */
+// Shared form primitives are used by all eight administration modules.
 export function AdminButton({ className = "", type = "button", ...props }: AdminButtonProps) {
   return (
     <button

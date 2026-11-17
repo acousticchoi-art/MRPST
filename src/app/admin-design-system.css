@@ -16,7 +16,7 @@
    remain in the owning page stylesheets. */
 .admin{color:var(--mrpst-text);background:var(--mrpst-canvas)}
 .admin .content{color:var(--mrpst-text)}
-.admin :is(.stat,.module,.module-placeholder,.finance-panel,.student-panel,.academics-panel,.facility-panel,.library-panel,.meeting-panel,.settings-panel,.website-panel,.dashboard-panel){
+.admin :is(.stat,.module,.module-placeholder,.finance-panel,.academics-panel,.facility-panel,.library-panel,.meeting-detail,.settings-panel,.website-panel,.dashboard-panel){
  color:var(--mrpst-text);background:var(--mrpst-surface);border-color:var(--mrpst-border);border-radius:var(--mrpst-radius-md);
 }
 .admin :is(.finance-form,.student-form,.academics-form,.facility-form,.library-form,.meeting-form,.settings-form,.website-form){
@@ -58,7 +58,7 @@
 .admin :is(.finance-heading,.student-heading,.academics-heading,.facility-heading,.library-heading,.meeting-heading,.settings-heading,.website-heading) :is(h1,h2){color:var(--mrpst-brand)}
 .admin :is(.admin-subtitle,.module-heading span){color:var(--mrpst-muted)}
 .admin :is(.finance-alert,.student-alert,.academics-alert,.facility-alert,.library-alert,.website-alert,.settings-alert,.meetings-alert){border-radius:var(--mrpst-radius-sm)}
-.admin :is(.finance-tabs,.student-tabs,.academics-tabs,.facility-tabs,.library-tabs,.settings-tabs,.website-tabs){border-color:var(--mrpst-border)}
+.admin :is(.finance-tabs,.student-tabs,.academics-tabs,.facility-tabs,.library-tabs,.meeting-detail-tabs,.settings-tabs,.website-tabs){border-color:var(--mrpst-border)}
 
 
 /* Shared form-field safety: preserve each module's own grid, gaps and control sizing. */

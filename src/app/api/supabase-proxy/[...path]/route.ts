@@ -57,11 +57,14 @@ async function proxy(request:NextRequest,{params}:{params:Promise<{path:string[]
         academic_terms:"academics",
         academic_courses:"academics",
         academic_timetable_slots:"academics",
+        academic_calendar_events:"academics",
         academic_course_syllabi:"academics",
         academic_instructors:"academics",
         academic_teaching_assignments:"academics",
         academic_enrollments:"academics",
         academic_grades:"academics",
+        student_promotion_batches:"academics",
+        student_promotion_items:"academics",
         facility_buildings:"facilities",
         facility_inventory:"facilities",
         facility_vehicles:"facilities",
@@ -90,6 +93,9 @@ async function proxy(request:NextRequest,{params}:{params:Promise<{path:string[]
         mrpst_submit_scholarship_award:"finance",mrpst_review_scholarship_award:"finance",
         mrpst_create_scholarship_disbursement:"finance",mrpst_refresh_scholarship_status:"finance",
         mrpst_copy_academic_timetable:"academics",
+        mrpst_set_student_promotion_decision:"academics",
+        mrpst_create_student_promotion_batch:"academics",
+        mrpst_approve_student_promotion:"academics",
         mrpst_checkout_library_book:"library",mrpst_return_library_book:"library"
       };
       const targetModule=resource==="rpc"?(rpcModules[parts[3]??""]??null):(tableModules[resource]??null);

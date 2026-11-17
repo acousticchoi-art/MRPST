@@ -1135,3 +1135,44 @@ textarea {
   :lang(my) .homepage .hero.hero-redesign h1{line-height:1.52!important}
   :lang(my) .homepage .hero.hero-redesign p{line-height:2.3!important}
 }
+
+
+/* Mobile public header: keep the dropdown above the hero and in one column */
+@media(max-width:760px){
+  .header{
+    position:relative!important;
+    z-index:1000!important;
+    isolation:isolate;
+    overflow:visible!important;
+  }
+  .header>.nav,
+  .header>.header-tools{display:none!important}
+  .header>.mobile-menu{
+    display:block!important;
+    position:relative!important;
+    z-index:1002!important;
+    flex:0 0 42px!important;
+  }
+  .header .mobile-nav{
+    position:absolute!important;
+    top:calc(100% + 9px)!important;
+    right:0!important;
+    z-index:1003!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-auto-flow:row!important;
+    width:min(300px,calc(100vw - 34px))!important;
+    max-height:min(70vh,560px);
+    overflow-y:auto;
+    background:#fff!important;
+  }
+  .header .mobile-nav>a{
+    display:flex!important;
+    width:100%!important;
+    min-width:0!important;
+    white-space:normal!important;
+    line-height:1.45;
+  }
+  .homepage{position:relative;z-index:0}
+  .hero.hero-redesign{margin-top:0!important}
+}

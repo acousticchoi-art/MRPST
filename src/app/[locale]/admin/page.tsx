@@ -102,14 +102,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
     <aside className="sidebar">
       <div className="sidebar-header">
         <Link href={`/${locale}`} className="brand"><span className="brand-logo"><img src="/mrpst-logo.svg" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
-        <div className="sidebar-mobile-tools">
-          <nav className="admin-language" aria-label="Language">
-            <a className={locale==="my"?"selected":""} href="/my/admin">မြန်မာ</a><a className={locale==="ko"?"selected":""} href="/ko/admin">한국어</a>
-          </nav>
-          <Link href={`/${locale}`}>{t.view}</Link>
-          {supabase&&<AdminActions locale={locale}/>}
         </div>
-      </div>
       <details className="admin-menu-details" open>
         <summary>{lang==="ko"?"관리 메뉴":"Menu"}</summary>
         <nav className="sidebar-nav">
@@ -120,11 +113,11 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
       </details>
     </aside>
     <main className="admin-main">
-      <header className="topbar"><strong>{t.admin}</strong><div className="admin-user">
+      <header className="topbar"><Link href={`/${locale}`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.svg" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">
         <nav className="admin-language" aria-label="Language">
           <a className={locale==="my"?"selected":""} href="/my/admin">မြန်မာ</a><a className={locale==="ko"?"selected":""} href="/ko/admin">한국어</a>
         </nav>
-        <span>{userEmail||"Preview mode"}</span>
+        
         <Link href={`/${locale}`}>{t.view}</Link>
         {supabase&&<AdminActions locale={locale}/>}
       </div></header>

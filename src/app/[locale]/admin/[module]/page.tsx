@@ -63,27 +63,19 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
     <aside className="sidebar">
       <div className="sidebar-nav">
-        <Link href={`/${locale}`} className="brand"><span className="mark">M</span><span>MRPST<small>{t.admin}</small></span></Link>
+        
         <div className="side-label">{t.workspace}</div>
         <Link className="side-link" href={`/${locale}/admin`}>{t.dashboard}</Link>
         {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([moduleKey,entry])=><Link className={moduleKey===key?"side-link active":"side-link"} href={`/${locale}/admin/${moduleKey}`} key={moduleKey}>{moduleNames[moduleKey]??entry.title}</Link>)}</div>:null;})}
       </div>
-      <div className="sidebar-mobile-tools">
-        <nav className="admin-language" aria-label="Language">
-          <a className={lang==="my"?"selected":""} href={`/my/admin/${module}`}>မြန်မာ</a>
-          <a className={lang==="ko"?"selected":""} href={`/ko/admin/${module}`}>한국어</a>
-        </nav>
-        <Link href={`/${locale}`}>{t.view}</Link>
-        {supabase&&<AdminActions locale={locale}/>}
-      </div>
-    </aside>
+      </aside>
     <main className="admin-main">
-      <header className="topbar"><strong>{t.admin}</strong><div className="admin-user">
+      <header className="topbar"><Link href={`/${locale}`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.svg" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">
         <nav className="admin-language" aria-label="Language">
           <a className={lang==="my"?"selected":""} href={`/my/admin/${module}`}>မြန်မာ</a>
           <a className={lang==="ko"?"selected":""} href={`/ko/admin/${module}`}>한국어</a>
         </nav>
-        <span>{userEmail||"Preview mode"}</span>
+        
         <Link href={`/${locale}`}>{t.view}</Link>
         {supabase&&<AdminActions locale={locale}/>}
       </div></header>

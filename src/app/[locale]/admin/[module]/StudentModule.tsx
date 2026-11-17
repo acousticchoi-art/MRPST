@@ -4,21 +4,18 @@ import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 import {AdminFormActions,FormField} from "./AdminUI";
 
 type Student={id:string;auth_user_id:string|null;program_code:string|null;student_number:string;full_name:string;full_name_my:string|null;full_name_en:string|null;gender:string|null;date_of_birth:string|null;admission_year:number|null;program:string|null;cohort:string|null;student_status:string;phone:string|null;email:string|null;guardian_name:string|null;guardian_phone:string|null;notes:string|null};
-type RecordRow={id:string;student_id:string;academic_year:number;term:string;course_code:string|null;course_name:string;credits:number|null;score:number|null;grade:string|null;remarks:string|null};
 type Award={award_id:string;student_id:string;academic_year:number;scholarship_name:string;base_amount:number;paid_amount:number;remaining_amount:number;status:string};
 const statusLabel:Record<string,string>={active:"재학",leave:"휴학",graduated:"졸업",withdrawn:"자퇴"};
 const awardLabel:Record<string,string>={draft:"임시저장",submitted:"결재대기",approved:"승인",rejected:"반려",completed:"지급 완료",cancelled:"취소"};
 const money=(n:number)=>new Intl.NumberFormat("en-US",{maximumFractionDigits:0}).format(Number(n)||0);
 const emptyProfile={student_number:"",full_name:"",full_name_en:"",full_name_my:"",gender:"unspecified",date_of_birth:"",admission_year:String(new Date().getFullYear()),program:"",cohort:"",student_status:"active",phone:"",email:"",guardian_name:"",guardian_phone:"",notes:""};
-const emptyRecord={academic_year:String(new Date().getFullYear()),term:"1학기",course_code:"",course_name:"",credits:"",score:"",grade:"",remarks:""};
 
 export default function StudentModule(){
  const supabase=useMemo(()=>createSupabaseBrowserClient(),[]);
- const [students,setStudents]=useState<Student[]>([]),[records,setRecords]=useState<RecordRow[]>([]),[awards,setAwards]=useState<Award[]>([]);
+ const [students,setStudents]=useState<Student[]>([]),[records,setRecords]=useState<any[]>([]),[awards,setAwards]=useState<Award[]>([]);
  const [selectedId,setSelectedId]=useState(""),[tab,setTab]=useState("profiles"),[search,setSearch]=useState(""),[filter,setFilter]=useState("all");
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
  const [profileOpen,setProfileOpen]=useState(false),[editingStudent,setEditingStudent]=useState(""),[profile,setProfile]=useState<any>(emptyProfile);
- const [recordOpen,setRecordOpen]=useState(false),[editingRecord,setEditingRecord]=useState(""),[record,setRecord]=useState<any>(emptyRecord);
  const [accountOpen,setAccountOpen]=useState(false),[accountEmail,setAccountEmail]=useState(""),[accountPassword,setAccountPassword]=useState(""),[accountBusy,setAccountBusy]=useState(false);
  const load=useCallback(async()=>{setLoading(true);setError("");try{
   // 브라우저에서 Supabase로 직접 요청하지 않고 동일 출처의 Vercel API를 통해 조회합니다.
@@ -45,7 +42,6 @@ export default function StudentModule(){
  const visible=students.filter(s=>(filter==="all"||s.student_status===filter)&&(!search.trim()||[s.student_number,s.full_name,s.full_name_en,s.full_name_my,s.program,s.cohort].some(v=>(v??"").toLowerCase().includes(search.toLowerCase()))));
  const studentRecords=records.filter(r=>r.student_id===selectedId),studentAwards=awards.filter(a=>a.student_id===selectedId);
  const setP=(k:string,v:string)=>setProfile((old:any)=>({...old,[k]:v}));
- const setR=(k:string,v:string)=>setRecord((old:any)=>({...old,[k]:v}));
  const newProfile=()=>{setEditingStudent("");setProfile({...emptyProfile});setProfileOpen(true);};
  const editProfile=(s:Student)=>{setEditingStudent(s.id);setProfile({student_number:s.student_number,full_name:s.full_name,full_name_en:s.full_name_en??"",full_name_my:s.full_name_my??"",gender:s.gender??"unspecified",date_of_birth:s.date_of_birth??"",admission_year:s.admission_year?String(s.admission_year):"",program:s.program??(s.program_code==="ece"?"Early Childhood Education":s.program_code==="theology"?"Theology":""),cohort:s.cohort??"",student_status:s.student_status,phone:s.phone??"",email:s.email??"",guardian_name:s.guardian_name??"",guardian_phone:s.guardian_phone??"",notes:s.notes??""});setProfileOpen(true);};
  const saveProfile=async()=>{if(!supabase)return;setSaving(true);setError("");try{
@@ -56,14 +52,6 @@ export default function StudentModule(){
  }catch(e:any){setError(e.message??"학생 정보 저장에 실패했습니다.");}finally{setSaving(false);}};
  const archiveStudent=async()=>{if(!supabase||!selected||!window.confirm("이 학생의 학적 상태를 자퇴로 변경할까요? 학생 및 학업·장학금 기록은 삭제하지 않고 보존합니다."))return;setSaving(true);setError("");try{const {error}=await supabase.from("students").update({student_status:"withdrawn"}).eq("id",selected.id);if(error)throw error;setNotice("학생을 자퇴 처리했습니다. 기존 기록은 보존됩니다.");await load();}catch(e:any){setError(e.message||"학적 상태 변경에 실패했습니다.");}finally{setSaving(false);}};
  const issueStudentAccount=async()=>{if(!supabase||!selected)return;setAccountBusy(true);setError("");try{const {data,error}=await supabase.functions.invoke("admin-manage-user",{body:{action:"create_student",student_id:selected.id,email:accountEmail.trim(),password:accountPassword}});if(error)throw error; if(data?.error)throw new Error(data.error);setNotice("학생 로그인 계정을 발급하고 학생 정보와 연결했습니다.");setAccountOpen(false);setAccountPassword("");setAccountEmail("");await load();}catch(e:any){setError(e.message??"학생 계정 발급에 실패했습니다.");}finally{setAccountBusy(false);}};
- const newRecord=()=>{setEditingRecord("");setRecord({...emptyRecord});setRecordOpen(true);};
- const editRecord=(r:RecordRow)=>{setEditingRecord(r.id);setRecord({academic_year:String(r.academic_year),term:r.term,course_code:r.course_code??"",course_name:r.course_name,credits:r.credits==null?"":String(r.credits),score:r.score==null?"":String(r.score),grade:r.grade??"",remarks:r.remarks??""});setRecordOpen(true);};
- const saveRecord=async()=>{if(!supabase||!selectedId)return;setSaving(true);setError("");try{
-  const payload={student_id:selectedId,academic_year:Number(record.academic_year),term:record.term,course_code:record.course_code.trim()||null,course_name:record.course_name.trim(),credits:record.credits?Number(record.credits):null,score:record.score?Number(record.score):null,grade:record.grade.trim()||null,remarks:record.remarks.trim()||null};
-  const x=editingRecord?await supabase.from("student_academic_records").update(payload).eq("id",editingRecord):await supabase.from("student_academic_records").insert(payload);
-  if(x.error)throw x.error;setNotice(editingRecord?"학업 기록을 수정했습니다.":"학업 기록을 등록했습니다.");setRecordOpen(false);await load();
- }catch(e:any){setError(e.message??"학업 기록 저장에 실패했습니다.");}finally{setSaving(false);}};
- const removeRecord=async(id:string)=>{if(!supabase||!window.confirm("이 학업 기록을 삭제할까요?"))return;const x=await supabase.from("student_academic_records").delete().eq("id",id);if(x.error)setError(x.error.message);else{setNotice("학업 기록을 삭제했습니다.");await load();}};
  const input=(label:string,key:string,type="text")=><FormField label={label}><input type={type} value={profile[key]??""} onChange={e=>setP(key,e.target.value)}/></FormField>;
  return <div className="student-workspace">
   <div className="student-intro"><div><span className="eyebrow">STUDENT INFORMATION SYSTEM</span><h2>Student Management</h2><p>학생 기본정보, 학업 이력과 장학금 내역을 통합 관리합니다.</p></div><button className="student-primary" onClick={newProfile}>＋ 학생 등록</button></div>
@@ -93,10 +81,5 @@ export default function StudentModule(){
    <FormField label="학적 상태"><select value={profile.student_status} onChange={e=>setP("student_status",e.target.value)}><option value="active">재학</option><option value="leave">휴학</option><option value="graduated">졸업</option><option value="withdrawn">자퇴</option></select></FormField>{input("전화번호","phone")}{input("이메일","email","email")}{input("보호자 이름","guardian_name")}{input("보호자 연락처","guardian_phone")}<FormField label="비고" full><textarea value={profile.notes} onChange={e=>setP("notes",e.target.value)}/></FormField>
   </div><AdminFormActions className="student-modal-actions" primaryClassName="student-primary" close={()=>setProfileOpen(false)} saving={saving} disabled={!profile.student_number.trim()||!profile.full_name.trim()} submit={()=>void saveProfile()}/></section></div>}
   {accountOpen&&selected&&<div className="student-modal-backdrop"><section className="student-modal"><div className="student-modal-head"><div><span className="eyebrow">STUDENT ACCOUNT</span><h3>학생 로그인 계정 발급</h3></div><button onClick={()=>setAccountOpen(false)}>×</button></div><p>{selected.full_name} · {selected.student_number}</p><div className="student-form-grid"><FormField label="로그인 이메일 *"><input type="email" value={accountEmail} onChange={e=>setAccountEmail(e.target.value)} required/></FormField><FormField label="초기 비밀번호 *"><input type="password" minLength={8} value={accountPassword} onChange={e=>setAccountPassword(e.target.value)} placeholder="8자 이상"/></FormField></div><p className="student-readonly">발급 후 학생 로그인 화면에서 이메일과 초기 비밀번호로 접속합니다. 계정은 이 학생의 학번에 연결됩니다.</p><AdminFormActions className="student-modal-actions" primaryClassName="student-primary" close={()=>setAccountOpen(false)} saving={accountBusy} disabled={!accountEmail.includes("@")||accountPassword.length<8} submit={()=>void issueStudentAccount()} submitLabel="계정 발급" savingLabel="발급 중…"/></section></div>}
-  {recordOpen&&selected&&<div className="student-modal-backdrop"><section className="student-modal"><div className="student-modal-head"><div><span className="eyebrow">ACADEMIC RECORD</span><h3>{editingRecord?"학업 기록 수정":"학업 기록 등록"}</h3></div><button onClick={()=>setRecordOpen(false)}>×</button></div><div className="student-form-grid">
-   <FormField label="학년도 *"><input type="number" min="2000" max="2200" value={record.academic_year} onChange={e=>setR("academic_year",e.target.value)}/></FormField><FormField label="학기 *"><select value={record.term} onChange={e=>setR("term",e.target.value)}><option>1학기</option><option>2학기</option><option>여름학기</option><option>겨울학기</option><option>집중과정</option></select></FormField>
-   <FormField label="과목 코드"><input value={record.course_code} onChange={e=>setR("course_code",e.target.value)}/></FormField><FormField label="과목명 *"><input value={record.course_name} onChange={e=>setR("course_name",e.target.value)}/></FormField>
-   <FormField label="학점"><input type="number" min="0" step="0.5" value={record.credits} onChange={e=>setR("credits",e.target.value)}/></FormField><FormField label="점수"><input type="number" min="0" max="100" step="0.1" value={record.score} onChange={e=>setR("score",e.target.value)}/></FormField><FormField label="성적"><input value={record.grade} onChange={e=>setR("grade",e.target.value)} placeholder="예: A, B+, Pass"/></FormField><FormField label="비고"><input value={record.remarks} onChange={e=>setR("remarks",e.target.value)}/></FormField>
-  </div><AdminFormActions className="student-modal-actions" primaryClassName="student-primary" close={()=>setRecordOpen(false)} saving={saving} disabled={!record.course_name.trim()||!Number(record.academic_year)} submit={()=>void saveRecord()}/></section></div>}
  </div>;
 }

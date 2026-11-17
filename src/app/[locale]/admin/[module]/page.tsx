@@ -1,7 +1,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import {notFound,redirect} from "next/navigation";
-import {createSupabaseServerClient} from "@/lib/supabase/server";
+import {getServerModuleAccess} from "@/lib/auth/server-access";
 import {MODULES,getModuleKey,canAccessModule,type MrpstRole} from "@/lib/auth/permissions";
 import AdminActions from "../AdminActions";
 const AdminMyanmarTranslator=dynamic(()=>import("../AdminMyanmarTranslator"));
@@ -36,27 +36,14 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
   const key=getModuleKey(module);
   if(!key)notFound();
   const item=MODULES[key];
-  const supabase=await createSupabaseServerClient();
-  if(!supabase) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>관리자 서비스에 연결할 수 없습니다</h1><p className="login-intro">로그인 서비스 설정이 확인되지 않아 관리 기능을 열 수 없습니다. 서비스 설정을 확인한 뒤 다시 시도해 주세요.</p><Link className="btn secondary" href={`/${locale}`}>홈페이지로 돌아가기</Link></section></main>;
-  let userEmail="";
-  let roles:MrpstRole[]=[];
-  let overrides:{module_key:string;can_view:boolean}[]=[];
-  if(supabase){
-    const {data:{user}}=await supabase.auth.getUser();
-    if(!user)redirect(`/${locale}/login`);
-    userEmail=user.email??"";
-    const [{data:roleRows,error},{data:profile},{data:permissions}]=await Promise.all([
-      supabase.from("user_roles").select("role, department_id").eq("user_id",user.id),
-      supabase.from("user_profiles").select("is_active").eq("user_id",user.id).maybeSingle(),
-      supabase.from("user_module_permissions").select("module_key,can_view").eq("user_id",user.id)
-    ]);
-    roles=(roleRows??[]).map(row=>row.role as MrpstRole);
-    overrides=permissions??[];
-    if(error||!roleRows?.length||profile?.is_active!==true||!canAccessModule(roles,key,overrides)){
-      return <main className="login-wrap"><section className="login-card"><span className="eyebrow">PERMISSION REQUIRED</span><h1>Access restricted</h1><p className="login-intro">Your assigned role does not include access to {item.title}. Contact the Super Administrator if this access is required for your work.</p></section></main>;
-    }
+  const access=await getServerModuleAccess(key);
+  if(!access.ok){
+    if(access.status===401)redirect(`/${locale}/login`);
+    return <main className="login-wrap"><section className="login-card"><span className="eyebrow">PERMISSION REQUIRED</span><h1>Access restricted</h1><p className="login-intro">{access.error}</p></section></main>;
   }
-  const visible=Object.entries(MODULES).filter(([moduleKey])=>!supabase||canAccessModule(roles,moduleKey as keyof typeof MODULES,overrides));
+  const {supabase,roles,permissions:overrides,user}=access;
+  const userEmail=user.email??"";
+  const visible=Object.entries(MODULES).filter(([moduleKey])=>canAccessModule(roles,moduleKey as keyof typeof MODULES,overrides));
   const moduleGroups=[["academic",["students","academics"]],["finance",["finance"]],["operations",["facilities","library","meetings"]],["system",["administration","website"]]] as const;
   const visibleInGroup=(keys:readonly string[])=>visible.filter(([moduleKey])=>keys.includes(moduleKey));
   const moduleNames:Record<string,string>={finance:t.finance,students:t.students,academics:t.academics,facilities:t.facilities,library:t.library,meetings:t.meetings,administration:t.administration,website:t.website};

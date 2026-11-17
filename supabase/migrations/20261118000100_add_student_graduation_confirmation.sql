@@ -71,6 +71,13 @@ begin
     nullif(trim(p_notes), ''), auth.uid()
   ) returning id into v_graduation_id;
 
+  insert into public.student_status_history(
+    student_id, previous_status, new_status, effective_date, reason, changed_by
+  ) values (
+    v_student_id, 'active', 'graduated', coalesce(p_graduation_date, current_date),
+    '정식 졸업 확정', auth.uid()
+  );
+
   update public.students
   set student_status = 'graduated',
       graduation_year = p_graduation_year,

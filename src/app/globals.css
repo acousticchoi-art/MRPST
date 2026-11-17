@@ -1472,3 +1472,107 @@ textarea {
   html body .admin>.sidebar .sidebar-mobile-tools .top-action{padding-inline:6px!important;font-size:10px!important}
   html body .admin>.sidebar .sidebar-mobile-tools .admin-language a{padding-inline:5px!important}
 }
+
+
+/* Desktop admin layout: preserve the original sidebar and topbar presentation */
+@media screen and (min-width:761px){
+  html body .admin{
+    display:grid!important;
+    grid-template-columns:245px minmax(0,1fr)!important;
+    align-items:stretch!important;
+    min-height:100vh!important;
+  }
+  html body .admin>.sidebar{
+    display:block!important;
+    position:sticky!important;
+    inset:auto!important;
+    top:0!important;
+    width:auto!important;
+    height:100vh!important;
+    min-height:100vh!important;
+    max-height:none!important;
+    padding:25px 16px!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+  }
+  html body .admin>.sidebar>.sidebar-header{
+    display:block!important;
+    min-height:0!important;
+    padding:0!important;
+    border:0!important;
+  }
+  html body .admin>.sidebar .sidebar-header>.brand{
+    display:flex!important;
+    align-items:center!important;
+    margin:0 0 35px!important;
+  }
+  html body .admin>.sidebar .sidebar-header>.sidebar-mobile-tools{display:none!important}
+  html body .admin>.sidebar>.admin-menu-details{display:block!important;margin:0!important}
+  html body .admin>.sidebar>.admin-menu-details>summary{display:none!important}
+  html body .admin>.sidebar>.admin-menu-details>.sidebar-nav{
+    display:block!important;
+    width:auto!important;
+    min-width:0!important;
+    padding:0!important;
+    overflow:visible!important;
+  }
+  html body .admin>.sidebar .sidebar-nav>.side-label{
+    display:block!important;
+    margin:24px 10px 10px!important;
+  }
+  html body .admin>.sidebar .sidebar-nav>.side-link,
+  html body .admin>.sidebar .sidebar-nav>.sidebar-group>.side-link{
+    display:block!important;
+    min-height:0!important;
+    height:auto!important;
+    margin:3px 0!important;
+    padding:11px 12px!important;
+    text-align:left!important;
+    white-space:normal!important;
+    border:0!important;
+    border-radius:7px!important;
+    background:transparent!important;
+    font-size:13px!important;
+    line-height:normal!important;
+  }
+  html body .admin>.sidebar .sidebar-nav>.sidebar-group{
+    display:block!important;
+    width:auto!important;
+    margin:0!important;
+  }
+  html body .admin>.admin-main{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    overflow-x:clip!important;
+  }
+  html body .admin>.admin-main>.topbar{
+    display:flex!important;
+    height:70px!important;
+    min-height:70px!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    padding:0 30px!important;
+  }
+  html body .admin>.admin-main>.content{padding:30px!important}
+}
+
+/* Mobile: remove decorative divider rules around the logo/action row */
+@media screen and (max-width:760px){
+  html body .admin>.sidebar,
+  html body .admin>.sidebar>.sidebar-header,
+  html body .admin>.sidebar .sidebar-header>.brand,
+  html body .admin>.sidebar .sidebar-header>.sidebar-mobile-tools{
+    border-top:0!important;
+    border-bottom:0!important;
+    box-shadow:none!important;
+  }
+  html body .admin>.sidebar>.sidebar-header:before,
+  html body .admin>.sidebar>.sidebar-header:after,
+  html body .admin>.sidebar .sidebar-header>.sidebar-mobile-tools:before,
+  html body .admin>.sidebar .sidebar-header>.sidebar-mobile-tools:after{
+    display:none!important;
+    content:none!important;
+  }
+}

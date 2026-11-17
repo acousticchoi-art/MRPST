@@ -11,7 +11,7 @@ export async function GET() {
   }
   const {supabase} = access;
 
-  const [students,enrollments,grades,scholarships] = await Promise.all([
+  const [students,enrollments,grades,scholarships,graduations] = await Promise.all([
     supabase.from("students")
       .select("id,auth_user_id,program_code,student_number,full_name,full_name_my,full_name_en,gender,date_of_birth,admission_year,program,cohort,student_status,phone,email,guardian_name,guardian_phone,notes,graduation_year,graduation_term,graduation_date,graduation_number")
       .order("student_number"),
@@ -21,7 +21,8 @@ export async function GET() {
     supabase.from("academic_grades")
       .select("id,student_id,course_id,term_id,score,grade,remarks,updated_at")
       .order("updated_at",{ascending:false}),
-    supabase.rpc("mrpst_student_scholarship_history")
+    supabase.rpc("mrpst_student_scholarship_history"),
+    supabase.from("student_graduations").select("id,student_id,program_code,graduation_year,graduation_term,graduation_date,degree_name,graduation_number,honors,notes,approved_at").order("graduation_year",{ascending:false})
   ]);
 
   const gradeByEnrollment = new Map<string,any>();
@@ -53,6 +54,7 @@ export async function GET() {
   return NextResponse.json({
     students:{data:students.data ?? [],error:students.error?.message ?? null},
     grades:{data:academicHistory,error:enrollments.error?.message ?? grades.error?.message ?? null},
-    scholarships:{data:scholarships.data ?? [],error:scholarships.error?.message ?? null}
+    scholarships:{data:scholarships.data ?? [],error:scholarships.error?.message ?? null},
+    graduations:{data:graduations.data ?? [],error:graduations.error?.message ?? null}
   },{headers:{"Cache-Control":"no-store, max-age=0"}});
 }

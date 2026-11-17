@@ -1694,3 +1694,63 @@ textarea {
   html body .admin .admin-user>a,
   html body .admin .admin-user .top-action{min-height:34px!important;padding:6px 8px!important;font-size:11px!important}
 }
+
+
+/* Canonical shared admin header: identical on dashboard and every module, including mobile */
+@media screen and (max-width:760px){
+  html body .admin>.admin-main>.topbar{
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:8px!important;
+    width:100%!important;
+    min-height:64px!important;
+    height:auto!important;
+    padding:9px 12px!important;
+  }
+  html body .admin>.admin-main>.topbar>.admin-topbar-brand{
+    display:flex!important;
+    flex:0 1 auto!important;
+    min-width:0!important;
+    align-items:center!important;
+    gap:7px!important;
+  }
+  html body .admin>.admin-main>.topbar>.admin-topbar-brand .brand-logo{
+    display:block!important;
+    flex:0 0 38px!important;
+    width:38px!important;
+    height:38px!important;
+  }
+  html body .admin>.admin-main>.topbar>.admin-user{
+    display:flex!important;
+    flex:0 1 auto!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:4px!important;
+    width:auto!important;
+    min-width:0!important;
+    margin-left:auto!important;
+  }
+  html body .admin>.admin-main>.topbar>.admin-user .admin-language{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    gap:2px!important;
+  }
+  html body .admin>.admin-main>.topbar>.admin-user .admin-language a,
+  html body .admin>.admin-main>.topbar>.admin-user>a,
+  html body .admin>.admin-main>.topbar>.admin-user .top-action{
+    display:inline-flex!important;
+    flex:0 0 auto!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-height:32px!important;
+    padding:5px 6px!important;
+    font-size:10px!important;
+    line-height:1.1!important;
+    white-space:nowrap!important;
+  }
+  html body .admin>.sidebar>.sidebar-header{display:none!important}
+}

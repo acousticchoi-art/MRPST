@@ -2,7 +2,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import {notFound,redirect} from "next/navigation";
 import {getServerModuleAccess} from "@/lib/auth/server-access";
-import {MODULES,getModuleKey,canAccessModule,type MrpstRole} from "@/lib/auth/permissions";
+import {MODULES,getModuleKey,canAccessModule} from "@/lib/auth/permissions";
 import AdminActions from "../AdminActions";
 const AdminMyanmarTranslator=dynamic(()=>import("../AdminMyanmarTranslator"));
 const FinanceModule=dynamic(()=>import("./FinanceModule"));
@@ -42,7 +42,6 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
     return <main className="login-wrap"><section className="login-card"><span className="eyebrow">PERMISSION REQUIRED</span><h1>Access restricted</h1><p className="login-intro">{access.error}</p></section></main>;
   }
   const {supabase,roles,permissions:overrides,user}=access;
-  const userEmail=user.email??"";
   const visible=Object.entries(MODULES).filter(([moduleKey])=>canAccessModule(roles,moduleKey as keyof typeof MODULES,overrides));
   const moduleGroups=[["academic",["students","academics"]],["finance",["finance"]],["operations",["facilities","library","meetings"]],["system",["administration","website"]]] as const;
   const visibleInGroup=(keys:readonly string[])=>visible.filter(([moduleKey])=>keys.includes(moduleKey));

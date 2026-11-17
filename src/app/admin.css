@@ -282,7 +282,6 @@ input,select,textarea,button{max-width:100%}
 .settings-member-empty strong{font-size:14px;color:var(--navy)}
 .settings-member-empty p{font-size:11px;line-height:1.7;color:var(--muted);max-width:280px}
 .settings-danger-zone{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:20px;padding:13px;border:1px solid #eadbd8;border-radius:7px;background:#fffaf9}
-.settings-danger-zone>div{display:flex;flex-direction:column;gap:4px}
 .settings-danger-zone strong{font-size:11px;color:#85453e}
 .settings-danger-zone small{font-size:10px;line-height:1.5;color:var(--muted)}
 .settings-danger-zone button{border:1px solid #d9b8b3;background:#fff;color:#91483f;border-radius:5px;padding:8px 10px;font-size:10px;white-space:nowrap;cursor:pointer}

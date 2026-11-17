@@ -62,6 +62,8 @@ async function proxy(request:NextRequest,{params}:{params:Promise<{path:string[]
         academic_teaching_assignments:"academics",
         academic_enrollments:"academics",
         academic_grades:"academics",
+        facility_buildings:"facilities",
+        facility_inventory:"facilities",
         facility_vehicles:"facilities",
         facility_maintenance:"facilities",
         facility_vehicle_logs:"facilities",
@@ -71,6 +73,8 @@ async function proxy(request:NextRequest,{params}:{params:Promise<{path:string[]
         meeting_participants:"meetings",
         meeting_action_items:"meetings",
         meeting_materials:"meetings",
+        user_profiles:"administration",
+        user_roles:"administration",
         user_module_permissions:"administration",
         departments:"administration",
         website_contents:"website"

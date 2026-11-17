@@ -1,6 +1,6 @@
 import {supabaseUrl} from "./config";
 
-const proxiedPrefixes=["/rest/v1/","/functions/v1/"];
+const proxiedPrefixes=["/rest/v1/","/functions/v1/","/auth/v1/"];
 
 export const supabaseProxyFetch:typeof fetch=async(input,init)=>{
   const request=new Request(input,init);

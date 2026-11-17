@@ -22,21 +22,29 @@ async function proxy(request:NextRequest,{params}:{params:Promise<{path:string[]
   if(!isSupabaseConfigured)return NextResponse.json({error:"Supabase 서버 설정을 확인할 수 없습니다."},{status:503});
   const {path}=await params;
   const pathname="/"+(path??[]).join("/");
-  const allowed=pathname.startsWith("/rest/v1/")||pathname.startsWith("/functions/v1/");
-  if(!allowed)return NextResponse.json({error:"허용되지 않은 Supabase 경로입니다."},{status:404});
+  const isAuthPath=pathname.startsWith("/auth/v1/");
+  const isDataPath=pathname.startsWith("/rest/v1/")||pathname.startsWith("/functions/v1/");
+  if(!isAuthPath&&!isDataPath)return NextResponse.json({error:"허용되지 않은 Supabase 경로입니다."},{status:404});
   if(!allowedMethods.includes(request.method))return NextResponse.json({error:"허용되지 않은 요청 방식입니다."},{status:405});
-
-  const supabase=await createSupabaseServerClient();
-  if(!supabase)return NextResponse.json({error:"로그인 연결을 확인할 수 없습니다."},{status:503});
-  const {data:{user},error:userError}=await supabase.auth.getUser();
-  if(userError||!user)return NextResponse.json({error:"로그인이 필요합니다."},{status:401});
-  const {data:{session},error:sessionError}=await supabase.auth.getSession();
-  if(sessionError||!session?.access_token)return NextResponse.json({error:"로그인 세션이 만료되었습니다. 다시 로그인해 주세요."},{status:401});
 
   const headers=new Headers();
   for(const name of requestHeaders){const value=request.headers.get(name);if(value)headers.set(name,value);}
   headers.set("apikey",supabaseAnonKey);
-  headers.set("Authorization",`Bearer ${session.access_token}`);
+
+  if(isAuthPath){
+    // Auth endpoints (password login, token refresh, recovery and logout) must be
+    // reachable before a session exists. The anon key is public; no service key is forwarded.
+    const authorization=request.headers.get("authorization");
+    if(authorization)headers.set("Authorization",authorization);
+  }else{
+    const supabase=await createSupabaseServerClient();
+    if(!supabase)return NextResponse.json({error:"로그인 연결을 확인할 수 없습니다."},{status:503});
+    const {data:{user},error:userError}=await supabase.auth.getUser();
+    if(userError||!user)return NextResponse.json({error:"로그인이 필요합니다."},{status:401});
+    const {data:{session},error:sessionError}=await supabase.auth.getSession();
+    if(sessionError||!session?.access_token)return NextResponse.json({error:"로그인 세션이 만료되었습니다. 다시 로그인해 주세요."},{status:401});
+    headers.set("Authorization",`Bearer ${session.access_token}`);
+  }
 
   try{
     const upstream=await fetch(`${supabaseUrl}${pathname}${request.nextUrl.search}`,{

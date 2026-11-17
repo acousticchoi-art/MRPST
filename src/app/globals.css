@@ -1456,7 +1456,7 @@ textarea {
   html body .admin>.sidebar .sidebar-nav>.side-link.active{
     background:#ffffff30!important;color:#fff!important;
   }
-  html body .admin>.admin-main>.topbar{display:none!important}
+  html body .admin>.admin-main>.topbar{display:flex!important}
   html body .admin>.admin-main{
     display:block!important;width:100%!important;min-width:0!important;
     overflow:visible!important;
@@ -1753,4 +1753,30 @@ textarea {
     white-space:nowrap!important;
   }
   html body .admin>.sidebar>.sidebar-header{display:none!important}
+}
+
+/* Restore the canonical admin identity/action row on mobile; navigation remains below it */
+@media screen and (max-width:760px){
+ html body .admin{display:flex!important;flex-direction:column!important}
+ html body .admin>.admin-main{display:flex!important;flex-direction:column!important;order:0!important;width:100%!important;min-width:0!important}
+ html body .admin>.admin-main>.topbar{display:flex!important;order:0!important;position:relative!important;z-index:20!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:space-between!important;gap:6px!important;width:100%!important;min-height:66px!important;height:auto!important;padding:8px 10px!important}
+ html body .admin>.admin-main>.topbar>.admin-topbar-brand{display:flex!important;flex:0 1 auto!important;align-items:center!important;min-width:0!important;gap:6px!important}
+ html body .admin>.admin-main>.topbar>.admin-topbar-brand .brand-logo{display:block!important;flex:0 0 40px!important;width:40px!important;height:40px!important;background:#fff!important;border-radius:50%!important;overflow:hidden!important}
+ html body .admin>.admin-main>.topbar>.admin-topbar-brand .brand-logo img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important}
+ html body .admin>.admin-main>.topbar>.admin-user{display:flex!important;flex:0 1 auto!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-end!important;gap:3px!important;width:auto!important;min-width:0!important;margin-left:auto!important}
+ html body .admin>.admin-main>.topbar>.admin-user .admin-language{display:flex!important;flex-wrap:nowrap!important;gap:1px!important}
+ html body .admin>.admin-main>.topbar>.admin-user .admin-language a,
+ html body .admin>.admin-main>.topbar>.admin-user>a,
+ html body .admin>.admin-main>.topbar>.admin-user .top-action{display:inline-flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:center!important;min-height:31px!important;padding:4px 5px!important;font-size:9px!important;line-height:1.1!important;white-space:nowrap!important}
+ html body .admin>.sidebar{order:1!important;position:relative!important;top:auto!important;width:100%!important;height:auto!important;min-height:0!important;padding:10px 12px!important}
+ html body .admin>.sidebar>.sidebar-header{display:none!important}
+ html body .admin>.sidebar>.admin-menu-details{display:block!important;margin:0!important}
+ html body .admin>.admin-main>.content{order:2!important;padding:18px 14px!important}
+}
+@media screen and (max-width:360px){
+ html body .admin>.admin-main>.topbar{gap:3px!important;padding-inline:7px!important}
+ html body .admin>.admin-main>.topbar>.admin-topbar-brand .brand-logo{flex-basis:34px!important;width:34px!important;height:34px!important}
+ html body .admin>.admin-main>.topbar>.admin-user .admin-language a,
+ html body .admin>.admin-main>.topbar>.admin-user>a,
+ html body .admin>.admin-main>.topbar>.admin-user .top-action{padding-inline:3px!important;font-size:8px!important}
 }

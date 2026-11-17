@@ -68,3 +68,23 @@
 .admin .academics-table :is(th,td){border-color:var(--mrpst-border)}
 .admin .academics-table th{color:var(--mrpst-muted)}
 .admin .academics-table td{color:var(--mrpst-text)}
+
+
+/* Shared form-field safety: preserve each module's own grid, gaps and control sizing. */
+.admin :is(
+ .finance-form-grid,.student-form-grid,.academics-form-grid,.facility-form-grid,
+ .library-form-grid,.meeting-form-grid,.settings-form-grid,.settings-role-form,
+ .website-fields,.website-form
+){min-width:0}
+.admin :is(
+ .finance-form-grid,.student-form-grid,.academics-form-grid,.facility-form-grid,
+ .library-form-grid,.meeting-form-grid,.settings-form-grid,.settings-role-form,
+ .website-fields,.website-form
+) :is(input,select,textarea){min-width:0;max-width:100%;box-sizing:border-box}
+
+/* One shared overflow rule for the table wrappers verified in module markup. */
+.admin :is(
+ .finance-table-wrap,.student-table-wrap,.academics-table-wrap,.academic-table-wrap,
+ .facility-table-wrap,.library-table-wrap,.meeting-table-wrap,.settings-table-wrap,
+ .table-wrap,[class$="-table-wrap"]
+){display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}

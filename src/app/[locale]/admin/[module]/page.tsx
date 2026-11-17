@@ -62,12 +62,14 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
   const moduleNames:Record<string,string>={finance:t.finance,students:t.students,academics:t.academics,facilities:t.facilities,library:t.library,meetings:t.meetings,administration:t.administration,website:t.website};
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
     <aside className="sidebar">
-      <div className="sidebar-nav">
-        
-        <div className="side-label">{t.workspace}</div>
-        <Link className="side-link" href={`/${locale}/admin`}>{t.dashboard}</Link>
-        {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([moduleKey,entry])=><Link className={moduleKey===key?"side-link active":"side-link"} href={`/${locale}/admin/${moduleKey}`} key={moduleKey}>{moduleNames[moduleKey]??entry.title}</Link>)}</div>:null;})}
-      </div>
+      <details className="admin-menu-details" open>
+        <summary>{lang==="ko"?"관리 메뉴":"Menu"}</summary>
+        <nav className="sidebar-nav">
+          <div className="side-label">{t.workspace}</div>
+          <Link className="side-link" href={`/${locale}/admin`}>{t.dashboard}</Link>
+          {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([moduleKey,entry])=><Link className={moduleKey===key?"side-link active":"side-link"} href={`/${locale}/admin/${moduleKey}`} key={moduleKey}>{moduleNames[moduleKey]??entry.title}</Link>)}</div>:null;})}
+        </nav>
+      </details>
       </aside>
     <main className="admin-main">
       <header className="topbar"><Link href={`/${locale}`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">

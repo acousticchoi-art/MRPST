@@ -1188,3 +1188,18 @@ textarea {
     grid-auto-flow:row!important;
   }
 }
+
+
+/* Final mobile menu state guard: apply at every viewport breakpoint */
+.mobile-menu:not([open]) > .mobile-nav{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+.mobile-menu[open] > .mobile-nav{
+  display:grid !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+  grid-template-columns:minmax(0,1fr) !important;
+  grid-auto-flow:row !important;
+}

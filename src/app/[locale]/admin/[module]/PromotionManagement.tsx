@@ -57,7 +57,7 @@ export default function PromotionManagement(){
  };
  const openGraduation=(item:Row)=>{
   const code=item.student?.program_code;
-  const degree=code==="mdiv"?"Master of Divinity":code==="ece"?"Early Childhood Education":code==="theology"?"Bachelor of Theology":"";
+  const degree=code==="mdiv"?"Master of Divinity":code==="ece"?"Early Childhood Education":/diploma/i.test(item.student?.program||"")?"Diploma in Theology":code==="theology"?"Bachelor of Theology":"";
   setGraduationItem(item);
   setGraduationForm({graduation_year:String(Number(selectedBatch?.academic_year||year)),graduation_term:"2",graduation_date:"",degree_name:degree,graduation_number:"",honors:"",notes:""});
   setError("");

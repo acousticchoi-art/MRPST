@@ -95,8 +95,8 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
  };
  const remove=async(id:string,type:"course"|"event")=>{
   if(!db||!mutationsEnabled){setNotice("학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다.");return;}if(!window.confirm("이 항목을 삭제할까요?"))return;
-  const {error:e}=await db.from(type==="event"?"academic_timetable_events":"academic_timetable_entries").delete().eq("id",id);
-  if(e)setError(e.message);else{setNotice("항목을 삭제했습니다.");await load();}
+  const {data:deleted,error:e}=await db.from(type==="event"?"academic_timetable_events":"academic_timetable_entries").delete().eq("id",id).select("id").maybeSingle();
+  if(e)setError(e.message);else if(!deleted?.id||deleted.id!==id)setError("삭제된 시간표 항목을 확인할 수 없습니다.");else{setNotice("항목을 삭제했습니다.");await load();}
  };
  const copySchedule=async()=>{
   if(!db||!mutationsEnabled){setNotice("학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다.");return;}if(!copyFrom||copyFrom===termId)return;

@@ -73,7 +73,8 @@ export default function PromotionManagement(){
  const ready=items.length>0&&items.every(x=>x.decision!=="needs_review");
  return <section className="academics-panel promotion-panel">
   <div className="academics-panel-head"><div><h3>학년 진급</h3><p>두 학기 종료 후 재학생 명단을 확인하고 한 번에 진급 처리합니다.</p></div></div>
-  {!mutationsEnabled&&<div className="academics-alert">진급·졸업 데이터 변경은 개발 DB 분리 전까지 잠겨 있습니다. 조회와 검토만 가능합니다.</div>}\n  {error&&<div className="academics-alert error">{error}</div>}{notice&&<div className="academics-alert">{notice}</div>}
+  {!mutationsEnabled&&<div className="academics-alert">진급·졸업 데이터 변경은 개발 DB 분리 전까지 잠겨 있습니다. 조회와 검토만 가능합니다.</div>}
+  {error&&<div className="academics-alert error">{error}</div>}{notice&&<div className="academics-alert">{notice}</div>}
   <div className="promotion-controls">
    <label>학년도<select value={year} onChange={e=>setYear(e.target.value)}>{[...new Set(terms.map(x=>String(x.academic_year)))].map(y=><option key={y} value={y}>{y}학년도</option>)}</select></label>
    <button className="academics-primary small" disabled={!canManage||!mutationsEnabled||saving||!completedYears.includes(Number(year))||batches.some(x=>x.academic_year===Number(year))} onClick={()=>void createBatch()}>{saving?"처리 중…":"진급 명단 자동 생성"}</button>

@@ -61,7 +61,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
  const save=async()=>{
   if(!db||!mutationsEnabled){setNotice("학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다.");return;}setSaving(true);setError("");
   try{
-   const {data:{user}}=await db.auth.getUser();
+   const {data:{user},error:userError}=await db.auth.getUser();if(userError)throw userError;if(!user)throw new Error("로그인이 필요합니다.");
    const common={term_id:termId,department_id:departmentId,day_of_week:Number(form.day_of_week),start_time:form.start_time,end_time:form.end_time};
    const overlaps=(row:any)=>time(row.start_time)<time(form.end_time)&&time(row.end_time)>time(form.start_time);
    const [existingEntries,existingEvents]=await Promise.all([
@@ -82,12 +82,12 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
    let result:any;
    if(editingType==="event"){
     if(!form.title.trim())throw new Error("일정명을 입력해 주세요.");
-    const payload={...common,title:form.title.trim(),notes:form.notes.trim()||null,created_by:user?.id||null};
-    result=editing?await db.from("academic_timetable_events").update(payload).eq("id",editing):await db.from("academic_timetable_events").insert(payload);
+    const payload={...common,title:form.title.trim(),notes:form.notes.trim()||null};
+    result=editing?await db.from("academic_timetable_events").update(payload).eq("id",editing):await db.from("academic_timetable_events").insert({...payload,created_by:user.id});
    }else{
     if(!form.course_id)throw new Error("과목을 선택해 주세요.");
-    const payload={...common,course_id:form.course_id,instructor_id:form.instructor_id||null,class_group:form.class_group.trim(),room:form.room.trim()||null,notes:form.notes.trim()||null,created_by:user?.id||null};
-    result=editing?await db.from("academic_timetable_entries").update(payload).eq("id",editing):await db.from("academic_timetable_entries").insert(payload);
+    const payload={...common,course_id:form.course_id,instructor_id:form.instructor_id||null,class_group:form.class_group.trim(),room:form.room.trim()||null,notes:form.notes.trim()||null};
+    result=editing?await db.from("academic_timetable_entries").update(payload).eq("id",editing):await db.from("academic_timetable_entries").insert({...payload,created_by:user.id});
    }
    if(result.error)throw result.error;
    setModal(false);setNotice(editing?"시간표 항목을 수정했습니다.":"시간표 항목을 등록했습니다.");await load();

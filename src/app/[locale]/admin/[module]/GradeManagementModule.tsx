@@ -117,7 +117,11 @@ export default function GradeManagementModule(){
   finally{setSaving(false);}
  };
 
- const deleteScore=async(student:Student)=>{\n  if(!db||!canManage)return;\n  if(enrollments.some(e=>e.student_id===student.id&&e.course_id===courseId&&e.term_id===termId&&e.enrollment_status==="completed")){setError("이미 이수 완료된 과목의 성적은 삭제할 수 없습니다. 수강 이수 상태를 먼저 변경해야 합니다.");return;}\n  if(!window.confirm(student.full_name+" 학생의 이 과목 성적을 삭제할까요?"))return;
+ const deleteScore=async(student:Student)=>{
+  if(!academicMutationsEnabled){setNotice("성적 삭제는 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다.");return;}
+  if(!db||!canManage)return;
+  if(enrollments.some(e=>e.student_id===student.id&&e.course_id===courseId&&e.term_id===termId&&e.enrollment_status==="completed")){setError("이미 이수 완료된 과목의 성적은 삭제할 수 없습니다. 수강 이수 상태를 먼저 변경해야 합니다.");return;}
+  if(!window.confirm(student.full_name+" 학생의 이 과목 성적을 삭제할까요?"))return;
   setSaving(true);setError("");setNotice("");
   try{const {error}=await db.from("academic_grades").delete().eq("student_id",student.id).eq("course_id",courseId).eq("term_id",termId);if(error)throw error;setNotice("성적을 삭제했습니다.");await load();}
   catch(err:any){setError(err?.message||"성적 삭제에 실패했습니다.");}

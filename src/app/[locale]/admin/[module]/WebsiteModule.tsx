@@ -40,9 +40,10 @@ export default function WebsiteModule(){
   try{
    const {data:{user}}=await db.auth.getUser();
    const rows=pageFields.map((field,index)=>({content_type:"page",content_key:field.key,locale,title:pageValues[field.key]?.title||"",body:pageValues[field.key]?.body||"",is_published:true,sort_order:index,updated_by:user?.id??null}));
-   const {error}=await db.from("website_contents").upsert(rows,{onConflict:"content_type,content_key,locale"});
+   const {data:saved,error}=await db.from("website_contents").upsert(rows,{onConflict:"content_type,content_key,locale"}).select("content_key,locale,title,body,is_published");
    if(error)throw error;
-   setNotice("페이지 콘텐츠를 저장하고 홈페이지에 게시했습니다.");await load();
+   if(!saved||saved.length!==rows.length||saved.some(row=>{const expected=rows.find(x=>x.content_key===row.content_key&&x.locale===row.locale);return !expected||row.title!==expected.title||row.body!==expected.body||row.is_published!==true;}))throw new Error("일부 홈페이지 콘텐츠 저장 결과를 확인할 수 없습니다.");
+   setNotice("페이지 콘텐츠 저장 및 게시 결과를 확인했습니다.");await load();
   }catch(e:any){setError(e?.message||"저장하지 못했습니다.");}
   finally{setSaving(false);}
  }

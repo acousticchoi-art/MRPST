@@ -7,6 +7,7 @@ type Department={id:string;code:string;name_en:string;name_ko:string|null;name_m
 type Term={id:string;term_code:string;name:string;academic_year:number;status:string};
 type Student={id:string;student_number:string;full_name:string;program_code:string|null;cohort:string|null;student_status:string};
 type Course={id:string;course_code:string;title:string;department_id:string|null;level:string|null;is_active:boolean};
+type Enrollment={student_id:string;course_id:string;term_id:string;enrollment_status:string};
 type Grade={id:string;student_id:string;course_id:string;term_id:string;score:number|null;grade:string|null;remarks:string|null;updated_at:string;entered_by:string|null};
 
 const roleCanEnter=["super_admin","administrator","academic_officer"];
@@ -19,6 +20,7 @@ export default function GradeManagementModule(){
  const [students,setStudents]=useState<Student[]>([]);
  const [courses,setCourses]=useState<Course[]>([]);
  const [grades,setGrades]=useState<Grade[]>([]);
+ const [enrollments,setEnrollments]=useState<Enrollment[]>([]);
  const [termId,setTermId]=useState("");
  const [departmentId,setDepartmentId]=useState("");
  const [level,setLevel]=useState("");
@@ -44,18 +46,19 @@ export default function GradeManagementModule(){
    const roleResult=await db.from("user_roles").select("role").eq("user_id",user.id);
    if(roleResult.error)throw roleResult.error;
    setCanManage((roleResult.data??[]).some((r:any)=>roleCanEnter.includes(r.role)));
-   const [d,t,s,c,g]=await Promise.all([
+   const [d,t,s,c,g,e]=await Promise.all([
     db.from("departments").select("id,code,name_en,name_ko,name_my").eq("is_active",true).order("code"),
     db.from("academic_terms").select("id,term_code,name,academic_year,status").order("academic_year",{ascending:false}).order("term_code",{ascending:false}),
     db.from("students").select("id,student_number,full_name,program_code,cohort,student_status").order("full_name"),
     db.from("academic_courses").select("id,course_code,title,department_id,level,is_active").eq("is_active",true).order("course_code"),
-    db.from("academic_grades").select("id,student_id,course_id,term_id,score,grade,remarks,updated_at,entered_by").order("updated_at",{ascending:false})
+    db.from("academic_grades").select("id,student_id,course_id,term_id,score,grade,remarks,updated_at,entered_by").order("updated_at",{ascending:false}),
+    db.from("academic_enrollments").select("student_id,course_id,term_id,enrollment_status")
    ]);
-   const errors=[d.error,t.error,s.error,c.error,g.error].filter(Boolean).map((x:any)=>x.message);
+   const errors=[d.error,t.error,s.error,c.error,g.error,e.error].filter(Boolean).map((x:any)=>x.message);
    if(errors.length)throw new Error(errors.join(" · "));
    const nextTerms=(t.data??[]) as Term[];
    const nextDepartments=(d.data??[]) as Department[];
-   setDepartments(nextDepartments);setTerms(nextTerms);setStudents((s.data??[]) as Student[]);setCourses((c.data??[]) as Course[]);setGrades((g.data??[]) as Grade[]);
+   setDepartments(nextDepartments);setTerms(nextTerms);setStudents((s.data??[]) as Student[]);setCourses((c.data??[]) as Course[]);setGrades((g.data??[]) as Grade[]);setEnrollments((e.data??[]) as Enrollment[]);
    if(!termId&&nextTerms.length){setTermId((nextTerms.find(x=>x.status==="active")??nextTerms[0]).id);}
    
   }catch(err:any){setError(err?.message||"성적 데이터를 불러오지 못했습니다.");}
@@ -78,7 +81,7 @@ export default function GradeManagementModule(){
  const gradeByKey=useMemo(()=>new Map(termGrades.map(x=>[x.student_id+"|"+x.course_id,x])),[termGrades]);
  const selectedStudent=students.find(x=>x.id===selectedStudentId);
  const studentCourses=visibleCourses.map(course=>({course,grade:gradeByKey.get(selectedStudentId+"|"+course.id)}));
- const inputStudents=useMemo(()=>courseId?visibleStudents:[],[courseId,visibleStudents]);
+ const inputStudents=useMemo(()=>courseId&&termId?visibleStudents.filter(student=>enrollments.some(e=>e.student_id===student.id&&e.course_id===courseId&&e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status))):[],[courseId,termId,visibleStudents,enrollments]);
  const currentCourse=visibleCourses.find(x=>x.id===courseId);
  useEffect(()=>{
   const next:Record<string,string>={};

@@ -80,7 +80,7 @@ export default function GradeManagementModule(){
  const termGrades=useMemo(()=>grades.filter(x=>x.term_id===termId),[grades,termId]);
  const gradeByKey=useMemo(()=>new Map(termGrades.map(x=>[x.student_id+"|"+x.course_id,x])),[termGrades]);
  const selectedStudent=students.find(x=>x.id===selectedStudentId);
- const studentCourses=visibleCourses.map(course=>({course,grade:gradeByKey.get(selectedStudentId+"|"+course.id)}));
+ const studentCourses=visibleCourses.filter(course=>enrollments.some(e=>e.student_id===selectedStudentId&&e.course_id===course.id&&e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status))).map(course=>({course,grade:gradeByKey.get(selectedStudentId+"|"+course.id)}));
  const inputStudents=useMemo(()=>courseId&&termId?visibleStudents.filter(student=>enrollments.some(e=>e.student_id===student.id&&e.course_id===courseId&&e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status))):[],[courseId,termId,visibleStudents,enrollments]);
  const currentCourse=visibleCourses.find(x=>x.id===courseId);
  useEffect(()=>{
@@ -120,11 +120,12 @@ export default function GradeManagementModule(){
  };
 
  const stats=useMemo(()=>{
-  const entered=visibleStudents.reduce((sum,student)=>sum+visibleCourses.filter(course=>gradeByKey.has(student.id+"|"+course.id)).length,0);
-  const possible=visibleStudents.length*visibleCourses.length;
-  const scores=visibleStudents.flatMap(student=>visibleCourses.map(course=>gradeByKey.get(student.id+"|"+course.id)?.score).filter((v):v is number=>v!==null&&v!==undefined));
+  const eligible=enrollments.filter(e=>e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status)&&visibleStudents.some(s=>s.id===e.student_id)&&visibleCourses.some(c=>c.id===e.course_id));
+  const entered=eligible.filter(e=>gradeByKey.has(e.student_id+"|"+e.course_id)).length;
+  const possible=eligible.length;
+  const scores=eligible.map(e=>gradeByKey.get(e.student_id+"|"+e.course_id)?.score).filter((v):v is number=>v!==null&&v!==undefined);
   return {students:visibleStudents.length,courses:visibleCourses.length,entered,missing:Math.max(0,possible-entered),average:scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null};
- },[visibleStudents,visibleCourses,gradeByKey]);
+ },[enrollments,termId,visibleStudents,visibleCourses,gradeByKey]);
 
  return <div className={styles.workspace}>
   <div className={styles.heading}>

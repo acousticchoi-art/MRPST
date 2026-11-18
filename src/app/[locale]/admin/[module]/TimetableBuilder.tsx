@@ -9,7 +9,7 @@ const blankEvent={day_of_week:"1",start_time:"07:00",end_time:"07:30",title:"",n
 const time=(v:string)=>String(v||"").slice(0,5);
 const dayName=(n:number)=>["","월요일","화요일","수요일","목요일","금요일","토요일"][n]||"";
 
-export default function TimetableBuilder({canManage}:{canManage:boolean}){
+export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage:boolean;mutationsEnabled:boolean}){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [terms,setTerms]=useState<Row[]>([]),[departments,setDepartments]=useState<Row[]>([]),[courses,setCourses]=useState<Row[]>([]),[instructors,setInstructors]=useState<Row[]>([]);
  const [entries,setEntries]=useState<Row[]>([]),[events,setEvents]=useState<Row[]>([]);
@@ -59,7 +59,7 @@ export default function TimetableBuilder({canManage}:{canManage:boolean}){
   setError("");setModal(true);
  };
  const save=async()=>{
-  if(!db)return;setSaving(true);setError("");
+  if(!db||!mutationsEnabled){setNotice("학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다.");return;}setSaving(true);setError("");
   try{
    const {data:{user}}=await db.auth.getUser();
    const common={term_id:termId,department_id:departmentId,day_of_week:Number(form.day_of_week),start_time:form.start_time,end_time:form.end_time};
@@ -94,12 +94,12 @@ export default function TimetableBuilder({canManage}:{canManage:boolean}){
   }catch(e:any){setError(e.message||"저장하지 못했습니다.");}finally{setSaving(false);}
  };
  const remove=async(id:string,type:"course"|"event")=>{
-  if(!db||!window.confirm("이 항목을 삭제할까요?"))return;
+  if(!db||!mutationsEnabled){setNotice("학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다.");return;}if(!window.confirm("이 항목을 삭제할까요?"))return;
   const {error:e}=await db.from(type==="event"?"academic_timetable_events":"academic_timetable_entries").delete().eq("id",id);
   if(e)setError(e.message);else{setNotice("항목을 삭제했습니다.");await load();}
  };
  const copySchedule=async()=>{
-  if(!db||!copyFrom||copyFrom===termId)return;
+  if(!db||!mutationsEnabled){setNotice("학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다.");return;}if(!copyFrom||copyFrom===termId)return;
   if(!window.confirm("선택한 학기의 시간표를 현재 학기로 복사할까요? 현재 학기에 이미 등록된 항목은 유지되고, 기존 항목과 시간이 완전히 같은 복사 항목은 건너뜁니다."))return;
   setSaving(true);setError("");
   try{
@@ -126,10 +126,11 @@ export default function TimetableBuilder({canManage}:{canManage:boolean}){
  };
  const print=()=>window.print();
  return <div className="timetable-workspace">
-  <div className="timetable-heading"><div><span className="eyebrow">ACADEMIC TIMETABLE</span><h2>강의 시간표 편성</h2><p>학기마다 요일과 시간을 자유롭게 편성합니다. 이전 학기 시간표는 복사한 뒤 수정할 수 있습니다.</p></div><div className="timetable-actions"><button className="timetable-secondary" onClick={print}>PDF / 인쇄</button>{canManage&&<><button className="timetable-secondary" onClick={()=>startEdit(undefined,"event")}>＋ 공통 일정</button><button className="timetable-primary" onClick={()=>startEdit()}>＋ 강의 배치</button></>}</div></div>
+  <div className="timetable-heading"><div><span className="eyebrow">ACADEMIC TIMETABLE</span><h2>강의 시간표 편성</h2><p>학기마다 요일과 시간을 자유롭게 편성합니다. 이전 학기 시간표는 복사한 뒤 수정할 수 있습니다.</p></div><div className="timetable-actions"><button className="timetable-secondary" onClick={print}>PDF / 인쇄</button>{canManage&&mutationsEnabled&&<><button className="timetable-secondary" onClick={()=>startEdit(undefined,"event")}>＋ 공통 일정</button><button className="timetable-primary" onClick={()=>startEdit()}>＋ 강의 배치</button></>}</div></div>
   <div className="timetable-filters"><label>학기<select value={termId} onChange={e=>setTermId(e.target.value)}>{terms.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><label>학과<select value={departmentId} onChange={e=>setDepartmentId(e.target.value)}>{departments.map(x=><option key={x.id} value={x.id}>{x.name_ko||x.name_en||x.code}</option>)}</select></label></div>
-  {canManage&&<div className="timetable-copy-row"><label>복사할 이전 학기<select value={copyFrom} onChange={e=>setCopyFrom(e.target.value)}><option value="">학기 선택</option>{terms.filter(x=>x.id!==termId).map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><button className="timetable-secondary" disabled={!copyFrom||saving} onClick={()=>void copySchedule()}>선택 학기 시간표 복사</button></div>}
-  {error&&<div className="academics-alert error">{error}</div>}{notice&&<div className="academics-alert">{notice}</div>}
+  {canManage&&mutationsEnabled&&<div className="timetable-copy-row"><label>복사할 이전 학기<select value={copyFrom} onChange={e=>setCopyFrom(e.target.value)}><option value="">학기 선택</option>{terms.filter(x=>x.id!==termId).map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><button className="timetable-secondary" disabled={!copyFrom||saving} onClick={()=>void copySchedule()}>선택 학기 시간표 복사</button></div>}
+  {!mutationsEnabled&&<div className="academics-alert">학사 데이터 변경 기능은 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다. 현재는 조회만 가능합니다.</div>}
+{error&&<div className="academics-alert error">{error}</div>}{notice&&<div className="academics-alert">{notice}</div>}
   <div className="timetable-paper">
    <header className="timetable-paper-title"><h1>MRPST LECTURE SCHEDULE ({selectedDepartment?.code==="ECE"?"E.C.E":"Theology"})</h1><strong>{selectedTerm?.name||"학기를 선택해 주세요"}</strong><span>{selectedDepartment?.name_en||""}</span></header>
    {loading?<p className="academics-empty">시간표를 불러오는 중입니다.</p>:<div className="timetable-scroll"><table className="timetable-grid"><thead><tr><th>TIME / DAY</th>{days.map(d=><th key={d.value}>{d.label}</th>)}</tr></thead><tbody>

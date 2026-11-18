@@ -69,7 +69,7 @@ export default function AdministrationModule(){
   if(selected.roles.some(r=>r.role===role&&r.department_id===(depId||null))){setError("이미 동일한 역할과 부서가 지정되어 있습니다.");return;}
   void run(async()=>{const {data,error}=await db!.from("user_roles").insert({user_id:selected.user_id,role,department_id:depId||null}).select("id").single();if(error)throw error;if(!data?.id)throw new Error("역할이 저장되지 않았습니다.");return data;},"역할을 추가했습니다.");
  };
- const toggle=(p:P)=>void run(()=>db!.rpc("mrpst_set_user_active",{target_user:p.user_id,make_active:!p.is_active}),p.is_active?"계정을 비활성화했습니다.":"계정을 활성화했습니다.");
+ const toggle=(p:P)=>void run(async()=>{const desired=!p.is_active;const {error}=await db!.rpc("mrpst_set_user_active",{target_user:p.user_id,make_active:desired});if(error)throw error;const {data:verify,error:verifyError}=await db!.from("user_profiles").select("is_active").eq("user_id",p.user_id).maybeSingle();if(verifyError)throw verifyError;if(!verify||verify.is_active!==desired)throw new Error("계정 상태 변경 결과를 확인할 수 없습니다.");return verify;},p.is_active?"계정을 비활성화했습니다.":"계정을 활성화했습니다.");
  async function savePagePermissions(){
   if(!selected||!db)return;
   const {data:{user}}=await db.auth.getUser();

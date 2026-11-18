@@ -1,5 +1,5 @@
--- Canonical promotion and graduation guards after the 20261118001800 history-trigger fix.
--- Definitions are the verified live functions; retain exact academic-year/term checks.
+-- Final canonical promotion and graduation guards after migrations 01100-01800.
+-- Preserves cohort semester numbering, exact term validation, and trigger-owned status history.
 CREATE OR REPLACE FUNCTION public.mrpst_approve_student_promotion(p_batch_id uuid)
  RETURNS integer
  LANGUAGE plpgsql
@@ -23,9 +23,8 @@ begin
       or not exists(select 1 from public.student_term_enrollments e where e.student_id=s.id and e.academic_year=v_academic_year and e.term_number=2
         and e.semester_number=case i.from_cohort when 'First Year' then 2 when 'Second Year' then 4 when 'Third Year' then 6 when 'Fourth Year' then 8 else null end and e.enrollment_status='completed'))
   ) then raise exception '진급 명단 생성 후 학생 학적 또는 개인별 1·2학기 이수 상태가 변경되었습니다. 명단을 다시 확인해 주세요.'; end if;
-
   update public.students s set cohort=i.to_cohort,
-    current_semester=greatest(coalesce(s.current_semester,0),case i.to_cohort when 'Second Year' then 2 when 'Third Year' then 4 when 'Fourth Year' then 6 else 0 end),
+    current_semester=greatest(coalesce(s.current_semester,0),case i.to_cohort when 'Second Year' then 3 when 'Third Year' then 5 when 'Fourth Year' then 7 else 0 end),
     updated_at=now()
   from public.student_promotion_items i where i.batch_id=p_batch_id and i.student_id=s.id
     and i.decision='promote' and s.student_status='active' and s.cohort is not distinct from i.from_cohort;
@@ -56,7 +55,7 @@ declare v_student_id uuid; v_batch_status text; v_decision text; v_student_statu
   v_program_code text; v_program text; v_current_semester smallint; v_max_semester smallint; v_graduation_id uuid;
 begin
   if not public.mrpst_can_manage_academics() then raise exception '졸업 확정 권한이 없습니다.'; end if;
-  if p_graduation_year<2000 or p_graduation_year>2200 then raise exception '졸업 연도가 올바르지 않습니다.'; end if;
+  if p_graduation_year not between 2000 and 2200 then raise exception '졸업 연도가 올바르지 않습니다.'; end if;
   if p_graduation_term not in (1,2) then raise exception '졸업 학기는 1학기 또는 2학기여야 합니다.'; end if;
   select i.student_id,i.decision,b.status into v_student_id,v_decision,v_batch_status
   from public.student_promotion_items i join public.student_promotion_batches b on b.id=i.batch_id
@@ -85,7 +84,7 @@ begin
     graduation_date=p_graduation_date,graduation_number=nullif(trim(p_graduation_number),''),updated_at=now() where id=v_student_id;
   update public.student_status_history set effective_date=coalesce(p_graduation_date,current_date),reason='정식 졸업 확정'
   where id=(select id from public.student_status_history where student_id=v_student_id and previous_status='active'
-    and new_status='graduated' and created_at>=transaction_timestamp() order by created_at desc limit 1);
+    and new_status='graduated' and changed_by=auth.uid() and created_at>=transaction_timestamp() order by created_at desc limit 1);
   return v_graduation_id;
 end;
 $function$

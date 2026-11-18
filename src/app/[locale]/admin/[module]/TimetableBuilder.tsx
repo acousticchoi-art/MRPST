@@ -83,11 +83,11 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
    if(editingType==="event"){
     if(!form.title.trim())throw new Error("일정명을 입력해 주세요.");
     const payload={...common,title:form.title.trim(),notes:form.notes.trim()||null};
-    result=editing?await db.from("academic_timetable_events").update(payload).eq("id",editing):await db.from("academic_timetable_events").insert({...payload,created_by:user.id});
+    result=editing?await db.from("academic_timetable_events").update(payload).eq("id",editing).select("id").single():await db.from("academic_timetable_events").insert({...payload,created_by:user.id}).select("id").single();
    }else{
     if(!form.course_id)throw new Error("과목을 선택해 주세요.");
     const payload={...common,course_id:form.course_id,instructor_id:form.instructor_id||null,class_group:form.class_group.trim(),room:form.room.trim()||null,notes:form.notes.trim()||null};
-    result=editing?await db.from("academic_timetable_entries").update(payload).eq("id",editing):await db.from("academic_timetable_entries").insert({...payload,created_by:user.id});
+    result=editing?await db.from("academic_timetable_entries").update(payload).eq("id",editing).select("id").single():await db.from("academic_timetable_entries").insert({...payload,created_by:user.id}).select("id").single();
    }
    if(result.error)throw result.error;
    setModal(false);setNotice(editing?"시간표 항목을 수정했습니다.":"시간표 항목을 등록했습니다.");await load();

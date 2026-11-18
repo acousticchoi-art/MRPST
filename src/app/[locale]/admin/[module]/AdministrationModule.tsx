@@ -109,7 +109,7 @@ export default function AdministrationModule(){
    const existing=selected.permissions.find(permission=>permission.module_key===option.key);
    return {user_id:selected.user_id,module_key:option.key,can_view:selectedPageKeys.includes(option.key),can_manage:existing?.can_manage??hasRoleManageAccess(selected.roles,option.key),assigned_by:user?.id??null,updated_at:new Date().toISOString()};
   });
-  await run(async()=>{const {data,error}=await db.from("user_module_permissions").upsert(rows,{onConflict:"user_id,module_key"}).select("module_key");if(error)throw error;if((data??[]).length!==pageOptions.length)throw new Error("일부 페이지 권한이 저장되지 않았습니다.");return data;},"페이지 표시 설정을 저장했습니다.");
+  await run(async()=>{const {data,error}=await db.from("user_module_permissions").upsert(rows,{onConflict:"user_id,module_key"}).select("module_key,can_view");if(error)throw error;if(!data||data.length!==rows.length||data.some(saved=>{const expected=rows.find(row=>row.module_key===saved.module_key);return !expected||saved.can_view!==expected.can_view;}))throw new Error("일부 페이지 권한 저장 결과가 입력한 설정과 일치하지 않습니다.");return data;},"페이지 표시 설정을 저장했습니다.");
  }
  const tabs=[["users","계정 관리"],["departments","부서 관리"],["audit","변경 이력"]];
  return <div className="settings-workspace">

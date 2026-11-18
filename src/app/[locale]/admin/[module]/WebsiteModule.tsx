@@ -12,7 +12,7 @@ const pageFields=[
  {key:"address",label:"학교 주소",hint:"메인 화면 하단에 표시할 주소"}
 ] as const;
 const locales=[{value:"ko",label:"한국어"},{value:"my",label:"မြန်မာ"}];
-export default function WebsiteModule(){
+export default function WebsiteModule({canManage}:{canManage:boolean}){
  const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED==="true";
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [items,setItems]=useState<Entry[]>([]);
@@ -35,6 +35,7 @@ export default function WebsiteModule(){
  }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[locale]);
  useEffect(()=>{void load();},[load]);
  async function savePages(){
+  if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}
   if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}
   if(!db)return;setSaving(true);setError("");setNotice("");
   try{
@@ -48,6 +49,7 @@ export default function WebsiteModule(){
   finally{setSaving(false);}
  }
  async function saveNotice(){
+  if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}
   if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}
   if(!db||!noticeTitle.trim()||!noticeBody.trim()){setError("공지 제목과 내용을 입력해 주세요.");return;}
   setSaving(true);setError("");setNotice("");
@@ -63,8 +65,8 @@ export default function WebsiteModule(){
  }
  function resetNotice(){setEditingId("");setNoticeTitle("");setNoticeBody("");setNoticeLocale("ko");setNoticePublished(true);}
  function editNotice(item:Entry){setEditingId(item.id);setNoticeTitle(item.title);setNoticeBody(item.body);setNoticeLocale(item.locale);setNoticePublished(item.is_published);}
- async function toggleNotice(item:Entry){if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!db)return;setSaving(true);setError("");try{const {data:verified,error}=await db.from("website_contents").update({is_published:!item.is_published}).eq("id",item.id).select("id,is_published").single();if(error)throw error;if(!verified||verified.id!==item.id||verified.is_published===item.is_published)throw new Error("공지 게시 상태 변경 결과를 확인할 수 없습니다.");setNotice(item.is_published?"공지사항 게시를 중단했습니다.":"공지사항을 게시했습니다.");await load();}catch(e:any){setError(e?.message||"상태를 변경하지 못했습니다.");}finally{setSaving(false);}}
- async function deleteNotice(item:Entry){if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!db||!window.confirm("이 공지사항을 삭제할까요?"))return;setSaving(true);setError("");try{const {data:deleted,error}=await db.from("website_contents").delete().eq("id",item.id).select("id").maybeSingle();if(error)throw error;if(!deleted?.id||deleted.id!==item.id)throw new Error("삭제된 공지사항을 확인할 수 없습니다.");setNotice("공지사항을 삭제했습니다.");await load();}catch(e:any){setError(e?.message||"삭제하지 못했습니다.");}finally{setSaving(false);}}
+ async function toggleNotice(item:Entry){if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!db)return;setSaving(true);setError("");try{const {data:verified,error}=await db.from("website_contents").update({is_published:!item.is_published}).eq("id",item.id).select("id,is_published").single();if(error)throw error;if(!verified||verified.id!==item.id||verified.is_published===item.is_published)throw new Error("공지 게시 상태 변경 결과를 확인할 수 없습니다.");setNotice(item.is_published?"공지사항 게시를 중단했습니다.":"공지사항을 게시했습니다.");await load();}catch(e:any){setError(e?.message||"상태를 변경하지 못했습니다.");}finally{setSaving(false);}}
+ async function deleteNotice(item:Entry){if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!db||!window.confirm("이 공지사항을 삭제할까요?"))return;setSaving(true);setError("");try{const {data:deleted,error}=await db.from("website_contents").delete().eq("id",item.id).select("id").maybeSingle();if(error)throw error;if(!deleted?.id||deleted.id!==item.id)throw new Error("삭제된 공지사항을 확인할 수 없습니다.");setNotice("공지사항을 삭제했습니다.");await load();}catch(e:any){setError(e?.message||"삭제하지 못했습니다.");}finally{setSaving(false);}}
  const notices=items.filter(x=>x.content_type==="announcement").sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
  return <div className="website-workspace website-workspace-v2">
   <div className="website-heading website-heading-v2">

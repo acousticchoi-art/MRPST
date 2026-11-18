@@ -86,6 +86,8 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   }
   if(accessDenied) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>{t.denied}</h1><p className="login-intro">{t.deniedText}</p><Link className="btn secondary" href={`/${locale}`}>{t.back}</Link></section></main>;
   const visible=Object.entries(MODULES).filter(([key])=>!supabase||canAccessModule(roles,key as keyof typeof MODULES,moduleOverrides));
+  const canAccessAcademics=visible.some(([key])=>key==="academics");
+  const canAccessWebsite=visible.some(([key])=>key==="website");
   const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
   const weekStartDate=new Date(today+"T12:00:00");
   weekStartDate.setDate(weekStartDate.getDate()-(weekStartDate.getDay()+6)%7);
@@ -147,11 +149,11 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
         </section>
         <div className="dashboard-columns">
           <section className="dashboard-panel dashboard-schedule">
-            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</span><h2>{lang==="ko"?"다가오는 일정":"လာမည့် အစီအစဉ်များ"}</h2></div><Link href={`/${locale}/admin/academics`}>{lang==="ko"?"일정 관리 →":"စီမံခန့်ခွဲရန် →"}</Link></div>
+            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</span><h2>{lang==="ko"?"다가오는 일정":"လာမည့် အစီအစဉ်များ"}</h2></div>{canAccessAcademics&&<Link href={`/${locale}/admin/academics`}>{lang==="ko"?"일정 관리 →":"စီမံခန့်ခွဲရန် →"}</Link>}</div>
             {upcomingEvents.length? <div className="dashboard-event-list">{upcomingEvents.map((event:any)=><article key={event.id}><time>{event.start_date}{event.start_time?" · "+String(event.start_time).slice(0,5):""}</time><div><strong>{event.title}</strong>{event.location&&<small>{event.location}</small>}</div></article>)}</div>:<p className="dashboard-empty">{lang==="ko"?"예정된 일정이 없습니다.":"မှတ်ပုံတင်ထားသော အစီအစဉ် မရှိသေးပါ။"}</p>}
           </section>
           <section className="dashboard-panel dashboard-announcements">
-            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"MRPST NEWS":"MRPST NEWS"}</span><h2>{lang==="ko"?"최근 공지사항":"နောက်ဆုံး ကြေညာချက်များ"}</h2></div><Link href={`/${locale}/admin/website`}>{lang==="ko"?"공지사항 관리 →":"စီမံခန့်ခွဲရန် →"}</Link></div>
+            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"MRPST NEWS":"MRPST NEWS"}</span><h2>{lang==="ko"?"최근 공지사항":"နောက်ဆုံး ကြေညာချက်များ"}</h2></div>{canAccessWebsite&&<Link href={`/${locale}/admin/website`}>{lang==="ko"?"공지사항 관리 →":"စီမံခန့်ခွဲရန် →"}</Link>}</div>
             {recentAnnouncements.length?<div className="dashboard-announcement-list">{recentAnnouncements.map((item:any)=><article key={item.content_key}><div><strong>{item.title}</strong><p>{item.body}</p></div><span className={item.is_published?"published":"draft"}>{item.is_published?(lang==="ko"?"게시":"Published"):(lang==="ko"?"임시저장":"Draft")}</span></article>)}</div>:<p className="dashboard-empty">{lang==="ko"?"등록된 공지사항이 없습니다.":"ကြေညာချက် မရှိသေးပါ။"}</p>}
           </section>
         </div>

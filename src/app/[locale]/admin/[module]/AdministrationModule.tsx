@@ -26,7 +26,6 @@ function hasRoleManageAccess(userRoles:UserRole[],moduleKey:string){
  return userRoles.some(userRole=>userRole.role==="super_admin"||userRole.role==="administrator"||(manageRolesByPage[moduleKey]||[]).includes(userRole.role));
 }
 export default function AdministrationModule(){
- const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED==="true";
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [users,setUsers]=useState<P[]>([]),[deps,setDeps]=useState<D[]>([]),[logs,setLogs]=useState<any[]>([]);
  const [tab,setTab]=useState("users"),[search,setSearch]=useState(""),[statusFilter,setStatusFilter]=useState("all");
@@ -49,9 +48,8 @@ export default function AdministrationModule(){
  }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[]);
  useEffect(()=>{void load();},[load]);
  async function invokeAdmin(body:Record<string,unknown>){const response=await fetch("/api/admin/manage-user",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(body),cache:"no-store"});const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));if(!response.ok||data?.error)throw new Error(data?.error||`계정 관리 요청 실패 (HTTP ${response.status})`);return data;}
- async function createAccount(){if(!mutationsEnabled){setCreateError("계정 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!newUser.full_name.trim()||!newUser.email.trim()||newUser.password.length<8){setCreateError("이름, 이메일, 8자 이상의 비밀번호를 입력해 주세요.");return;}setSaving(true);setCreateError("");try{const result=await invokeAdmin({action:"create",...newUser,full_name:newUser.full_name.trim(),email:newUser.email.trim()});if(!result?.user_id)throw new Error("계정 생성 결과를 확인할 수 없습니다.");setNotice("새 계정을 생성했습니다.");setCreateOpen(false);setNewUser({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""});await load();}catch(e:any){setCreateError(e?.message||"계정을 생성하지 못했습니다. 입력한 내용은 유지됩니다.");}finally{setSaving(false);}}
+ async function createAccount(){if(!newUser.full_name.trim()||!newUser.email.trim()||newUser.password.length<8){setCreateError("이름, 이메일, 8자 이상의 비밀번호를 입력해 주세요.");return;}setSaving(true);setCreateError("");try{const result=await invokeAdmin({action:"create",...newUser,full_name:newUser.full_name.trim(),email:newUser.email.trim()});if(!result?.user_id)throw new Error("계정 생성 결과를 확인할 수 없습니다.");setNotice("새 계정을 생성했습니다.");setCreateOpen(false);setNewUser({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""});await load();}catch(e:any){setCreateError(e?.message||"계정을 생성하지 못했습니다. 입력한 내용은 유지됩니다.");}finally{setSaving(false);}}
  async function run(fn:()=>any,msg:string){
-  if(!mutationsEnabled){setError("계정·권한 데이터 변경은 개발 안전 잠금이 활성화되어 있습니다.");return false;}
   setSaving(true);setError("");setNotice("");
   try{const r=await fn();if(r?.error)throw r.error;setNotice(msg);await load();return true;}
   catch(e:any){setError(e?.message||"처리하지 못했습니다.");return false;}

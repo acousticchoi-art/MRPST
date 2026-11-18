@@ -13,7 +13,7 @@ export async function GET() {
 
   const [students,enrollments,grades,scholarships,graduations,statusHistory] = await Promise.all([
     supabase.from("students")
-      .select("id,auth_user_id,program_code,student_number,full_name,full_name_my,full_name_en,gender,date_of_birth,admission_year,program,cohort,student_status,phone,email,guardian_name,guardian_phone,notes,graduation_year,graduation_term,graduation_date,graduation_number")
+      .select("id,auth_user_id,program_code,current_semester,student_number,full_name,full_name_my,full_name_en,gender,date_of_birth,admission_year,program,cohort,student_status,phone,email,guardian_name,guardian_phone,notes,graduation_year,graduation_term,graduation_date,graduation_number")
       .order("student_number"),
     supabase.from("academic_enrollments")
       .select("id,student_id,course_id,term_id,enrollment_status,academic_courses(course_code,title,credits),academic_terms(academic_year,name,term_code)")

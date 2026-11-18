@@ -126,9 +126,9 @@ export default function GradeManagementModule(){
 
  const stats=useMemo(()=>{
   const eligible=enrollments.filter(e=>e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status)&&visibleStudents.some(s=>s.id===e.student_id)&&visibleCourses.some(c=>c.id===e.course_id));
-  const entered=eligible.filter(e=>gradeByKey.has(e.student_id+"|"+e.course_id)).length;
-  const possible=eligible.length;
   const scores=eligible.map(e=>gradeByKey.get(e.student_id+"|"+e.course_id)?.score).filter((v):v is number=>v!==null&&v!==undefined);
+  const entered=scores.length;
+  const possible=eligible.length;
   return {students:visibleStudents.length,courses:visibleCourses.length,entered,missing:Math.max(0,possible-entered),average:scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null};
  },[enrollments,termId,visibleStudents,visibleCourses,gradeByKey]);
 

@@ -92,9 +92,12 @@ export default function GradeManagementModule(){
 
  const exportCsv=()=>{
   const rows=[["Serial No.","Student Name","Department","Year","Average Score","Entered Subjects","Total Subjects"],...visibleStudents.map(student=>{
-   const scores=visibleCourses.map(course=>gradeByKey.get(student.id+"|"+course.id)?.score).filter((v):v is number=>v!==null&&v!==undefined);
+   const studentEnrollments=enrollments.filter(e=>e.student_id===student.id&&e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status));
+   const enrolledCourseIds=[...new Set(studentEnrollments.map(e=>e.course_id))];
+   const scores=enrolledCourseIds.map(id=>gradeByKey.get(student.id+"|"+id)?.score).filter((v):v is number=>v!==null&&v!==undefined);
    const average=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null;
-   return [student.student_number,student.full_name,department?.name_en||department?.code,student.cohort,average===null?"":average.toFixed(2),scores.length,visibleCourses.length];
+   const studentDepartment=departments.find(d=>d.code.toLowerCase()===String(student.program_code||"").toLowerCase());
+   return [student.student_number,student.full_name,studentDepartment?.name_en||studentDepartment?.code||student.program_code,student.cohort,average===null?"":average.toFixed(2),scores.length,enrolledCourseIds.length];
   })];
   const blob=new Blob(["\uFEFF"+rows.map(row=>row.map(csvCell).join(",")).join("\r\n")],{type:"text/csv;charset=utf-8"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="MRPST_"+(terms.find(x=>x.id===termId)?.term_code||"grades")+"_grades.csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);

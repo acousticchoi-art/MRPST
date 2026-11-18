@@ -30,7 +30,7 @@ export default function PromotionManagement(){
   setLoading(false);
  },[db,batchId]);
  useEffect(()=>{void load();},[load]);
- const completedYears=useMemo(()=>{const m=new Map<number,number>();terms.filter(x=>x.status==="completed").forEach(x=>m.set(Number(x.academic_year),(m.get(Number(x.academic_year))||0)+1));return [...m.entries()].filter(([,n])=>n>=2).map(([y])=>y);},[terms]);
+ const completedYears=useMemo(()=>{const m=new Map<number,Set<string>>();terms.filter(x=>x.status==="completed").forEach(x=>{const term=String(x.term_code||"").match(/([12])$/)?.[1];if(!term)return;const y=Number(x.academic_year);if(!m.has(y))m.set(y,new Set<string>());m.get(y)!.add(term);});return [...m.entries()].filter(([,set])=>set.has("1")&&set.has("2")).map(([y])=>y);},[terms]);
  const selectedBatch=batches.find(x=>x.id===batchId);
  const counts=useMemo(()=>items.reduce((a,x)=>{a[x.decision]=(a[x.decision]||0)+1;return a;},{ } as Record<string,number>),[items]);
  const changeDecision=async(item:Row,decision:string)=>{

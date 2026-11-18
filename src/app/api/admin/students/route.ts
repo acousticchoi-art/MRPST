@@ -57,6 +57,7 @@ export async function GET() {
     grades:{data:academicHistory,error:enrollments.error?.message ?? grades.error?.message ?? null},
     scholarships:{data:scholarships.data ?? [],error:scholarships.error?.message ?? null},
     graduations:{data:graduations.data ?? [],error:graduations.error?.message ?? null},
-    statusHistory:{data:statusHistory.data ?? [],error:statusHistory.error?.message ?? null}
+    statusHistory:{data:statusHistory.data ?? [],error:statusHistory.error?.message ?? null},
+    canManage:access.canManage
   },{headers:{"Cache-Control":"no-store, max-age=0"}});
 }

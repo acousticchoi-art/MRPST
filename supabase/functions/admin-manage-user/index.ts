@@ -59,8 +59,8 @@ Deno.serve(async (req: Request) => {
   const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", caller.id);
   const callerRoles = (roles ?? []).map((item: { role: string }) => item.role);
   const isSuperAdmin = callerRoles.includes("super_admin");
-  const canIssueStudent = isSuperAdmin || callerRoles.some((role: string) => ["administrator", "student_officer", "academic_officer"].includes(role));
-  if (profile?.is_active !== true || !canIssueStudent) return json({ error: "학생 계정 발급 권한이 필요합니다." }, 403);
+  const { data: canManageStudents, error: permissionError } = await admin.rpc("mrpst_can_manage_module", { target_user: caller.id, target_module: "students" });
+  if (profile?.is_active !== true || permissionError || canManageStudents !== true) return json({ error: "학생 계정 발급 권한이 필요합니다." }, 403);
 
   try {
     const body = await req.json();

@@ -10,10 +10,9 @@ type Course={id:string;course_code:string;title:string;department_id:string|null
 type Enrollment={student_id:string;course_id:string;term_id:string;enrollment_status:string};
 type Grade={id:string;student_id:string;course_id:string;term_id:string;score:number|null;grade:string|null;remarks:string|null;updated_at:string;entered_by:string|null};
 
-const roleCanEnter=["super_admin","administrator","academic_officer"];
 const csvCell=(value:unknown)=>'"'+String(value??"").replace(/"/g,'""')+'"';
 
-export default function GradeManagementModule(){
+export default function GradeManagementModule({canManage}:{canManage:boolean}){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]); const academicMutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED==="true";
  const [departments,setDepartments]=useState<Department[]>([]);
  const [terms,setTerms]=useState<Term[]>([]);
@@ -29,7 +28,6 @@ export default function GradeManagementModule(){
  const [search,setSearch]=useState("");
  const [selectedStudentId,setSelectedStudentId]=useState("");
  const [inputValues,setInputValues]=useState<Record<string,string>>({});
- const [canManage,setCanManage]=useState(false);
  const [currentUserId,setCurrentUserId]=useState("");
  const [loading,setLoading]=useState(true);
  const [saving,setSaving]=useState(false);
@@ -41,11 +39,8 @@ export default function GradeManagementModule(){
   setLoading(true);setError("");
   try{
    const {data:{user}}=await db.auth.getUser();
-   if(!user){setCanManage(false);setCurrentUserId("");setError("로그인이 필요합니다.");setLoading(false);return;}
+   if(!user){setCurrentUserId("");setError("로그인이 필요합니다.");setLoading(false);return;}
    setCurrentUserId(user.id);
-   const roleResult=await db.from("user_roles").select("role").eq("user_id",user.id);
-   if(roleResult.error)throw roleResult.error;
-   setCanManage((roleResult.data??[]).some((r:any)=>roleCanEnter.includes(r.role)));
    const [d,t,s,c,g,e]=await Promise.all([
     db.from("departments").select("id,code,name_en,name_ko,name_my").eq("is_active",true).order("code"),
     db.from("academic_terms").select("id,term_code,name,academic_year,status").order("academic_year",{ascending:false}).order("term_code",{ascending:false}),

@@ -19,7 +19,7 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
 
   const access=await getServerModuleAccess(moduleKey);
   if(!access.ok)return NextResponse.json({error:access.error},{status:access.status});
-  const {supabase,roles}=access;
+  const {supabase}=access;
 
   const search=request.nextUrl.searchParams;
   const from=search.get("from")||"2000-01-01";
@@ -84,7 +84,7 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
       ];
       const values=await Promise.all(queries.map(result));
       keys.forEach((key,index)=>data[key]=values[index]);
-      data.canManage=roles.some(role=>["super_admin","administrator","academic_officer"].includes(role));
+
     }else if(moduleKey==="administration"){
       const [p,d,l]=await Promise.all([
         result(supabase.from("user_profiles").select("user_id,full_name,email,preferred_locale,is_active,created_at").order("created_at",{ascending:false})),
@@ -136,6 +136,7 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
       data.items=await result(supabase.from("website_contents").select("*").order("sort_order").order("updated_at",{ascending:false}));
     }
 
+    data.canManage=access.canManage;
     return NextResponse.json(data,{headers:{"Cache-Control":"no-store, max-age=0"}});
   }catch(error:any){
     return NextResponse.json({error:error?.message||"데이터 조회 중 오류가 발생했습니다."},{status:500});

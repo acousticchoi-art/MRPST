@@ -32,7 +32,8 @@ export default function LibraryModule(){
  const setM=(k:string,v:string)=>setMemberForm((x:any)=>({...x,[k]:v}));
  const available=(book:Book)=>Math.max(0,book.total_copies-loans.filter(l=>l.book_id===book.id&&l.status==="active").length);
  const filteredBooks=books.filter(b=>!search.trim()||[b.title,b.author,b.isbn,b.category,b.shelf_location].some(v=>(v??"").toLowerCase().includes(search.toLowerCase())));
- const activeLoans=loans.filter(l=>l.status==="active");\n const loanableMembers=members.filter(m=>m.member_type!=="student"||students.some(s=>s.id===m.student_id&&s.student_status==="active"));
+ const activeLoans=loans.filter(l=>l.status==="active");
+ const loanableMembers=members.filter(m=>m.member_type!=="student"||students.some(s=>s.id===m.student_id&&s.student_status==="active"));
  const overdue=activeLoans.filter(l=>l.due_date<today());
  const saveBook=async()=>{if(!mutationsEnabled){setError("도서관 데이터 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!supabase)return;setSaving(true);setError("");try{
   const payload={isbn:bookForm.isbn.trim()||null,title:bookForm.title.trim(),author:bookForm.author.trim()||null,publisher:bookForm.publisher.trim()||null,publication_year:bookForm.publication_year?Number(bookForm.publication_year):null,category:bookForm.category.trim()||null,language:bookForm.language.trim()||null,shelf_location:bookForm.shelf_location.trim()||null,total_copies:Number(bookForm.total_copies),description:bookForm.description.trim()||null};

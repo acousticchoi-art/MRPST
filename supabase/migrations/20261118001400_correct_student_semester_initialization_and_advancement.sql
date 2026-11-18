@@ -5,8 +5,8 @@ update public.students
 set current_semester = case
   when cohort='First Year' then 1
   when cohort='Second Year' then 3
-  when cohort='Third Year' then 5
-  when cohort='Fourth Year' then 7
+  when cohort='Third Year' and program_code in ('theology','mdiv') then 5
+  when cohort='Fourth Year' and program_code='theology' and coalesce(program,'') not ilike '%diploma%' then 7
   else current_semester
 end
 where student_status='active' and current_semester is null
@@ -20,8 +20,8 @@ begin
     new.current_semester := case
       when new.cohort='First Year' then 1
       when new.cohort='Second Year' then 3
-      when new.cohort='Third Year' then 5
-      when new.cohort='Fourth Year' then 7
+      when new.cohort='Third Year' and new.program_code in ('theology','mdiv') then 5
+      when new.cohort='Fourth Year' and new.program_code='theology' and coalesce(new.program,'') not ilike '%diploma%' then 7
       else null
     end;
   end if;

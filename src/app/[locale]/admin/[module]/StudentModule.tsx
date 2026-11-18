@@ -51,11 +51,16 @@ export default function StudentModule(){
  const newProfile=()=>{setEditingStudent("");setProfile({...emptyProfile});setProfileOpen(true);};
  const editProfile=(s:Student)=>{setEditingStudent(s.id);setProfile({student_number:s.student_number,full_name:s.full_name,full_name_en:s.full_name_en??"",full_name_my:s.full_name_my??"",gender:s.gender??"unspecified",date_of_birth:s.date_of_birth??"",admission_year:s.admission_year?String(s.admission_year):"",program:s.program??(s.program_code==="ece"?"Early Childhood Education":s.program_code==="mdiv"?"Master of Divinity":s.program_code==="theology"?"Theology":""),cohort:s.cohort??"",student_status:s.student_status,phone:s.phone??"",email:s.email??"",guardian_name:s.guardian_name??"",guardian_phone:s.guardian_phone??"",notes:s.notes??""});setProfileOpen(true);};
  const saveProfile=async()=>{if(!supabase)return;setSaving(true);setError("");try{
+  const normalizedStudentNumber=profile.student_number.trim();
+  const duplicateQuery=await supabase.from("students").select("id,student_number").eq("student_number",normalizedStudentNumber).limit(1);
+  if(duplicateQuery.error)throw duplicateQuery.error;
+  const duplicate=duplicateQuery.data?.find((row:any)=>row.id!==editingStudent);
+  if(duplicate){throw new Error("이미 등록된 학번입니다. 기존 학생 정보를 확인해 주세요.");}
   const payload={student_number:profile.student_number.trim(),full_name:profile.full_name.trim(),full_name_en:profile.full_name_en.trim()||null,full_name_my:profile.full_name_my.trim()||null,gender:profile.gender,date_of_birth:profile.date_of_birth||null,admission_year:profile.admission_year?Number(profile.admission_year):null,program:profile.program.trim()||null,program_code:/early childhood|ece/i.test(profile.program)?"ece":/m\.?div|master of divinity/i.test(profile.program)?"mdiv":/theology|신학|diploma/i.test(profile.program)?"theology":null,cohort:profile.cohort.trim()||null,phone:profile.phone.trim()||null,email:profile.email.trim()||null,guardian_name:profile.guardian_name.trim()||null,guardian_phone:profile.guardian_phone.trim()||null,notes:profile.notes.trim()||null};
   if(editingStudent){const x=await supabase.from("students").update(payload).eq("id",editingStudent);if(x.error)throw x.error;setSelectedId(editingStudent);setNotice("학생 정보를 수정했습니다.");}
   else{const {data:u}=await supabase.auth.getUser();const x=await supabase.from("students").insert({...payload,created_by:u.user?.id}).select("id").single();if(x.error)throw x.error;setSelectedId(x.data.id);setNotice("학생을 등록했습니다.");}
   setProfileOpen(false);await load();
- }catch(e:any){setError(e.message??"학생 정보 저장에 실패했습니다.");}finally{setSaving(false);}};
+ }catch(e:any){setError(e.code==="23505"?"이미 등록된 학번입니다. 학번을 확인해 주세요.":e.message??"학생 정보 저장에 실패했습니다.");}finally{setSaving(false);}};
  const changeStudentStatus=async(nextStatus:"active"|"leave"|"withdrawn")=>{
   if(!supabase||!selected)return;
   const label=statusLabel[nextStatus];

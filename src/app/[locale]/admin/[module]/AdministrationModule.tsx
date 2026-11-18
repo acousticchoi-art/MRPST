@@ -59,7 +59,8 @@ export default function AdministrationModule(){
  function openUser(p:P){
   setSelectedId(p.user_id);setFullName(p.full_name||"");setPreferredLocale(p.preferred_locale==="my"?"my":"ko");setRole("staff");setDepId("");setNewPassword("");setNotice("");setError("");
   const isSuperAdmin=p.roles.some(userRole=>userRole.role==="super_admin");
-  setSelectedPageKeys(isSuperAdmin?pageOptions.map(option=>option.key):pageOptions.filter(option=>{const override=p.permissions.find(permission=>permission.module_key===option.key);return override?override.can_view:p.roles.some(userRole=>MODULES[option.key].roles.includes(userRole.role as MrpstRole));}).map(option=>option.key));
+  const isAdministrator=p.roles.some(userRole=>userRole.role==="administrator");
+  setSelectedPageKeys(isSuperAdmin||isAdministrator?pageOptions.map(option=>option.key):pageOptions.filter(option=>{const override=p.permissions.find(permission=>permission.module_key===option.key);return override?override.can_view:p.roles.some(userRole=>MODULES[option.key].roles.includes(userRole.role as MrpstRole));}).map(option=>option.key));
  }
  const actorName=(id:string|null)=>id?users.find(u=>u.user_id===id)?.full_name||"알 수 없는 사용자":"시스템 작업 · 실행자 미확인";
  const auditLabel=(x:any)=>{const b=x.details?.before||{},a=x.details?.after||{};if(x.entity_type==="user_profile")return users.find(u=>u.user_id===x.entity_id)?.full_name||a.full_name||b.full_name||x.details?.full_name||"회원";if(x.entity_type==="user_role"){const uid=a.user_id||b.user_id||x.details?.user_id||((x.details?.event==="account_created")?x.entity_id:null);return users.find(u=>u.user_id===uid)?.full_name||x.details?.full_name||"권한 대상";}if(x.entity_type==="department")return deps.find(d=>d.id===x.entity_id)?.name_ko||deps.find(d=>d.id===x.entity_id)?.name_en||a.name_ko||a.name_en||"부서";return x.entity_id||"—";};
@@ -147,14 +148,14 @@ export default function AdministrationModule(){
        <p className="settings-form-hint">이 회원에게 보여줄 페이지만 선택하세요.</p>
        <div className="settings-page-permissions">
         {pageOptions.map(option=><label className="settings-page-permission" key={option.key}>
-         <input type="checkbox" checked={selectedPageKeys.includes(option.key)} disabled={selected.roles.some(r=>r.role==="super_admin")} onChange={e=>setSelectedPageKeys(current=>e.target.checked?[...current,option.key]:current.filter(key=>key!==option.key))}/>
+         <input type="checkbox" checked={selectedPageKeys.includes(option.key)} disabled={selected.roles.some(r=>r.role==="super_admin"||r.role==="administrator")} onChange={e=>setSelectedPageKeys(current=>e.target.checked?[...current,option.key]:current.filter(key=>key!==option.key))}/>
          <span><strong>{option.title}</strong></span>
         </label>)}
        </div>
        <div className="settings-page-permission-actions">
-        <button type="button" className="settings-primary" disabled={saving||selected.roles.some(r=>r.role==="super_admin")} onClick={()=>void savePagePermissions()}>{saving?"저장 중…":"저장"}</button>
+        <button type="button" className="settings-primary" disabled={saving||selected.roles.some(r=>r.role==="super_admin"||r.role==="administrator")} onClick={()=>void savePagePermissions()}>{saving?"저장 중…":"저장"}</button>
        </div>
-       {selected.roles.some(r=>r.role==="super_admin")&&<p className="settings-form-hint">최고 관리자는 모든 페이지가 표시됩니다.</p>}
+       {selected.roles.some(r=>r.role==="super_admin")&&<p className="settings-form-hint">최고 관리자는 모든 페이지에 접근할 수 있습니다.</p>}{!selected.roles.some(r=>r.role==="super_admin")&&selected.roles.some(r=>r.role==="administrator")&&<p className="settings-form-hint">관리자 역할은 모든 관리 페이지에 접근할 수 있어 개별 페이지 표시 설정을 변경할 수 없습니다.</p>}
       </div>
       <div className="settings-danger-zone"><div><strong>계정 상태</strong><small>{selected.is_active?"현재 로그인 및 서비스 이용이 가능한 상태입니다.":"현재 비활성화된 계정입니다."}</small></div><button disabled={saving||selected.roles.some(r=>r.role==="super_admin")} onClick={()=>toggle(selected)}>{selected.is_active?"회원 비활성화":"회원 다시 활성화"}</button></div>
      </div>:<div className="settings-member-empty"><strong>회원을 선택해 주세요</strong><p>왼쪽 목록에서 회원을 선택하면 상세 정보와 권한을 관리할 수 있습니다.</p></div>}

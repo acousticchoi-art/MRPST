@@ -14,7 +14,7 @@ const roleCanEnter=["super_admin","administrator","academic_officer"];
 const csvCell=(value:unknown)=>'"'+String(value??"").replace(/"/g,'""')+'"';
 
 export default function GradeManagementModule(){
- const db=useMemo(()=>createSupabaseBrowserClient(),[]);
+ const db=useMemo(()=>createSupabaseBrowserClient(),[]); const academicMutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED==="true";
  const [departments,setDepartments]=useState<Department[]>([]);
  const [terms,setTerms]=useState<Term[]>([]);
  const [students,setStudents]=useState<Student[]>([]);
@@ -105,6 +105,7 @@ export default function GradeManagementModule(){
  };
 
  const saveScores=async()=>{
+  if(!academicMutationsEnabled){setNotice("성적 변경은 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다.");return;}
   if(!db||!termId||!courseId||!canManage)return;
   const rows=inputStudents.filter(student=>String(inputValues[student.id]??"").trim()!=="").map(student=>({student_id:student.id,course_id:courseId,term_id:termId,score:Number(inputValues[student.id]),entered_by:gradeByKey.get(student.id+"|"+courseId)?.entered_by??currentUserId}));
   if(rows.some(x=>!Number.isFinite(x.score)||x.score<0||x.score>100)){setError("점수는 0점부터 100점 사이의 숫자로 입력해 주세요.");return;}
@@ -147,7 +148,7 @@ export default function GradeManagementModule(){
    <article><span>입력 점수</span><strong>{stats.entered}</strong></article>
    <article><span>미입력</span><strong>{stats.missing}</strong></article>
   </div>
-  {error&&<div className={styles.alertError}>{error}</div>}{notice&&<div className={styles.alertSuccess}>{notice}</div>}
+  {error&&<div className={styles.alertError}>{error}</div>}{notice&&<div className={styles.alertSuccess}>{notice}</div>}{!academicMutationsEnabled&&<div className={styles.alert}>성적 변경 기능이 안전 모드로 잠겨 있습니다. 조회와 출력은 사용할 수 있습니다.</div>}
   {!db&&<div className={styles.alert}>Supabase 연결 설정이 필요합니다.</div>}
   {!canManage&&db&&<div className={styles.alert}>성적관리 권한이 확인되지 않았습니다. Super Admin 또는 행정 담당자 계정으로 로그인해 주세요.</div>}
   <div className={styles.tabs}><button className={tab==="lookup"?styles.activeTab:""} onClick={()=>setTab("lookup")}>성적 조회</button><button className={tab==="entry"?styles.activeTab:""} onClick={()=>setTab("entry")}>과목별 성적 입력</button></div>
@@ -173,10 +174,10 @@ export default function GradeManagementModule(){
    </div>
    {currentCourse&&<div className={styles.entryTitle}><strong>{currentCourse.title}</strong><span>{currentCourse.course_code} · {terms.find(x=>x.id===termId)?.name||"학기 미선택"}</span></div>}
    <div className={styles.tableWrap}><table><thead><tr><th>순번</th><th>학생 이름</th><th>점수</th><th>기존 점수</th><th>작업</th></tr></thead><tbody>
-    {inputStudents.map(student=>{const old=gradeByKey.get(student.id+"|"+courseId);return <tr key={student.id}><td>{student.student_number}</td><td>{student.full_name}</td><td><input className={styles.scoreInput} type="number" min="0" max="100" step="0.01" value={inputValues[student.id]??""} onChange={e=>setInputValues(v=>({...v,[student.id]:e.target.value}))} aria-label={student.full_name+" 점수"}/></td><td>{old?.score??"—"}</td><td>{old&&<button className={styles.deleteButton} disabled={saving} onClick={()=>void deleteScore(student)}>삭제</button>}</td></tr>;})}
+    {inputStudents.map(student=>{const old=gradeByKey.get(student.id+"|"+courseId);return <tr key={student.id}><td>{student.student_number}</td><td>{student.full_name}</td><td><input className={styles.scoreInput} type="number" min="0" max="100" step="0.01" value={inputValues[student.id]??""} onChange={e=>setInputValues(v=>({...v,[student.id]:e.target.value}))} aria-label={student.full_name+" 점수"}/></td><td>{old?.score??"—"}</td><td>{old&&<button className={styles.deleteButton} disabled={!academicMutationsEnabled||saving} onClick={()=>void deleteScore(student)}>삭제</button>}</td></tr>;})}
     {!inputStudents.length&&<tr><td colSpan={5} className={styles.empty}>{!termId?"먼저 학기를 선택하세요.":!courseId?"과목을 선택하세요.":"선택한 학과·학년에 등록된 학생이 없습니다."}</td></tr>}
    </tbody></table></div>
-   <div className={styles.saveRow}><span>{inputStudents.length}명 · 빈 칸은 저장하지 않습니다.</span><button className={styles.primary} disabled={!canManage||saving||!inputStudents.length||!courseId||!termId} onClick={()=>void saveScores()}>{saving?"저장 중…":"변경 점수 저장"}</button></div>
+   <div className={styles.saveRow}><span>{inputStudents.length}명 · 빈 칸은 저장하지 않습니다.</span><button className={styles.primary} disabled={!academicMutationsEnabled||!canManage||saving||!inputStudents.length||!courseId||!termId} onClick={()=>void saveScores()}>{saving?"저장 중…":"변경 점수 저장"}</button></div>
   </section>}
   {loading&&<p className={styles.loading}>성적 데이터를 불러오는 중입니다.</p>}
   <p className={styles.footnote}>현재는 점수만 관리합니다. 학점, 등급 환산 및 GPA 계산은 적용하지 않습니다. 미입력 점수는 0점으로 처리하지 않습니다.</p>

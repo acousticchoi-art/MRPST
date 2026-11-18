@@ -28,9 +28,13 @@ begin
   return new;
 end;
 $$;
-drop trigger if exists mrpst_initialize_student_semester on public.students;
-create trigger mrpst_initialize_student_semester
-before insert or update of cohort,program_code,current_semester on public.students
+drop trigger if exists mrpst_initialize_student_semester_insert on public.students;
+drop trigger if exists mrpst_initialize_student_semester_update on public.students;
+create trigger mrpst_initialize_student_semester_insert
+before insert on public.students
+for each row execute function public.mrpst_initialize_student_semester();
+create trigger mrpst_initialize_student_semester_update
+before update of cohort,program_code,current_semester on public.students
 for each row execute function public.mrpst_initialize_student_semester();
 
 -- Advance only after the exact current academic term's semester record is completed.
@@ -92,7 +96,7 @@ begin
     where i.batch_id=p_batch_id and i.decision='promote'
       and (not exists(select 1 from public.student_term_enrollments e where e.student_id=s.id and e.academic_year=v_academic_year and e.term_number=1 and e.enrollment_status='completed'
         and e.semester_number=case i.from_cohort when 'First Year' then 1 when 'Second Year' then 3 when 'Third Year' then 5 else null end)
-      or not exists(select 1 from public.student_term_enrollments e where e.student_id=s.id and e.academic_year=v_academic_year and e.term_number=2 and e.enrollment_status='completed
+      or not exists(select 1 from public.student_term_enrollments e where e.student_id=s.id and e.academic_year=v_academic_year and e.term_number=2 and e.enrollment_status='completed'
         and e.semester_number=case i.from_cohort when 'First Year' then 2 when 'Second Year' then 4 when 'Third Year' then 6 else null end))
   ) then raise exception '진급 대상 학생의 개인 학기 이수 기록이 누락되었습니다. 학기 이수 확정 후 승인해 주세요.'; end if;
 

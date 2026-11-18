@@ -111,14 +111,33 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
    ]);
    if(a.error||b.error)throw a.error||b.error;
    const [currentA,currentB]=await Promise.all([
-    db.from("academic_timetable_entries").select("day_of_week,start_time,end_time,course_id,class_group").eq("term_id",termId).eq("department_id",departmentId),
+    db.from("academic_timetable_entries").select("day_of_week,start_time,end_time,course_id,class_group,department_id,instructor_id,room").eq("term_id",termId).eq("is_active",true),
     db.from("academic_timetable_events").select("day_of_week,start_time,end_time,title").eq("term_id",termId).eq("department_id",departmentId)
    ]);
    if(currentA.error||currentB.error)throw currentA.error||currentB.error;
-   const courseKeys=new Set((currentA.data||[]).map(x=>[x.day_of_week,time(x.start_time),time(x.end_time),x.course_id,x.class_group].join("|")));
-   const eventKeys=new Set((currentB.data||[]).map(x=>[x.day_of_week,time(x.start_time),time(x.end_time),x.title].join("|")));
-   const courseRows=(a.data||[]).filter(x=>!courseKeys.has([x.day_of_week,time(x.start_time),time(x.end_time),x.course_id,x.class_group].join("|"))).map(({id,created_at,updated_at,...x})=>({...x,term_id:termId,created_by:user.id}));
-   const eventRows=(b.data||[]).filter(x=>!eventKeys.has([x.day_of_week,time(x.start_time),time(x.end_time),x.title].join("|"))).map(({id,created_at,updated_at,...x})=>({...x,term_id:termId,created_by:user.id}));
+   const overlaps=(x:any,y:any)=>x.day_of_week===y.day_of_week&&time(x.start_time)<time(y.end_time)&&time(x.end_time)>time(y.start_time);
+   const courseKey=(x:any)=>[x.day_of_week,time(x.start_time),time(x.end_time),x.course_id,x.class_group].join("|");
+   const eventKey=(x:any)=>[x.day_of_week,time(x.start_time),time(x.end_time),x.title].join("|");
+   const existingCourses=currentA.data||[],existingEvents=currentB.data||[];
+   const courseKeys=new Set(existingCourses.filter(x=>x.department_id===departmentId).map(courseKey));
+   const eventKeys=new Set(existingEvents.map(eventKey));
+   const courseRows=(a.data||[]).filter(x=>!courseKeys.has(courseKey(x))).map(({id,created_at,updated_at,...x})=>({...x,term_id:termId,created_by:user.id}));
+   const eventRows=(b.data||[]).filter(x=>!eventKeys.has(eventKey(x))).map(({id,created_at,updated_at,...x})=>({...x,term_id:termId,created_by:user.id}));
+   // Validate all copied rows against target timetable and each other before inserting anything.
+   const acceptedCourses:any[]=[];
+   for(const row of courseRows){
+    if(existingEvents.some(x=>overlaps(row,x)))throw new Error("시간표 복사 중단: 복사할 강의가 현재 학기의 공통 일정과 겹칩니다.");
+    if(existingCourses.some(x=>overlaps(row,x)&&(x.department_id===departmentId||!!row.instructor_id&&x.instructor_id===row.instructor_id||!!row.room&&String(x.room||"").trim()===String(row.room||"").trim())))throw new Error("시간표 복사 중단: 학과 강의, 담당 교수 또는 강의실 시간 충돌이 발견되었습니다.");
+    if(acceptedCourses.some(x=>overlaps(row,x)&&(x.department_id===departmentId||!!row.instructor_id&&x.instructor_id===row.instructor_id||!!row.room&&String(x.room||"").trim()===String(row.room||"").trim())))throw new Error("시간표 복사 중단: 복사되는 강의들끼리 시간 충돌이 발견되었습니다.");
+    acceptedCourses.push(row);
+   }
+   const acceptedEvents:any[]=[];
+   for(const row of eventRows){
+    if(existingEvents.some(x=>overlaps(row,x)))throw new Error("시간표 복사 중단: 기존 공통 일정과 시간이 겹칩니다.");
+    if(existingCourses.some(x=>x.department_id===departmentId&&overlaps(row,x))||acceptedCourses.some(x=>x.department_id===departmentId&&overlaps(row,x)))throw new Error("시간표 복사 중단: 공통 일정과 강의 시간이 겹칩니다.");
+    if(acceptedEvents.some(x=>overlaps(row,x)))throw new Error("시간표 복사 중단: 복사되는 공통 일정끼리 시간이 겹칩니다.");
+    acceptedEvents.push(row);
+   }
    if(courseRows.length){const {error:e}=await db.from("academic_timetable_entries").insert(courseRows);if(e)throw e;}
    if(eventRows.length){const {error:e}=await db.from("academic_timetable_events").insert(eventRows);if(e)throw e;}
    setNotice("이전 학기 시간표 복사가 완료되었습니다. 새 학기 일정에 맞게 자유롭게 수정하세요.");await load();

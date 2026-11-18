@@ -138,8 +138,8 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
     if(acceptedEvents.some(x=>overlaps(row,x)))throw new Error("시간표 복사 중단: 복사되는 공통 일정끼리 시간이 겹칩니다.");
     acceptedEvents.push(row);
    }
-   if(courseRows.length){const {error:e}=await db.from("academic_timetable_entries").insert(courseRows);if(e)throw e;}
-   if(eventRows.length){const {error:e}=await db.from("academic_timetable_events").insert(eventRows);if(e)throw e;}
+   if(courseRows.length){const {data:savedCourses,error:e}=await db.from("academic_timetable_entries").insert(courseRows).select("id");if(e)throw e;if((savedCourses||[]).length!==courseRows.length)throw new Error("복사한 강의 시간표 저장 개수가 일치하지 않습니다.");}
+   if(eventRows.length){const {data:savedEvents,error:e}=await db.from("academic_timetable_events").insert(eventRows).select("id");if(e)throw e;if((savedEvents||[]).length!==eventRows.length)throw new Error("복사한 공통 일정 저장 개수가 일치하지 않습니다.");}
    setNotice("이전 학기 시간표 복사가 완료되었습니다. 새 학기 일정에 맞게 자유롭게 수정하세요.");await load();
   }catch(e:any){setError(e.message||"시간표 복사에 실패했습니다.");}finally{setSaving(false);}
  };

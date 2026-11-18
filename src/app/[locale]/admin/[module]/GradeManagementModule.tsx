@@ -112,7 +112,7 @@ export default function GradeManagementModule(){
   const changed=rows.filter(row=>{const old=gradeByKey.get(row.student_id+"|"+courseId);return !old||Number(old.score)!==row.score;});
   if(!changed.length){setNotice("변경된 점수가 없습니다.");return;}
   setSaving(true);setError("");setNotice("");
-  try{const {error}=await db.from("academic_grades").upsert(changed,{onConflict:"student_id,course_id,term_id"});if(error)throw error;setNotice(changed.length+"명의 성적을 저장했습니다.");await load();}
+  try{const {data:saved,error}=await db.from("academic_grades").upsert(changed,{onConflict:"student_id,course_id,term_id"}).select("student_id,course_id,term_id,score");if(error)throw error;if(!saved||saved.length!==changed.length||saved.some(row=>!changed.some(expected=>expected.student_id===row.student_id&&expected.course_id===row.course_id&&expected.term_id===row.term_id&&expected.score===row.score)))throw new Error("일부 성적 저장 결과를 확인할 수 없습니다.");setNotice(changed.length+"명의 성적을 저장했습니다.");await load();}
   catch(err:any){setError(err?.message||"성적 저장에 실패했습니다.");}
   finally{setSaving(false);}
  };
@@ -123,7 +123,7 @@ export default function GradeManagementModule(){
   if(enrollments.some(e=>e.student_id===student.id&&e.course_id===courseId&&e.term_id===termId&&e.enrollment_status==="completed")){setError("이미 이수 완료된 과목의 성적은 삭제할 수 없습니다. 수강 이수 상태를 먼저 변경해야 합니다.");return;}
   if(!window.confirm(student.full_name+" 학생의 이 과목 성적을 삭제할까요?"))return;
   setSaving(true);setError("");setNotice("");
-  try{const {error}=await db.from("academic_grades").delete().eq("student_id",student.id).eq("course_id",courseId).eq("term_id",termId);if(error)throw error;setNotice("성적을 삭제했습니다.");await load();}
+  try{const {data:deleted,error}=await db.from("academic_grades").delete().eq("student_id",student.id).eq("course_id",courseId).eq("term_id",termId).select("id");if(error)throw error;if(!deleted?.length)throw new Error("성적 삭제 결과를 확인할 수 없습니다.");setNotice("성적을 삭제했습니다.");await load();}
   catch(err:any){setError(err?.message||"성적 삭제에 실패했습니다.");}
   finally{setSaving(false);}
  };

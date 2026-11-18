@@ -134,7 +134,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
         <Link href={`/${locale}`}>{t.view}</Link>
         {supabase&&<AdminActions locale={locale}/>}
       </div></header>
-      <div className="content">{dashboardQueryErrors.length>0&&<div className="notice" role="alert">{lang==="ko"?"일부 대시보드 데이터를 불러오지 못했습니다: "+dashboardQueryErrors.join(", "):"Some dashboard data could not be loaded: "+dashboardQueryErrors.join(", ")}</div>}<span className="eyebrow">{t.eyebrow}</span><h1 className="admin-heading">{t.title}</h1><p className="admin-subtitle">{t.subtitle}</p>
+      <div className="content">{dashboardQueryErrors.length>0&&<div className="notice" role="alert">{lang==="ko"?"일부 대시보드 데이터를 불러오지 못했습니다: "+dashboardQueryErrors.join(", "):"ဒက်ရှ်ဘုတ်ဒေတာအချို့ကို မရယူနိုင်ပါ: "+dashboardQueryErrors.join(", ")}</div>}<span className="eyebrow">{t.eyebrow}</span><h1 className="admin-heading">{t.title}</h1><p className="admin-subtitle">{t.subtitle}</p>
         {!isSupabaseConfigured&&<div className="notice">{t.preview}</div>}
         <section className="dashboard-welcome">
           <div><span className="dashboard-date">{today}</span><h2>{lang==="ko"?"무슨 일을 하든지 마음을 다하여 주께 하듯 하고 사람에게 하듯 하지 말라.":"သင်တို့သည် ပြုလေသမျှသော အမှုတို့ကို သခင်ဘုရားအား ပြုသည်ဟု စိတ်နှလုံးအကြွင်းမဲ့ ပြုကြလော့။"}</h2><p>{lang==="ko"?"골로새서 3:23":"ကောလောသဲ ၃:၂၃"}</p></div>

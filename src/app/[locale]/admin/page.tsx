@@ -87,17 +87,23 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   if(accessDenied) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>{t.denied}</h1><p className="login-intro">{t.deniedText}</p><Link className="btn secondary" href={`/${locale}`}>{t.back}</Link></section></main>;
   const visible=Object.entries(MODULES).filter(([key])=>!supabase||canAccessModule(roles,key as keyof typeof MODULES,moduleOverrides));
   const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
-  const weekEndDate=new Date(today+"T12:00:00");
-  weekEndDate.setDate(weekEndDate.getDate()+7);
-  const weekEnd=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"}).format(weekEndDate);
-  const [activeStudentCount,graduateCount,upcomingResult,announcementResult]=await Promise.all([
+  const weekStartDate=new Date(today+"T12:00:00");
+  weekStartDate.setDate(weekStartDate.getDate()-(weekStartDate.getDay()+6)%7);
+  const weekEndDate=new Date(weekStartDate);
+  weekEndDate.setDate(weekEndDate.getDate()+6);
+  const dateFormat=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"});
+  const weekStart=dateFormat.format(weekStartDate);
+  const weekEnd=dateFormat.format(weekEndDate);
+  const [activeStudentCount,graduateCount,upcomingResult,upcomingCountResult,announcementResult]=await Promise.all([
     supabase?supabase.from("students").select("id",{count:"exact",head:true}).eq("student_status","active"):Promise.resolve({count:null}),
     supabase?supabase.from("students").select("id",{count:"exact",head:true}).eq("student_status","graduated"):Promise.resolve({count:null}),
-    supabase?supabase.from("academic_calendar_events").select("id,title,start_date,start_time,event_type,location").gte("start_date",today).lte("start_date",weekEnd).order("start_date",{ascending:true}).limit(5):Promise.resolve({data:[]}),
+    supabase?supabase.from("academic_calendar_events").select("id,title,start_date,start_time,event_type,location").gte("start_date",weekStart).lte("start_date",weekEnd).order("start_date",{ascending:true}).limit(5):Promise.resolve({data:[]}),
+    supabase?supabase.from("academic_calendar_events").select("id",{count:"exact",head:true}).gte("start_date",weekStart).lte("start_date",weekEnd):Promise.resolve({count:null}),
     supabase?supabase.from("website_contents").select("content_key,title,body,is_published,updated_at").eq("content_type","announcement").eq("locale",locale).order("updated_at",{ascending:false}).limit(3):Promise.resolve({data:[]})
   ]);
   const hasStudentStats=activeStudentCount.count!==null&&graduateCount.count!==null;
   const upcomingEvents=upcomingResult.data??[];
+  const upcomingCount=upcomingCountResult.count??upcomingEvents.length;
   const recentAnnouncements=announcementResult.data??[];
   const moduleGroups=[["academic",["students","academics"]],["finance",["finance"]],["operations",["facilities","library","meetings"]],["system",["administration","website"]]] as const;
   const visibleInGroup=(keys:readonly string[])=>visible.filter(([key])=>keys.includes(key));
@@ -130,7 +136,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
         <section className="dashboard-stats">
           <article className="dashboard-stat"><span>{t.currentStudents}</span><strong>{hasStudentStats?activeStudentCount.count?.toLocaleString("en-US"):"—"}</strong><small>{lang==="ko"?"현재 재학 상태":"လက်ရှိတက်ရောက်နေသော ကျောင်းသား"}</small></article>
           <article className="dashboard-stat"><span>{t.graduateTotal}</span><strong>{hasStudentStats?graduateCount.count?.toLocaleString("en-US"):"—"}</strong><small>{lang==="ko"?"졸업 처리된 학생":"ဘွဲ့ရပြီးသော ကျောင်းသားများ"}</small></article>
-          <article className="dashboard-stat"><span>{lang==="ko"?"이번 주 일정":"ယခုအပတ်အတွင်း"}</span><strong>{upcomingEvents.length}</strong><small>{lang==="ko"?"등록된 향후 일정":"လာမည့် အစီအစဉ်များ"}</small></article>
+          <article className="dashboard-stat"><span>{lang==="ko"?"이번 주 일정":"ယခုအပတ်အတွင်း"}</span><strong>{upcomingCount}</strong><small>{lang==="ko"?"이번 주 전체 일정":"ယခုအပတ်အစီအစဉ်များ"}</small></article>
         </section>
         <div className="dashboard-columns">
           <section className="dashboard-panel dashboard-schedule">

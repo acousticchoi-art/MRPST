@@ -56,10 +56,11 @@ begin
   end if;
   if not exists (
     select 1 from public.student_term_enrollments e
-    where e.student_id = v_student_id and e.semester_number = v_max_semester
+    where e.student_id = v_student_id and e.academic_year = p_graduation_year
+      and e.term_number = p_graduation_term and e.semester_number = v_max_semester
       and e.enrollment_status = 'completed'
   ) then
-    raise exception '최종 학기 이수 완료 기록이 필요합니다. 학기 이수 확인 후 졸업 처리해 주세요.';
+    raise exception '선택한 졸업 학년·학기의 최종 학기 이수 기록이 필요합니다.';
   end if;
   if exists (select 1 from public.student_graduations where student_id = v_student_id) then
     raise exception '이미 졸업 이력이 등록된 학생입니다.';

@@ -55,15 +55,15 @@ export default function WebsiteModule(){
    const existing=items.find(x=>x.id===editingId);
    const row={content_type:"announcement",content_key:existing?.content_key||"notice-"+crypto.randomUUID(),locale:noticeLocale,title:noticeTitle.trim(),body:noticeBody.trim(),is_published:noticePublished,sort_order:0,updated_by:user?.id??null};
    const query=existing?db.from("website_contents").update(row).eq("id",existing.id):db.from("website_contents").insert({...row,created_by:user?.id??null});
-   const {error}=await query;if(error)throw error;
+   const {data:verified,error}=await query.select("id").single();if(error)throw error;if(!verified?.id||(existing&&verified.id!==existing.id))throw new Error("공지사항 저장 결과를 확인할 수 없습니다.");
    setNotice(existing?"공지사항을 수정했습니다.":"공지사항을 등록했습니다.");resetNotice();await load();
   }catch(e:any){setError(e?.message||"공지사항을 저장하지 못했습니다.");}
   finally{setSaving(false);}
  }
  function resetNotice(){setEditingId("");setNoticeTitle("");setNoticeBody("");setNoticeLocale("ko");setNoticePublished(true);}
  function editNotice(item:Entry){setEditingId(item.id);setNoticeTitle(item.title);setNoticeBody(item.body);setNoticeLocale(item.locale);setNoticePublished(item.is_published);}
- async function toggleNotice(item:Entry){if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!db)return;setSaving(true);setError("");try{const {error}=await db.from("website_contents").update({is_published:!item.is_published}).eq("id",item.id);if(error)throw error;setNotice(item.is_published?"공지사항 게시를 중단했습니다.":"공지사항을 게시했습니다.");await load();}catch(e:any){setError(e?.message||"상태를 변경하지 못했습니다.");}finally{setSaving(false);}}
- async function deleteNotice(item:Entry){if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!db||!window.confirm("이 공지사항을 삭제할까요?"))return;setSaving(true);setError("");try{const {error}=await db.from("website_contents").delete().eq("id",item.id);if(error)throw error;setNotice("공지사항을 삭제했습니다.");await load();}catch(e:any){setError(e?.message||"삭제하지 못했습니다.");}finally{setSaving(false);}}
+ async function toggleNotice(item:Entry){if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!db)return;setSaving(true);setError("");try{const {data:verified,error}=await db.from("website_contents").update({is_published:!item.is_published}).eq("id",item.id).select("id,is_published").single();if(error)throw error;if(!verified||verified.id!==item.id||verified.is_published===item.is_published)throw new Error("공지 게시 상태 변경 결과를 확인할 수 없습니다.");setNotice(item.is_published?"공지사항 게시를 중단했습니다.":"공지사항을 게시했습니다.");await load();}catch(e:any){setError(e?.message||"상태를 변경하지 못했습니다.");}finally{setSaving(false);}}
+ async function deleteNotice(item:Entry){if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!db||!window.confirm("이 공지사항을 삭제할까요?"))return;setSaving(true);setError("");try{const {data:deleted,error}=await db.from("website_contents").delete().eq("id",item.id).select("id").maybeSingle();if(error)throw error;if(!deleted?.id||deleted.id!==item.id)throw new Error("삭제된 공지사항을 확인할 수 없습니다.");setNotice("공지사항을 삭제했습니다.");await load();}catch(e:any){setError(e?.message||"삭제하지 못했습니다.");}finally{setSaving(false);}}
  const notices=items.filter(x=>x.content_type==="announcement").sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
  return <div className="website-workspace website-workspace-v2">
   <div className="website-heading website-heading-v2">

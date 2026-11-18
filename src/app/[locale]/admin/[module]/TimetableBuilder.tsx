@@ -63,6 +63,22 @@ export default function TimetableBuilder({canManage}:{canManage:boolean}){
   try{
    const {data:{user}}=await db.auth.getUser();
    const common={term_id:termId,department_id:departmentId,day_of_week:Number(form.day_of_week),start_time:form.start_time,end_time:form.end_time};
+   const overlaps=(row:any)=>time(row.start_time)<time(form.end_time)&&time(row.end_time)>time(form.start_time);
+   const [existingEntries,existingEvents]=await Promise.all([
+    db.from("academic_timetable_entries").select("id,department_id,instructor_id,room,start_time,end_time").eq("term_id",termId).eq("day_of_week",Number(form.day_of_week)).eq("is_active",true),
+    db.from("academic_timetable_events").select("id,start_time,end_time,title").eq("term_id",termId).eq("department_id",departmentId).eq("day_of_week",Number(form.day_of_week))
+   ]);
+   if(existingEntries.error||existingEvents.error)throw existingEntries.error||existingEvents.error;
+   const entriesForDay=existingEntries.data||[],eventsForDay=existingEvents.data||[];
+   if(editingType==="event"){
+    if(entriesForDay.some(x=>x.department_id===departmentId&&overlaps(x)))throw new Error("같은 학과의 강의 시간과 겹칩니다. 강의 또는 일정 시간을 조정해 주세요.");
+    if(eventsForDay.some(x=>x.id!==editing&&overlaps(x)))throw new Error("같은 학과의 다른 일정과 시간이 겹칩니다.");
+   }else{
+    if(entriesForDay.some(x=>x.id!==editing&&x.department_id===departmentId&&overlaps(x)))throw new Error("같은 학과의 다른 강의와 시간이 겹칩니다.");
+    if(eventsForDay.some(x=>overlaps(x)))throw new Error("같은 학과의 공통 일정과 시간이 겹칩니다.");
+    if(form.instructor_id&&entriesForDay.some(x=>x.id!==editing&&x.instructor_id===form.instructor_id&&overlaps(x)))throw new Error("담당 교수가 같은 시간에 다른 강의를 맡고 있습니다.");
+    if(form.room.trim()&&entriesForDay.some(x=>x.id!==editing&&String(x.room||"").trim()===form.room.trim()&&overlaps(x)))throw new Error("선택한 강의실이 같은 시간에 이미 사용 중입니다.");
+   }
    let result:any;
    if(editingType==="event"){
     if(!form.title.trim())throw new Error("일정명을 입력해 주세요.");

@@ -50,7 +50,7 @@ export default function GradeManagementModule(){
     db.from("departments").select("id,code,name_en,name_ko,name_my").eq("is_active",true).order("code"),
     db.from("academic_terms").select("id,term_code,name,academic_year,status").order("academic_year",{ascending:false}).order("term_code",{ascending:false}),
     db.from("students").select("id,student_number,full_name,program_code,cohort,student_status").order("full_name"),
-    db.from("academic_courses").select("id,course_code,title,department_id,level,is_active").eq("is_active",true).order("course_code"),
+    db.from("academic_courses").select("id,course_code,title,department_id,level,is_active").order("course_code"),
     db.from("academic_grades").select("id,student_id,course_id,term_id,score,grade,remarks,updated_at,entered_by").order("updated_at",{ascending:false}),
     db.from("academic_enrollments").select("student_id,course_id,term_id,enrollment_status")
    ]);
@@ -75,7 +75,8 @@ export default function GradeManagementModule(){
  ].filter((x):x is string=>Boolean(x)))).sort((a,b)=>a.localeCompare(b)),[courses,students,departmentId,programCode]);
  useEffect(()=>{if(level&&!levels.includes(level))setLevel("");},[levels,level]);
  const visibleCourses=useMemo(()=>courses.filter(x=>(!departmentId||x.department_id===departmentId)&&(!level||x.level===level)),[courses,departmentId,level]);
- useEffect(()=>{if(!visibleCourses.some(x=>x.id===courseId))setCourseId(visibleCourses[0]?.id??"");},[visibleCourses,courseId]);
+ const entryCourses=useMemo(()=>visibleCourses.filter(x=>x.is_active),[visibleCourses]);
+ useEffect(()=>{if(!entryCourses.some(x=>x.id===courseId))setCourseId(entryCourses[0]?.id??"");},[entryCourses,courseId]);
  const visibleStudents=useMemo(()=>students.filter(x=>(!programCode||x.program_code===programCode)&&(!level||x.cohort===level)&&(!search.trim()||x.full_name.toLowerCase().includes(search.toLowerCase())||x.student_number.toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>Number.isFinite(Number(a.student_number))&&Number.isFinite(Number(b.student_number))?Number(a.student_number)-Number(b.student_number):a.student_number.localeCompare(b.student_number)),[students,programCode,level,search]);
  const termGrades=useMemo(()=>grades.filter(x=>x.term_id===termId),[grades,termId]);
  const gradeByKey=useMemo(()=>new Map(termGrades.map(x=>[x.student_id+"|"+x.course_id,x])),[termGrades]);
@@ -83,7 +84,7 @@ export default function GradeManagementModule(){
  const studentCourses=visibleCourses.filter(course=>enrollments.some(e=>e.student_id===selectedStudentId&&e.course_id===course.id&&e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status))).map(course=>({course,grade:gradeByKey.get(selectedStudentId+"|"+course.id)}));
  const entryStudents=useMemo(()=>visibleStudents.filter(student=>student.student_status==="active"),[visibleStudents]);
  const inputStudents=useMemo(()=>courseId&&termId?entryStudents.filter(student=>enrollments.some(e=>e.student_id===student.id&&e.course_id===courseId&&e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status))):[],[courseId,termId,entryStudents,enrollments]);
- const currentCourse=visibleCourses.find(x=>x.id===courseId);
+ const currentCourse=entryCourses.find(x=>x.id===courseId);
  useEffect(()=>{
   const next:Record<string,string>={};
   inputStudents.forEach(student=>{const existing=gradeByKey.get(student.id+"|"+courseId);next[student.id]=existing?.score===null||existing?.score===undefined?"":String(existing.score);});
@@ -169,7 +170,7 @@ export default function GradeManagementModule(){
   {tab==="entry"&&<section className={styles.panel}>
    <div className={styles.panelHead}><div><h3>과목별 일괄 입력</h3><p>과목을 선택하면 선택한 학과·학년의 학생 목록이 표시됩니다. 점수는 0~100점, 소수점 입력을 지원합니다.</p></div></div>
    <div className={styles.entryFilters}>
-    <label>과목<select value={courseId} onChange={e=>setCourseId(e.target.value)}><option value="">과목 선택</option>{visibleCourses.map(x=><option key={x.id} value={x.id}>{x.course_code} · {x.title}</option>)}</select></label>
+    <label>과목<select value={courseId} onChange={e=>setCourseId(e.target.value)}><option value="">과목 선택</option>{entryCourses.map(x=><option key={x.id} value={x.id}>{x.course_code} · {x.title}</option>)}</select></label>
    </div>
    {currentCourse&&<div className={styles.entryTitle}><strong>{currentCourse.title}</strong><span>{currentCourse.course_code} · {terms.find(x=>x.id===termId)?.name||"학기 미선택"}</span></div>}
    <div className={styles.tableWrap}><table><thead><tr><th>순번</th><th>학생 이름</th><th>점수</th><th>기존 점수</th><th>작업</th></tr></thead><tbody>

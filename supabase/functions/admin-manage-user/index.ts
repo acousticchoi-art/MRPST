@@ -46,7 +46,13 @@ Deno.serve(async (req: Request) => {
       return result;
     }
     const { mrpst_admin_provisioning_token: _consumedToken, ...cleanUserMetadata } = result.data.user.user_metadata ?? {};
-    await admin.auth.admin.updateUserById(result.data.user.id, { user_metadata: cleanUserMetadata });
+    const { error: metadataCleanupError } = await admin.auth.admin.updateUserById(result.data.user.id, { user_metadata: cleanUserMetadata });
+    if (metadataCleanupError) {
+      // Fail closed: do not leave a provisioned user with the internal token in metadata.
+      await admin.auth.admin.deleteUser(result.data.user.id);
+      await admin.from("mrpst_auth_user_creation_tokens").delete().eq("token", token);
+      return { data: { user: null }, error: metadataCleanupError };
+    }
     return result;
   };
   const { data: profile } = await admin.from("user_profiles").select("is_active").eq("user_id", caller.id).maybeSingle();

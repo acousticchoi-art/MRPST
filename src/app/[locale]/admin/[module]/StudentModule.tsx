@@ -76,6 +76,7 @@ export default function StudentModule(){
  const advanceTerm=async(s:Student)=>{if(!academicMutationsEnabled){setNotice("학사 데이터 변경은 개발 DB 연결 및 기능 활성화 후 사용할 수 있습니다.");return;}if(!supabase||!selectedTerm||!termNumber)return;setTermBusy(true);setError("");try{const {data,error}=await supabase.rpc("mrpst_advance_student_semester",{p_student_ids:[s.id],p_academic_year:selectedTerm.academic_year,p_term_number:termNumber});if(error)throw error;const msg=data?.[0]?.result??"진급 처리 결과를 확인하세요";setNotice(s.full_name+" · "+msg);await loadTermData();await load();}catch(e:any){setError(e.message||"학기 진급 처리 실패");}finally{setTermBusy(false);}};
 
  const changeStudentStatus=async(nextStatus:"active"|"leave"|"withdrawn")=>{
+  if(!academicMutationsEnabled){setNotice("학적 상태 변경은 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다.");return;}
   if(!supabase||!selected)return;
   const label=statusLabel[nextStatus];
   if(!window.confirm(selected.full_name+" 학생을 "+label+" 상태로 변경할까요? 변경 이력은 자동으로 보존됩니다."))return;

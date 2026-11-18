@@ -87,10 +87,13 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   if(accessDenied) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>{t.denied}</h1><p className="login-intro">{t.deniedText}</p><Link className="btn secondary" href={`/${locale}`}>{t.back}</Link></section></main>;
   const visible=Object.entries(MODULES).filter(([key])=>!supabase||canAccessModule(roles,key as keyof typeof MODULES,moduleOverrides));
   const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+  const weekEndDate=new Date(today+"T12:00:00");
+  weekEndDate.setDate(weekEndDate.getDate()+7);
+  const weekEnd=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"}).format(weekEndDate);
   const [activeStudentCount,graduateCount,upcomingResult,announcementResult]=await Promise.all([
     supabase?supabase.from("students").select("id",{count:"exact",head:true}).eq("student_status","active"):Promise.resolve({count:null}),
     supabase?supabase.from("students").select("id",{count:"exact",head:true}).eq("student_status","graduated"):Promise.resolve({count:null}),
-    supabase?supabase.from("academic_calendar_events").select("id,title,start_date,start_time,event_type,location").gte("start_date",today).order("start_date",{ascending:true}).limit(5):Promise.resolve({data:[]}),
+    supabase?supabase.from("academic_calendar_events").select("id,title,start_date,start_time,event_type,location").gte("start_date",today).lte("start_date",weekEnd).order("start_date",{ascending:true}).limit(5):Promise.resolve({data:[]}),
     supabase?supabase.from("website_contents").select("content_key,title,body,is_published,updated_at").eq("content_type","announcement").eq("locale",locale).order("updated_at",{ascending:false}).limit(3):Promise.resolve({data:[]})
   ]);
   const hasStudentStats=activeStudentCount.count!==null&&graduateCount.count!==null;

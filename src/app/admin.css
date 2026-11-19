@@ -1750,3 +1750,22 @@ input,select,textarea,button{max-width:100%}
   }
   html body .admin>.sidebar{padding-top:9px!important;}
 }
+
+/* Mobile comparison cards for buildings and inventory; desktop retains tables. */
+.facility-building-cards,.facility-inventory-cards{display:none}
+.facility-building-card,.facility-inventory-card{min-width:0;padding:14px;border:1px solid #e1e7eb;border-radius:11px;background:#fff;margin-bottom:10px;box-shadow:0 3px 12px rgba(24,52,70,.035)}
+.facility-building-card header,.facility-inventory-card header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding-bottom:11px;border-bottom:1px solid #edf0f2}
+.facility-building-card header>div,.facility-inventory-card header>div{min-width:0}
+.facility-building-card header small,.facility-inventory-card header small{font-size:10px;color:#9b875e;font-weight:700;letter-spacing:.04em}
+.facility-building-card h4,.facility-inventory-card h4{margin:4px 0;color:#1d4057;font-size:16px;line-height:1.3;overflow-wrap:anywhere}
+.facility-inventory-card header p{margin:0;color:#75838e;font-size:11px}
+.facility-building-grid,.facility-inventory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:12px 0}
+.facility-building-grid>div,.facility-inventory-grid>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.facility-building-grid small,.facility-inventory-grid small{font-size:10px;color:#82909a}
+.facility-building-grid strong,.facility-inventory-grid strong{font-size:12px;color:#29485d;overflow-wrap:anywhere}
+.facility-building-card footer,.facility-inventory-card footer{display:flex;gap:8px;border-top:1px solid #edf0f2;padding-top:11px}
+.facility-building-card footer button,.facility-inventory-card footer button{flex:1;min-height:40px;border:1px solid #dbe2e7;background:#fff;border-radius:7px;color:#29485d}
+@media(max-width:650px){
+ .facility-buildings-desktop,.facility-inventory-desktop{display:none!important}
+ .facility-building-cards,.facility-inventory-cards{display:block}
+}

@@ -1512,3 +1512,61 @@ input,select,textarea,button{max-width:100%}
   .admin-menu-details>.sidebar-nav>.side-link,.admin-menu-details>.sidebar-nav>.sidebar-group>.side-link{padding:5px 7px!important;font-size:9px!important}
   .admin-main>.content{padding-top:110px!important}
 }
+
+/* Student management: mobile usability pass */
+@media(max-width:650px){
+  .student-workspace{gap:13px;min-width:0}
+  .student-intro{align-items:stretch;flex-direction:column;gap:10px;margin-bottom:0}
+  .student-intro h2{font-size:23px;line-height:1.25}
+  .student-intro p{font-size:12px;line-height:1.5}
+  .student-intro>.student-primary{width:100%;min-height:43px}
+  .student-tabs{gap:3px;padding:0 0 2px;scrollbar-width:thin}
+  .student-tabs button{min-height:42px;padding:10px 12px;font-size:12px}
+  .student-layout{gap:10px}
+  .student-roster{border-radius:10px}
+  .student-roster-head{padding:11px 12px}
+  .student-roster-head button{width:36px;height:36px;font-size:19px}
+  .student-search,.student-filter{min-height:42px;margin:8px 10px 0;width:calc(100% - 20px);font-size:14px;padding:10px 11px}
+  .student-roster-list{max-height:190px;padding:6px;overscroll-behavior:contain}
+  .student-roster-list>button{padding:10px;border-radius:8px;gap:3px}
+  .student-roster-list>button strong{font-size:13px}
+  .student-roster-list>button span{font-size:11px;overflow-wrap:anywhere}
+  .student-roster-list>button small{font-size:10px}
+  .student-detail{padding:12px;border-radius:10px}
+  .student-profile-head{gap:12px}
+  .student-profile-head h3{font-size:21px;line-height:1.25}
+  .student-profile-head p{font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+  .student-profile-actions{display:flex;flex-wrap:wrap;align-items:center;gap:7px;width:100%}
+  .student-profile-actions button{min-height:40px;padding:9px 11px;font-size:12px;flex:1 1 calc(50% - 7px)}
+  .student-profile-actions .student-status,.student-profile-actions .student-readonly{flex:0 0 auto}
+  .student-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:14px 0}
+  .student-summary-grid article{padding:10px}
+  .student-summary-grid span{font-size:10px}
+  .student-summary-grid strong{font-size:12px}
+  .student-panel{padding-top:14px}
+  .student-panel-head{align-items:flex-start;flex-direction:column;gap:8px}
+  .student-panel-head>button{min-height:40px;padding:9px 12px}
+  .student-panel-head p{line-height:1.5}
+  .student-row-actions{gap:6px}
+  .student-row-actions button{min-height:36px;padding:8px 10px}
+  .student-table-wrap{border:1px solid #edf0f2;border-radius:7px}
+  .student-table{min-width:680px}
+  .student-modal-backdrop{align-items:flex-end!important;padding:0!important}
+  .student-modal{width:100%!important;max-width:none!important;max-height:90dvh!important;overflow-y:auto!important;overscroll-behavior:contain;border-radius:18px 18px 0 0!important;padding:18px 16px calc(16px + env(safe-area-inset-bottom))!important}
+  .student-modal-head{position:sticky;top:-18px;background:#fff;z-index:2;padding:0 0 10px}
+  .student-modal-head h3{font-size:19px}
+  .student-form-grid{grid-template-columns:minmax(0,1fr)!important;gap:12px}
+  .student-form-grid label{font-size:12px}
+  .student-form-grid input,.student-form-grid select,.student-form-grid textarea{min-height:44px;font-size:14px;padding:10px 12px;border-radius:8px}
+  .student-form-grid textarea{min-height:90px}
+  .student-modal-actions{position:sticky;bottom:-16px;background:#fff;z-index:2;padding:12px 0 2px}
+  .student-modal-actions button{min-height:44px;flex:1 1 120px}
+}
+@media(max-width:390px){
+  .student-intro h2{font-size:21px}
+  .student-tabs button{padding:9px 10px;font-size:11px}
+  .student-roster-list{max-height:160px}
+  .student-profile-actions button{flex-basis:100%}
+  .student-summary-grid article{padding:9px}
+  .student-detail{padding:10px}
+}

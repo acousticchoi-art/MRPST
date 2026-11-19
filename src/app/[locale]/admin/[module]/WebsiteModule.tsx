@@ -68,7 +68,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
  async function toggleNotice(item:Entry){if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!db)return;setSaving(true);setError("");try{const {data:verified,error}=await db.from("website_contents").update({is_published:!item.is_published}).eq("id",item.id).select("id,is_published").single();if(error)throw error;if(!verified||verified.id!==item.id||verified.is_published===item.is_published)throw new Error("공지 게시 상태 변경 결과를 확인할 수 없습니다.");setNotice(item.is_published?"공지사항 게시를 중단했습니다.":"공지사항을 게시했습니다.");await load();}catch(e:any){setError(e?.message||"상태를 변경하지 못했습니다.");}finally{setSaving(false);}}
  async function deleteNotice(item:Entry){if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!db||!window.confirm("이 공지사항을 삭제할까요?"))return;setSaving(true);setError("");try{const {data:deleted,error}=await db.from("website_contents").delete().eq("id",item.id).select("id").maybeSingle();if(error)throw error;if(!deleted?.id||deleted.id!==item.id)throw new Error("삭제된 공지사항을 확인할 수 없습니다.");setNotice("공지사항을 삭제했습니다.");await load();}catch(e:any){setError(e?.message||"삭제하지 못했습니다.");}finally{setSaving(false);}}
  const notices=items.filter(x=>x.content_type==="announcement").sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
- return <div className="website-workspace website-workspace-v2">
+ return <div className="website-workspace website-workspace-v2">{!canManage&&<div className="website-alert">읽기 전용 권한입니다. 홈페이지 콘텐츠와 공지사항을 조회할 수 있습니다.</div>}
   <div className="website-heading website-heading-v2">
    <div><span className="eyebrow">PUBLIC WEBSITE CMS</span><h2>홈페이지 관리</h2><p>홈페이지에 공개되는 학교 소개와 공지사항을 한곳에서 관리합니다.</p></div>
    <a className="website-preview-link" href={`/${locale}`} target="_blank" rel="noreferrer">홈페이지 미리보기 ↗</a>
@@ -94,7 +94,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
     <div className="website-field-inputs">{field.key!=="address"&&<FormField label="제목"><input value={pageValues[field.key]?.title||""} onChange={e=>setPageValues(v=>({...v,[field.key]:{...v[field.key],title:e.target.value}}))} placeholder={field.label+" 제목"}/></FormField>}
      <FormField label={field.key==="address"?"주소":"본문 및 소개 문구"}><textarea rows={field.key==="about"?5:3} value={pageValues[field.key]?.body||""} onChange={e=>setPageValues(v=>({...v,[field.key]:{...v[field.key],body:e.target.value}}))} placeholder="홈페이지에 표시할 내용을 입력하세요."/></FormField></div>
    </article>)}</div>}
-   <div className="website-footer-actions"><span>변경한 내용은 저장 후 홈페이지에 게시됩니다.</span><button className="website-primary" disabled={saving||loading} onClick={()=>void savePages()}>{saving?"저장 중…":"변경 내용 저장 및 게시"}</button></div>
+   <div className="website-footer-actions"><span>변경한 내용은 저장 후 홈페이지에 게시됩니다.</span><button className="website-primary" disabled={!canManage||saving||loading} onClick={()=>void savePages()}>{saving?"저장 중…":"변경 내용 저장 및 게시"}</button></div>
   </section>}
   {tab==="notices"&&<div className="website-notice-layout website-notice-layout-v2">
    <section className="website-panel website-panel-v2 website-notice-editor">
@@ -104,7 +104,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
      <FormField label="공지사항 제목"><input value={noticeTitle} onChange={e=>setNoticeTitle(e.target.value)} placeholder="예: 2026학년도 2학기 개강 안내"/></FormField>
      <FormField label="공지사항 내용"><textarea rows={9} value={noticeBody} onChange={e=>setNoticeBody(e.target.value)} placeholder="공지할 내용을 입력하세요."/></FormField>
      <label className="website-publish-check website-publish-check-v2"><input type="checkbox" checked={noticePublished} onChange={e=>setNoticePublished(e.target.checked)}/><span><strong>저장 후 홈페이지에 게시</strong><small>체크를 해제하면 비공개 상태로 저장됩니다.</small></span></label>
-     <div className="website-actions website-actions-v2"><button className="website-primary" disabled={saving||!noticeTitle.trim()||!noticeBody.trim()} onClick={()=>void saveNotice()}>{saving?"저장 중…":editingId?"수정 내용 저장":"공지사항 등록"}</button>{editingId&&<button className="website-secondary" onClick={resetNotice}>수정 취소</button>}</div>
+     <div className="website-actions website-actions-v2"><button className="website-primary" disabled={!canManage||saving||!noticeTitle.trim()||!noticeBody.trim()} onClick={()=>void saveNotice()}>{saving?"저장 중…":editingId?"수정 내용 저장":"공지사항 등록"}</button>{editingId&&<button className="website-secondary" disabled={!canManage} onClick={resetNotice}>수정 취소</button>}</div>
     </div>
    </section>
    <section className="website-panel website-panel-v2 website-notice-list-panel">
@@ -112,7 +112,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
     <div className="website-notice-list website-notice-list-v2">{notices.map(item=><article className="website-notice-item website-notice-item-v2" key={item.id}>
      <div className="website-notice-meta"><span className="website-locale-tag">{locales.find(x=>x.value===item.locale)?.label||item.locale}</span><span className={item.is_published?"published":"draft"}>{item.is_published?"게시 중":"비공개"}</span></div>
      <h4>{item.title}</h4><p>{item.body}</p><small className="website-updated">{new Date(item.updated_at).toLocaleDateString("ko-KR",{year:"numeric",month:"short",day:"numeric"})}</small>
-     <div className="website-notice-actions"><button onClick={()=>editNotice(item)}>수정</button><button onClick={()=>void toggleNotice(item)} disabled={saving}>{item.is_published?"게시 중단":"게시하기"}</button><button className="danger" onClick={()=>void deleteNotice(item)} disabled={saving}>삭제</button></div>
+     <div className="website-notice-actions"><button disabled={!canManage||saving} onClick={()=>editNotice(item)}>수정</button><button onClick={()=>void toggleNotice(item)} disabled={!canManage||saving}>{item.is_published?"게시 중단":"게시하기"}</button><button className="danger" onClick={()=>void deleteNotice(item)} disabled={!canManage||saving}>삭제</button></div>
     </article>)}{!notices.length&&!loading&&<div className="website-empty website-empty-v2"><strong>아직 등록된 공지사항이 없습니다.</strong><span>왼쪽 작성 영역에서 첫 공지사항을 등록해 보세요.</span></div>}</div>
    </section>
   </div>}

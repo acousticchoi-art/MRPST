@@ -1729,3 +1729,14 @@ input,select,textarea,button{max-width:100%}
   .website-overview strong{font-size:21px}
   .website-notice-actions button{flex-basis:100%}
 }
+
+
+/* Meeting detail controls: prevent the action row from overflowing on phones. */
+@media(max-width:600px){
+  .meeting-detail-actions{display:flex;flex-wrap:wrap;gap:7px;width:100%;min-width:0}
+  .meeting-detail-actions button,.meeting-detail-actions select{min-height:40px;flex:1 1 110px;max-width:100%;box-sizing:border-box;padding:8px 10px;font-size:12px}
+  .meeting-detail-actions select{min-width:0;width:auto}
+}
+@media(max-width:390px){
+  .meeting-detail-actions button,.meeting-detail-actions select{flex-basis:100%;width:100%}
+}

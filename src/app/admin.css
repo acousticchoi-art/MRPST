@@ -1740,3 +1740,13 @@ input,select,textarea,button{max-width:100%}
 @media(max-width:390px){
   .meeting-detail-actions button,.meeting-detail-actions select{flex-basis:100%;width:100%}
 }
+
+
+/* Fix duplicate mobile admin identity/actions: keep the shared topbar only. */
+@media screen and (max-width:760px){
+  html body .admin>.sidebar>.mobile-sidebar-brand,
+  html body .admin>.sidebar>.sidebar-mobile-tools{
+    display:none!important;
+  }
+  html body .admin>.sidebar{padding-top:9px!important;}
+}

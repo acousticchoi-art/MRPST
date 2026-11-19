@@ -108,7 +108,7 @@ export default function AdministrationModule(){
   const {data:{user}}=await db.auth.getUser();
   const rows=pageOptions.map(option=>{
    const existing=selected.permissions.find(permission=>permission.module_key===option.key);
-   return {user_id:selected.user_id,module_key:option.key,can_view:selectedPageKeys.includes(option.key),can_manage:existing?.can_manage??hasRoleManageAccess(selected.roles,option.key),assigned_by:user?.id??null,updated_at:new Date().toISOString()};
+   const canView=selectedPageKeys.includes(option.key);return {user_id:selected.user_id,module_key:option.key,can_view:canView,can_manage:canView?(existing?.can_manage??hasRoleManageAccess(selected.roles,option.key)):false,assigned_by:user?.id??null,updated_at:new Date().toISOString()};
   });
   await run(async()=>{const {data,error}=await db.from("user_module_permissions").upsert(rows,{onConflict:"user_id,module_key"}).select("module_key,can_view");if(error)throw error;if(!data||data.length!==rows.length||data.some(saved=>{const expected=rows.find(row=>row.module_key===saved.module_key);return !expected||saved.can_view!==expected.can_view;}))throw new Error("일부 페이지 권한 저장 결과가 입력한 설정과 일치하지 않습니다.");return data;},"페이지 표시 설정을 저장했습니다.");
  }

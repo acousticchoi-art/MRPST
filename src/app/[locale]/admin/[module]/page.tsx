@@ -51,11 +51,13 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
       <details className="admin-menu-details" open>
         <summary>{lang==="ko"?"관리 메뉴":"Menu"}</summary>
         <nav className="sidebar-nav">
+          <Link href={`/${locale}`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
           <div className="side-label">{t.workspace}</div>
           <Link className="side-link" href={`/${locale}/admin`}>{t.dashboard}</Link>
           {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([moduleKey,entry])=><Link className={moduleKey===key?"side-link active":"side-link"} href={`/${locale}/admin/${moduleKey}`} key={moduleKey}>{moduleNames[moduleKey]??entry.title}</Link>)}</div>:null;})}
         </nav>
       </details>
+      <div className="sidebar-mobile-tools"><nav className="admin-language" aria-label="Language"><a className={lang==="my"?"selected":""} href={`/my/admin/${module}`}>မြန်မာ</a><a className={lang==="ko"?"selected":""} href={`/ko/admin/${module}`}>한국어</a></nav><Link href={`/${locale}`}>{t.view}</Link>{supabase&&<AdminActions locale={locale}/>}</div>
       </aside>
     <main className="admin-main">
       <header className="topbar"><Link href={`/${locale}`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">

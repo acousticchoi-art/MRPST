@@ -48,14 +48,17 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
   const moduleNames:Record<string,string>={finance:t.finance,students:t.students,academics:t.academics,facilities:t.facilities,library:t.library,meetings:t.meetings,administration:t.administration,website:t.website};
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
     <aside className="sidebar">
+      <Link href={`/${locale}`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
       <details className="admin-menu-details" open>
         <summary>{lang==="ko"?"관리 메뉴":"Menu"}</summary>
         <nav className="sidebar-nav">
+          
           <div className="side-label">{t.workspace}</div>
           <Link className="side-link" href={`/${locale}/admin`}>{t.dashboard}</Link>
           {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([moduleKey,entry])=><Link className={moduleKey===key?"side-link active":"side-link"} href={`/${locale}/admin/${moduleKey}`} key={moduleKey}>{moduleNames[moduleKey]??entry.title}</Link>)}</div>:null;})}
         </nav>
       </details>
+      <div className="sidebar-mobile-tools"><nav className="admin-language" aria-label="Language"><a className={lang==="my"?"selected":""} href={`/my/admin/${module}`}>မြန်မာ</a><a className={lang==="ko"?"selected":""} href={`/ko/admin/${module}`}>한국어</a></nav><Link href={`/${locale}`}>{t.view}</Link>{supabase&&<AdminActions locale={locale}/>}</div>
       </aside>
     <main className="admin-main">
       <header className="topbar"><Link href={`/${locale}`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">
@@ -68,7 +71,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
         {supabase&&<AdminActions locale={locale}/>}
       </div></header>
       <div className="content">
-        {key==="finance"?<FinanceModule/>:key==="students"?<StudentModule/>:key==="library"?<LibraryModule/>:key==="facilities"?<FacilitiesModule/>:key==="meetings"?<MeetingsModule/>:key==="academics"?<AcademicsModule/>:key==="administration"?<AdministrationModule/>:key==="website"?<WebsiteModule/>:<><h1 className="admin-heading">{moduleNames[key]??item.title}</h1><p className="admin-subtitle">{item.description}</p><div className="module-placeholder"><strong>Module foundation</strong><p>This area is reserved for the {item.title.toLowerCase()} workflow. Data entry, approval steps, reporting and department-level database policies will be added in the next implementation phase.</p><span>Not connected to live records</span></div></>}
+        {key==="finance"?<FinanceModule/>:key==="students"?<StudentModule/>:key==="library"?<LibraryModule canManage={access.canManage}/>:key==="facilities"?<FacilitiesModule canManage={access.canManage}/>:key==="meetings"?<MeetingsModule canManage={access.canManage}/>:key==="academics"?<AcademicsModule/>:key==="administration"?<AdministrationModule/>:key==="website"?<WebsiteModule canManage={access.canManage}/>:<><h1 className="admin-heading">{moduleNames[key]??item.title}</h1><p className="admin-subtitle">{item.description}</p><div className="module-placeholder"><strong>Module foundation</strong><p>This area is reserved for the {item.title.toLowerCase()} workflow. Data entry, approval steps, reporting and department-level database policies will be added in the next implementation phase.</p><span>Not connected to live records</span></div></>}
           </div>
     </main>
   </div></>;

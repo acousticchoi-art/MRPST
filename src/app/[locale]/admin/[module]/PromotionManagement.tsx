@@ -9,6 +9,7 @@ export default function PromotionManagement(){
  const [terms,setTerms]=useState<Row[]>([]),[batches,setBatches]=useState<Row[]>([]),[items,setItems]=useState<Row[]>([]);
  const [batchId,setBatchId]=useState(""),[year,setYear]=useState(String(new Date().getFullYear()));
  const [canManage,setCanManage]=useState(false),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
+ const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED==="true";
  const [graduationItem,setGraduationItem]=useState<Row|null>(null),[graduationForm,setGraduationForm]=useState<any>({graduation_year:String(new Date().getFullYear()),graduation_term:"2",graduation_date:"",degree_name:"",graduation_number:"",honors:"",notes:""});
  const load=useCallback(async()=>{
   if(!db){setLoading(false);return;}
@@ -29,17 +30,17 @@ export default function PromotionManagement(){
   setLoading(false);
  },[db,batchId]);
  useEffect(()=>{void load();},[load]);
- const completedYears=useMemo(()=>{const m=new Map<number,number>();terms.filter(x=>x.status==="completed").forEach(x=>m.set(Number(x.academic_year),(m.get(Number(x.academic_year))||0)+1));return [...m.entries()].filter(([,n])=>n>=2).map(([y])=>y);},[terms]);
+ const completedYears=useMemo(()=>{const m=new Map<number,Set<string>>();terms.filter(x=>x.status==="completed").forEach(x=>{const term=String(x.term_code||"").match(/([12])$/)?.[1];if(!term)return;const y=Number(x.academic_year);if(!m.has(y))m.set(y,new Set<string>());m.get(y)!.add(term);});return [...m.entries()].filter(([,set])=>set.has("1")&&set.has("2")).map(([y])=>y);},[terms]);
  const selectedBatch=batches.find(x=>x.id===batchId);
  const counts=useMemo(()=>items.reduce((a,x)=>{a[x.decision]=(a[x.decision]||0)+1;return a;},{ } as Record<string,number>),[items]);
  const changeDecision=async(item:Row,decision:string)=>{
-  if(!db||!canManage||selectedBatch?.status!=="review")return;
+  if(!db||!canManage||!mutationsEnabled||selectedBatch?.status!=="review")return;
   setSaving(true);setError("");const {error:e}=await db.rpc("mrpst_set_student_promotion_decision",{p_item_id:item.id,p_decision:decision,p_note:null});
   if(e)setError(e.message);else{setItems(old=>old.map(x=>x.id===item.id?{...x,decision}:x));setNotice("학생 처리 상태를 변경했습니다.");}
   setSaving(false);
  };
  const createBatch=async()=>{
-  if(!db)return;setSaving(true);setError("");setNotice("");
+  if(!db||!mutationsEnabled){setNotice("학사 변경 기능은 개발 DB 분리 및 활성화 후 사용할 수 있습니다.");return;}setSaving(true);setError("");setNotice("");
   const {data,error:e}=await db.rpc("mrpst_create_student_promotion_batch",{p_academic_year:Number(year)});
   if(e)setError(e.message);else{
    setBatchId(data);setNotice(year+"학년도 진급 명단을 만들었습니다.");
@@ -50,7 +51,7 @@ export default function PromotionManagement(){
   setSaving(false);
  };
  const approve=async()=>{
-  if(!db||!selectedBatch||!window.confirm(selectedBatch.academic_year+"학년도 진급 명단을 최종 승인할까요? 승인하면 진급 대상 학생의 학년 정보가 변경됩니다."))return;
+  if(!db||!mutationsEnabled||!selectedBatch||!window.confirm(selectedBatch.academic_year+"학년도 진급 명단을 최종 승인할까요? 승인하면 진급 대상 학생의 학년 정보가 변경됩니다."))return;
   setSaving(true);setError("");const {data,error:e}=await db.rpc("mrpst_approve_student_promotion",{p_batch_id:selectedBatch.id});
   if(e)setError(e.message);else setNotice("최종 승인 완료: "+data+"명의 학년을 변경했습니다.");
   setSaving(false);await load();
@@ -63,7 +64,7 @@ export default function PromotionManagement(){
   setError("");
  };
  const confirmGraduation=async()=>{
-  if(!db||!graduationItem)return;
+  if(!db||!mutationsEnabled||!graduationItem)return;
   setSaving(true);setError("");setNotice("");
   const {data,error:e}=await db.rpc("mrpst_confirm_student_graduation",{p_item_id:graduationItem.id,p_graduation_year:Number(graduationForm.graduation_year),p_graduation_term:Number(graduationForm.graduation_term),p_graduation_date:graduationForm.graduation_date||null,p_degree_name:graduationForm.degree_name.trim()||null,p_graduation_number:graduationForm.graduation_number.trim()||null,p_honors:graduationForm.honors.trim()||null,p_notes:graduationForm.notes.trim()||null});
   if(e)setError(e.message);else{setNotice("졸업 확정 및 졸업 이력 등록을 완료했습니다.");setGraduationItem(null);await load();}
@@ -72,10 +73,11 @@ export default function PromotionManagement(){
  const ready=items.length>0&&items.every(x=>x.decision!=="needs_review");
  return <section className="academics-panel promotion-panel">
   <div className="academics-panel-head"><div><h3>학년 진급</h3><p>두 학기 종료 후 재학생 명단을 확인하고 한 번에 진급 처리합니다.</p></div></div>
+  {!mutationsEnabled&&<div className="academics-alert">진급·졸업 데이터 변경은 개발 DB 분리 전까지 잠겨 있습니다. 조회와 검토만 가능합니다.</div>}
   {error&&<div className="academics-alert error">{error}</div>}{notice&&<div className="academics-alert">{notice}</div>}
   <div className="promotion-controls">
    <label>학년도<select value={year} onChange={e=>setYear(e.target.value)}>{[...new Set(terms.map(x=>String(x.academic_year)))].map(y=><option key={y} value={y}>{y}학년도</option>)}</select></label>
-   <button className="academics-primary small" disabled={!canManage||saving||!completedYears.includes(Number(year))||batches.some(x=>x.academic_year===Number(year))} onClick={()=>void createBatch()}>{saving?"처리 중…":"진급 명단 자동 생성"}</button>
+   <button className="academics-primary small" disabled={!canManage||!mutationsEnabled||saving||!completedYears.includes(Number(year))||batches.some(x=>x.academic_year===Number(year))} onClick={()=>void createBatch()}>{saving?"처리 중…":"진급 명단 자동 생성"}</button>
   </div>
   {!completedYears.includes(Number(year))&&<p className="academics-form-hint">해당 학년도의 1학기와 2학기가 모두 ‘종료’ 상태가 되어야 진급 명단을 생성할 수 있습니다.</p>}
   {batches.length>0&&<div className="promotion-controls"><label>진급 처리 내역<select value={batchId} onChange={e=>setBatchId(e.target.value)}>{batches.map(x=><option key={x.id} value={x.id}>{x.academic_year}학년도 · {x.status==="approved"?"승인 완료":"검토 중"}</option>)}</select></label></div>}
@@ -86,8 +88,8 @@ export default function PromotionManagement(){
     <article><span>확인 필요</span><strong>{counts.needs_review||0}</strong></article>
     <article><span>진급 제외</span><strong>{counts.excluded||0}</strong></article>
    </div>
-   <div className="academics-table-wrap"><table className="academics-table"><thead><tr><th>학번</th><th>학생</th><th>현재 학년</th><th>처리 결과</th><th>졸업 처리</th></tr></thead><tbody>{items.map(x=><tr key={x.id}><td>{x.student_number}</td><td>{x.student_name}</td><td>{x.from_cohort||"미등록"}</td><td>{selectedBatch.status==="approved"?decisionLabel[x.decision]:<select disabled={!canManage||saving} value={x.decision} onChange={e=>void changeDecision(x,e.target.value)}>{x.to_cohort&&<option value="promote">진급 예정</option>}<option value="graduation_review">졸업 검토</option><option value="needs_review">확인 필요</option><option value="excluded">진급 제외</option></select>}</td><td>{x.decision==="graduation_review"?(x.student?.student_status==="graduated"?<span className="academics-status-active">졸업 완료</span>:selectedBatch.status==="approved"?<button className="academics-secondary small" disabled={!canManage||saving} onClick={()=>openGraduation(x)}>졸업 확정</button>:"최종 승인 후 가능"):"—"}</td></tr>)}</tbody></table></div>
-   {selectedBatch.status==="review"?<div className="promotion-approve"><p className="academics-form-hint">4학년은 자동 졸업시키지 않고 졸업 검토로 남깁니다. 확인 필요 항목을 모두 처리해야 승인할 수 있습니다.</p><button className="academics-primary" disabled={!canManage||saving||!ready} onClick={()=>void approve()}>{saving?"처리 중…":"진급 최종 승인"}</button></div>:<p className="academics-form-hint">진급 승인 완료 · 졸업 검토 대상은 아래 표에서 별도로 졸업 확정해야 학적 상태가 ‘졸업’으로 변경됩니다. {selectedBatch.approved_at?new Date(selectedBatch.approved_at).toLocaleString("ko-KR"):""}</p>}
+   <div className="academics-table-wrap"><table className="academics-table"><thead><tr><th>학번</th><th>학생</th><th>현재 학년</th><th>처리 결과</th><th>졸업 처리</th></tr></thead><tbody>{items.map(x=><tr key={x.id}><td>{x.student_number}</td><td>{x.student_name}</td><td>{x.from_cohort||"미등록"}</td><td>{selectedBatch.status==="approved"?decisionLabel[x.decision]:<select disabled={!canManage||!mutationsEnabled||saving} value={x.decision} onChange={e=>void changeDecision(x,e.target.value)}>{x.to_cohort&&<option value="promote">진급 예정</option>}{(()=>{const level=x.from_cohort==="First Year"?1:x.from_cohort==="Second Year"?2:x.from_cohort==="Third Year"?3:x.from_cohort==="Fourth Year"?4:null;const code=x.student?.program_code;const max=code==="ece"?2:code==="mdiv"?3:code==="theology"&&/diploma/i.test(x.student?.program||"")?2:code==="theology"?4:null;return level!==null&&max!==null&&level===max?<option value="graduation_review">졸업 검토</option>:null;})()}<option value="needs_review">확인 필요 · 학적/이수 기록 점검</option><option value="excluded">진급 제외</option></select>}</td><td>{x.decision==="graduation_review"?(x.student?.student_status==="graduated"?<span className="academics-status-active">졸업 완료</span>:selectedBatch.status==="approved"?<button className="academics-secondary small" disabled={!canManage||!mutationsEnabled||saving} onClick={()=>openGraduation(x)}>졸업 확정</button>:"최종 승인 후 가능"):"—"}</td></tr>)}</tbody></table></div>
+   {selectedBatch.status==="review"?<div className="promotion-approve"><p className="academics-form-hint">진급 또는 졸업 검토는 해당 학년의 두 학기 이수 기록이 모두 완료되어야 지정할 수 있습니다. 학기 이수 기록이 없거나 학적 정보가 맞지 않는 학생은 확인 필요로 분류됩니다.</p><button className="academics-primary" disabled={!canManage||!mutationsEnabled||saving||!ready} onClick={()=>void approve()}>{saving?"처리 중…":"진급 최종 승인"}</button></div>:<p className="academics-form-hint">진급 승인 완료 · 졸업 검토 대상은 아래 표에서 별도로 졸업 확정해야 학적 상태가 ‘졸업’으로 변경됩니다. {selectedBatch.approved_at?new Date(selectedBatch.approved_at).toLocaleString("ko-KR"):""}</p>}
   </>}
   {!loading&&!selectedBatch&&<div className="academics-empty">아직 생성된 진급 명단이 없습니다. 두 학기가 모두 종료되면 자동 생성할 수 있습니다.</div>}
   {graduationItem&&<div className="promotion-graduation-backdrop"><section className="promotion-graduation-modal"><div className="academics-panel-head"><div><h3>졸업 확정</h3><p>{graduationItem.student_name} · {graduationItem.student_number}</p></div><button className="academics-secondary small" onClick={()=>setGraduationItem(null)}>닫기</button></div><div className="promotion-graduation-form">

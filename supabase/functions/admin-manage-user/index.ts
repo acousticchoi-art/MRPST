@@ -46,15 +46,21 @@ Deno.serve(async (req: Request) => {
       return result;
     }
     const { mrpst_admin_provisioning_token: _consumedToken, ...cleanUserMetadata } = result.data.user.user_metadata ?? {};
-    await admin.auth.admin.updateUserById(result.data.user.id, { user_metadata: cleanUserMetadata });
+    const { error: metadataCleanupError } = await admin.auth.admin.updateUserById(result.data.user.id, { user_metadata: cleanUserMetadata });
+    if (metadataCleanupError) {
+      // Fail closed: do not leave a provisioned user with the internal token in metadata.
+      await admin.auth.admin.deleteUser(result.data.user.id);
+      await admin.from("mrpst_auth_user_creation_tokens").delete().eq("token", token);
+      return { data: { user: null }, error: metadataCleanupError };
+    }
     return result;
   };
   const { data: profile } = await admin.from("user_profiles").select("is_active").eq("user_id", caller.id).maybeSingle();
   const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", caller.id);
   const callerRoles = (roles ?? []).map((item: { role: string }) => item.role);
   const isSuperAdmin = callerRoles.includes("super_admin");
-  const canIssueStudent = isSuperAdmin || callerRoles.some((role: string) => ["administrator", "student_officer", "academic_officer"].includes(role));
-  if (profile?.is_active !== true || !canIssueStudent) return json({ error: "학생 계정 발급 권한이 필요합니다." }, 403);
+  const { data: canManageStudents, error: permissionError } = await admin.rpc("mrpst_can_manage_module", { target_user: caller.id, target_module: "students" });
+  if (profile?.is_active !== true || permissionError || canManageStudents !== true) return json({ error: "학생 계정 발급 권한이 필요합니다." }, 403);
 
   try {
     const body = await req.json();
@@ -91,11 +97,11 @@ Deno.serve(async (req: Request) => {
         await admin.auth.admin.deleteUser(userId);
         return json({ error: linkError.message }, 400);
       }
-      await admin.from("admin_audit_log").insert({
+      const { error: auditError } = await admin.from("admin_audit_log").insert({
         actor_id: caller.id, entity_type: "student_account", entity_id: studentId, action: "insert",
         details: { event: "student_account_created", student_number: student.student_number, email },
       });
-      return json({ user_id: userId, email, student_number: student.student_number });
+      return json({ user_id: userId, email, student_number: student.student_number, audit_logged: !auditError, audit_warning: auditError ? "학생 계정은 생성되었지만 변경 이력 기록에 실패했습니다." : undefined });
     }
 
     if (body.action === "create") {
@@ -125,8 +131,8 @@ Deno.serve(async (req: Request) => {
         await admin.auth.admin.deleteUser(userId);
         return json({ error: roleError.message }, 400);
       }
-      await admin.from("admin_audit_log").insert({ actor_id: caller.id, entity_type: "user_role", entity_id: userId, action: "insert", details: { event: "account_created", email, full_name: fullName, role: requestedRole, department_id: departmentId } });
-      return json({ user_id: userId });
+      const { error: auditError } = await admin.from("admin_audit_log").insert({ actor_id: caller.id, entity_type: "user_role", entity_id: userId, action: "insert", details: { event: "account_created", email, full_name: fullName, role: requestedRole, department_id: departmentId } });
+      return json({ user_id: userId, audit_logged: !auditError, audit_warning: auditError ? "계정은 생성되었지만 변경 이력 기록에 실패했습니다." : undefined });
     }
     if (body.action === "update_password") {
       const userId = String(body.user_id || "");
@@ -136,8 +142,8 @@ Deno.serve(async (req: Request) => {
       if (!target) return json({ error: "대상 계정을 찾을 수 없습니다." }, 404);
       const { error: updateError } = await admin.auth.admin.updateUserById(userId, { password });
       if (updateError) return json({ error: updateError.message }, 400);
-      await admin.from("admin_audit_log").insert({ actor_id: caller.id, entity_type: "user_profile", entity_id: userId, action: "update", details: { event: "password_changed", email: target.email || "", full_name: target.full_name || "" } });
-      return json({ success: true });
+      const { error: auditError } = await admin.from("admin_audit_log").insert({ actor_id: caller.id, entity_type: "user_profile", entity_id: userId, action: "update", details: { event: "password_changed", email: target.email || "", full_name: target.full_name || "" } });
+      return json({ success: true, audit_logged: !auditError, audit_warning: auditError ? "비밀번호는 변경되었지만 변경 이력 기록에 실패했습니다." : undefined });
     }
     return json({ error: "지원하지 않는 작업입니다." }, 400);
   } catch (error) {

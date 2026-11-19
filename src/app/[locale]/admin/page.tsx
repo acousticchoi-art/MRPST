@@ -86,28 +86,49 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   }
   if(accessDenied) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>{t.denied}</h1><p className="login-intro">{t.deniedText}</p><Link className="btn secondary" href={`/${locale}`}>{t.back}</Link></section></main>;
   const visible=Object.entries(MODULES).filter(([key])=>!supabase||canAccessModule(roles,key as keyof typeof MODULES,moduleOverrides));
+  const canAccessAcademics=visible.some(([key])=>key==="academics");
+  const canAccessWebsite=visible.some(([key])=>key==="website");
   const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
-  const [activeStudentCount,graduateCount,upcomingResult,announcementResult]=await Promise.all([
-    supabase?supabase.from("students").select("id",{count:"exact",head:true}).eq("student_status","active"):Promise.resolve({count:null}),
-    supabase?supabase.from("students").select("id",{count:"exact",head:true}).eq("student_status","graduated"):Promise.resolve({count:null}),
-    supabase?supabase.from("academic_calendar_events").select("id,title,start_date,start_time,event_type,location").gte("start_date",today).order("start_date",{ascending:true}).limit(5):Promise.resolve({data:[]}),
-    supabase?supabase.from("website_contents").select("content_key,title,body,is_published,updated_at").eq("content_type","announcement").eq("locale",locale).order("updated_at",{ascending:false}).limit(3):Promise.resolve({data:[]})
+  const weekStartDate=new Date(today+"T12:00:00");
+  weekStartDate.setDate(weekStartDate.getDate()-(weekStartDate.getDay()+6)%7);
+  const weekEndDate=new Date(weekStartDate);
+  weekEndDate.setDate(weekEndDate.getDate()+6);
+  const dateFormat=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"});
+  const weekStart=dateFormat.format(weekStartDate);
+  const weekEnd=dateFormat.format(weekEndDate);
+  const [activeStudentCount,graduateCount,upcomingResult,upcomingCountResult,announcementResult]=await Promise.all([
+    supabase?supabase.from("students").select("id",{count:"exact",head:true}).eq("student_status","active"):Promise.resolve({count:null,error:null}),
+    supabase?supabase.from("students").select("id",{count:"exact",head:true}).eq("student_status","graduated"):Promise.resolve({count:null,error:null}),
+    supabase?supabase.from("academic_calendar_events").select("id,title,start_date,start_time,event_type,location").gte("start_date",weekStart).lte("start_date",weekEnd).order("start_date",{ascending:true}).limit(5):Promise.resolve({data:[],error:null}),
+    supabase?supabase.from("academic_calendar_events").select("id",{count:"exact",head:true}).gte("start_date",weekStart).lte("start_date",weekEnd):Promise.resolve({count:null,error:null}),
+    supabase?supabase.from("website_contents").select("content_key,title,body,is_published,updated_at").eq("content_type","announcement").eq("locale",locale).order("updated_at",{ascending:false}).limit(3):Promise.resolve({data:[],error:null})
   ]);
+  const dashboardQueryErrors=[
+    activeStudentCount.error&&"재학생 통계",
+    graduateCount.error&&"졸업생 통계",
+    upcomingResult.error&&"학사 일정",
+    upcomingCountResult.error&&"일정 집계",
+    announcementResult.error&&"공지사항"
+  ].filter(Boolean);
   const hasStudentStats=activeStudentCount.count!==null&&graduateCount.count!==null;
   const upcomingEvents=upcomingResult.data??[];
+  const upcomingCount=upcomingCountResult.count??upcomingEvents.length;
   const recentAnnouncements=announcementResult.data??[];
   const moduleGroups=[["academic",["students","academics"]],["finance",["finance"]],["operations",["facilities","library","meetings"]],["system",["administration","website"]]] as const;
   const visibleInGroup=(keys:readonly string[])=>visible.filter(([key])=>keys.includes(key));
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
     <aside className="sidebar">
+      <Link href={`/${locale}`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
       <details className="admin-menu-details" open>
         <summary>{lang==="ko"?"관리 메뉴":"Menu"}</summary>
         <nav className="sidebar-nav">
+          
           <div className="side-label">WORKSPACE</div>
           <Link className="side-link active" href={`/${locale}/admin`}>{t.dashboard}</Link>
           {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([key,item])=><Link className="side-link" href={`/${locale}/admin/${key}`} key={key}>{(t as any)[key]?.[0]??item.title}</Link>)}</div>:null;})}
         </nav>
       </details>
+      <div className="sidebar-mobile-tools"><nav className="admin-language" aria-label="Language"><a className={locale==="my"?"selected":""} href="/my/admin">မြန်မာ</a><a className={locale==="ko"?"selected":""} href="/ko/admin">한국어</a></nav><Link href={`/${locale}`}>{t.view}</Link>{supabase&&<AdminActions locale={locale}/>}</div>
     </aside>
     <main className="admin-main">
       <header className="topbar"><Link href={`/${locale}`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">
@@ -118,7 +139,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
         <Link href={`/${locale}`}>{t.view}</Link>
         {supabase&&<AdminActions locale={locale}/>}
       </div></header>
-      <div className="content"><span className="eyebrow">{t.eyebrow}</span><h1 className="admin-heading">{t.title}</h1><p className="admin-subtitle">{t.subtitle}</p>
+      <div className="content">{dashboardQueryErrors.length>0&&<div className="notice" role="alert">{lang==="ko"?"일부 대시보드 데이터를 불러오지 못했습니다: "+dashboardQueryErrors.join(", "):"ဒက်ရှ်ဘုတ်ဒေတာအချို့ကို မရယူနိုင်ပါ: "+dashboardQueryErrors.join(", ")}</div>}<span className="eyebrow">{t.eyebrow}</span><h1 className="admin-heading">{t.title}</h1><p className="admin-subtitle">{t.subtitle}</p>
         {!isSupabaseConfigured&&<div className="notice">{t.preview}</div>}
         <section className="dashboard-welcome">
           <div><span className="dashboard-date">{today}</span><h2>{lang==="ko"?"무슨 일을 하든지 마음을 다하여 주께 하듯 하고 사람에게 하듯 하지 말라.":"သင်တို့သည် ပြုလေသမျှသော အမှုတို့ကို သခင်ဘုရားအား ပြုသည်ဟု စိတ်နှလုံးအကြွင်းမဲ့ ပြုကြလော့။"}</h2><p>{lang==="ko"?"골로새서 3:23":"ကောလောသဲ ၃:၂၃"}</p></div>
@@ -127,15 +148,15 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
         <section className="dashboard-stats">
           <article className="dashboard-stat"><span>{t.currentStudents}</span><strong>{hasStudentStats?activeStudentCount.count?.toLocaleString("en-US"):"—"}</strong><small>{lang==="ko"?"현재 재학 상태":"လက်ရှိတက်ရောက်နေသော ကျောင်းသား"}</small></article>
           <article className="dashboard-stat"><span>{t.graduateTotal}</span><strong>{hasStudentStats?graduateCount.count?.toLocaleString("en-US"):"—"}</strong><small>{lang==="ko"?"졸업 처리된 학생":"ဘွဲ့ရပြီးသော ကျောင်းသားများ"}</small></article>
-          <article className="dashboard-stat"><span>{lang==="ko"?"이번 주 일정":"ယခုအပတ်အတွင်း"}</span><strong>{upcomingEvents.length}</strong><small>{lang==="ko"?"등록된 향후 일정":"လာမည့် အစီအစဉ်များ"}</small></article>
+          <article className="dashboard-stat"><span>{lang==="ko"?"이번 주 일정":"ယခုအပတ်အတွင်း"}</span><strong>{upcomingCount}</strong><small>{lang==="ko"?"이번 주 전체 일정":"ယခုအပတ်အစီအစဉ်များ"}</small></article>
         </section>
         <div className="dashboard-columns">
           <section className="dashboard-panel dashboard-schedule">
-            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</span><h2>{lang==="ko"?"다가오는 일정":"လာမည့် အစီအစဉ်များ"}</h2></div><Link href={`/${locale}/admin/academics`}>{lang==="ko"?"일정 관리 →":"စီမံခန့်ခွဲရန် →"}</Link></div>
+            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</span><h2>{lang==="ko"?"다가오는 일정":"လာမည့် အစီအစဉ်များ"}</h2></div>{canAccessAcademics&&<Link href={`/${locale}/admin/academics`}>{lang==="ko"?"일정 관리 →":"စီမံခန့်ခွဲရန် →"}</Link>}</div>
             {upcomingEvents.length? <div className="dashboard-event-list">{upcomingEvents.map((event:any)=><article key={event.id}><time>{event.start_date}{event.start_time?" · "+String(event.start_time).slice(0,5):""}</time><div><strong>{event.title}</strong>{event.location&&<small>{event.location}</small>}</div></article>)}</div>:<p className="dashboard-empty">{lang==="ko"?"예정된 일정이 없습니다.":"မှတ်ပုံတင်ထားသော အစီအစဉ် မရှိသေးပါ။"}</p>}
           </section>
           <section className="dashboard-panel dashboard-announcements">
-            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"MRPST NEWS":"MRPST NEWS"}</span><h2>{lang==="ko"?"최근 공지사항":"နောက်ဆုံး ကြေညာချက်များ"}</h2></div><Link href={`/${locale}/admin/website`}>{lang==="ko"?"공지사항 관리 →":"စီမံခန့်ခွဲရန် →"}</Link></div>
+            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"MRPST NEWS":"MRPST NEWS"}</span><h2>{lang==="ko"?"최근 공지사항":"နောက်ဆုံး ကြေညာချက်များ"}</h2></div>{canAccessWebsite&&<Link href={`/${locale}/admin/website`}>{lang==="ko"?"공지사항 관리 →":"စီမံခန့်ခွဲရန် →"}</Link>}</div>
             {recentAnnouncements.length?<div className="dashboard-announcement-list">{recentAnnouncements.map((item:any)=><article key={item.content_key}><div><strong>{item.title}</strong><p>{item.body}</p></div><span className={item.is_published?"published":"draft"}>{item.is_published?(lang==="ko"?"게시":"Published"):(lang==="ko"?"임시저장":"Draft")}</span></article>)}</div>:<p className="dashboard-empty">{lang==="ko"?"등록된 공지사항이 없습니다.":"ကြေညာချက် မရှိသေးပါ။"}</p>}
           </section>
         </div>

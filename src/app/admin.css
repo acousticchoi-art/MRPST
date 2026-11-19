@@ -1570,3 +1570,57 @@ input,select,textarea,button{max-width:100%}
   .student-summary-grid article{padding:9px}
   .student-detail{padding:10px}
 }
+
+/* Final mobile admin header: controls appear only once, in the brand row. */
+@media screen and (max-width:650px){
+  html body .admin>.sidebar{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,auto)!important;
+    grid-template-rows:54px 44px!important;
+    align-items:center!important;
+    gap:0!important;
+    padding:0 10px 4px!important;
+    overflow:hidden!important;
+  }
+  html body .admin>.sidebar>.mobile-sidebar-brand{
+    grid-column:1!important;grid-row:1!important;
+    display:flex!important;min-width:0!important;
+  }
+  html body .admin>.sidebar>.sidebar-mobile-tools{
+    grid-column:2!important;grid-row:1!important;
+    display:flex!important;align-items:center!important;justify-content:flex-end!important;
+    width:auto!important;min-width:0!important;height:54px!important;
+    padding:0!important;margin:0!important;border:0!important;
+  }
+  html body .admin>.sidebar>.admin-menu-details{
+    display:contents!important;
+  }
+  html body .admin>.sidebar>.admin-menu-details>summary{
+    display:none!important;
+  }
+  html body .admin>.sidebar>.admin-menu-details>.sidebar-nav{
+    grid-column:1/-1!important;grid-row:2!important;
+    display:flex!important;align-items:center!important;
+    width:100%!important;min-width:0!important;height:40px!important;
+    max-height:none!important;overflow-x:auto!important;overflow-y:hidden!important;
+    padding:0!important;margin:0!important;gap:6px!important;
+  }
+  html body .admin>.sidebar>.admin-menu-details>.sidebar-nav .side-label{
+    display:none!important;
+  }
+  html body .admin>.sidebar>.admin-menu-details>.sidebar-nav .side-link{
+    display:flex!important;flex:0 0 auto!important;min-height:34px!important;
+    margin:0!important;white-space:nowrap!important;
+  }
+  /* Prevent account/language actions from ever appearing inside navigation rows. */
+  html body .admin>.sidebar>.admin-menu-details .admin-language,
+  html body .admin>.sidebar>.admin-menu-details .top-action,
+  html body .admin>.sidebar>.admin-menu-details>a[href^="/"]{
+    display:none!important;
+  }
+  html body .admin-main>.topbar{display:none!important}
+}
+@media screen and (max-width:390px){
+  html body .admin>.sidebar{grid-template-rows:51px 42px!important;padding-inline:7px!important}
+  html body .admin>.sidebar>.sidebar-mobile-tools{height:51px!important;gap:3px!important}
+}

@@ -73,11 +73,11 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
    if(existingEntries.error||existingEvents.error)throw existingEntries.error||existingEvents.error;
    const entriesForDay=existingEntries.data||[],eventsForDay=existingEvents.data||[];
    if(editingType==="event"){
-    if(entriesForDay.some(x=>x.department_id===departmentId&&overlaps(x)))throw new Error("같은 학과의 강의 시간과 겹칩니다. 강의 또는 일정 시간을 조정해 주세요.");
+    
     if(eventsForDay.some(x=>x.id!==editing&&overlaps(x)))throw new Error("같은 학과의 다른 일정과 시간이 겹칩니다.");
    }else{
     if(entriesForDay.some(x=>x.id!==editing&&x.department_id===departmentId&&groupsConflict(x.class_group,form.class_group)&&overlaps(x)))throw new Error("같은 학과의 다른 강의와 시간이 겹칩니다.");
-    if(eventsForDay.some(x=>overlaps(x)))throw new Error("같은 학과의 공통 일정과 시간이 겹칩니다.");
+    
     if(form.instructor_id&&entriesForDay.some(x=>x.id!==editing&&x.instructor_id===form.instructor_id&&overlaps(x)))throw new Error("담당 교수가 같은 시간에 다른 강의를 맡고 있습니다.");
     if(form.room.trim()&&entriesForDay.some(x=>x.id!==editing&&String(x.room||"").trim()===form.room.trim()&&overlaps(x)))throw new Error("선택한 강의실이 같은 시간에 이미 사용 중입니다.");
    }
@@ -132,7 +132,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
    for(const row of courseRows){
     if(existingEvents.some(x=>overlaps(row,x)))throw new Error("시간표 복사 중단: 복사할 강의가 현재 학기의 공통 일정과 겹칩니다.");
     if(existingCourses.some(x=>overlaps(row,x)&&((x.department_id===departmentId&&groupsConflict(x.class_group,row.class_group))||!!row.instructor_id&&x.instructor_id===row.instructor_id||!!row.room&&String(x.room||"").trim()===String(row.room||"").trim())))throw new Error("시간표 복사 중단: 학과 강의, 담당 교수 또는 강의실 시간 충돌이 발견되었습니다.");
-    if(acceptedCourses.some(x=>overlaps(row,x)&&((x.department_id===departmentId&&groupKey(x.class_group)===groupKey(row.class_group))||!!row.instructor_id&&x.instructor_id===row.instructor_id||!!row.room&&String(x.room||"").trim()===String(row.room||"").trim())))throw new Error("시간표 복사 중단: 복사되는 강의들끼리 시간 충돌이 발견되었습니다.");
+    if(acceptedCourses.some(x=>overlaps(row,x)&&((x.department_id===departmentId&&groupsConflict(x.class_group,row.class_group))||!!row.instructor_id&&x.instructor_id===row.instructor_id||!!row.room&&String(x.room||"").trim()===String(row.room||"").trim())))throw new Error("시간표 복사 중단: 복사되는 강의들끼리 시간 충돌이 발견되었습니다.");
     acceptedCourses.push(row);
    }
    const acceptedEvents:any[]=[];

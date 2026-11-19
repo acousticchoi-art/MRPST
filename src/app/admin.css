@@ -1624,3 +1624,52 @@ input,select,textarea,button{max-width:100%}
   html body .admin>.sidebar{grid-template-rows:51px 42px!important;padding-inline:7px!important}
   html body .admin>.sidebar>.sidebar-mobile-tools{height:51px!important;gap:3px!important}
 }
+
+
+/* Timetable mobile usability: keep the desktop grid intact, scroll it safely on small screens. */
+@media(max-width:760px){
+  .timetable-workspace{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
+  .timetable-heading{display:flex;flex-direction:column;align-items:stretch;gap:10px;min-width:0}
+  .timetable-heading h2{font-size:22px;line-height:1.3;margin:6px 0}
+  .timetable-heading p{font-size:12px;line-height:1.55;overflow-wrap:anywhere}
+  .timetable-actions{display:flex;flex-wrap:wrap;gap:7px;width:100%}
+  .timetable-actions button{min-height:40px;flex:1 1 130px;padding:9px 10px;font-size:12px}
+  .timetable-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+  .timetable-filters label,.timetable-copy-row label{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:11px;color:var(--muted)}
+  .timetable-filters select,.timetable-copy-row select{min-width:0;width:100%;box-sizing:border-box;min-height:42px;padding:8px;font-size:13px}
+  .timetable-copy-row{display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:11px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .timetable-copy-row button{min-height:42px;width:100%;padding:9px;font-size:12px}
+  .timetable-paper{min-width:0;width:100%;overflow:hidden;border-radius:8px;background:#fff}
+  .timetable-paper-title{padding:14px 12px;display:flex;flex-direction:column;gap:5px;overflow-wrap:anywhere}
+  .timetable-paper-title h1{font-size:15px;line-height:1.4;margin:0}
+  .timetable-paper-title strong,.timetable-paper-title span{font-size:11px}
+  .timetable-scroll{width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;border:1px solid var(--line);border-radius:6px}
+  .timetable-grid{min-width:820px;width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px}
+  .timetable-grid th,.timetable-grid td{border:1px solid #e6e8eb;padding:5px;vertical-align:top}
+  .timetable-grid thead th{position:sticky;top:0;background:#f5f6f7;z-index:1;text-align:center;padding:9px 5px}
+  .timetable-grid th:first-child{width:82px}
+  .timetable-time{white-space:nowrap;font-size:10px;background:#f8f8f6}
+  .timetable-grid td{min-width:100px}
+  .timetable-course,.timetable-event{display:flex;flex-direction:column;gap:4px;padding:7px;margin:2px 0;border-radius:5px;background:#f3f6f9;overflow-wrap:anywhere}
+  .timetable-course.blue{background:#eaf2f8}
+  .timetable-course.pink{background:#f8edf0}
+  .timetable-course strong,.timetable-event strong{font-size:10px;line-height:1.45}
+  .timetable-course span,.timetable-course small,.timetable-event small{font-size:9px;line-height:1.4;overflow-wrap:anywhere}
+  .timetable-entry-actions{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+  .timetable-entry-actions button{min-height:30px;flex:1 1 42px;padding:5px 4px;font-size:10px;border:1px solid #d6dbe0;background:#fff;border-radius:4px}
+  .timetable-paper-footer{padding:9px 11px;font-size:10px;overflow-wrap:anywhere}
+  .timetable-course-library{padding:12px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}
+  .timetable-course-library h3{font-size:14px;margin:0 0 5px}
+  .timetable-course-library p{font-size:11px;line-height:1.5;margin:0 0 10px;color:var(--muted)}
+  .timetable-course-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .timetable-course-list article{min-width:0;display:flex;flex-direction:column;gap:3px;padding:8px;border:1px solid #edf0f2;border-radius:5px;overflow-wrap:anywhere}
+  .timetable-course-list strong{font-size:11px;line-height:1.4}
+  .timetable-course-list span{font-size:10px;color:var(--muted)}
+  .timetable-modal{width:100%!important;max-height:90dvh!important;overflow-y:auto!important}
+}
+@media(max-width:390px){
+  .timetable-filters{grid-template-columns:1fr}
+  .timetable-actions button{flex-basis:100%}
+  .timetable-course-list{grid-template-columns:1fr}
+  .timetable-paper-title h1{font-size:13px}
+}

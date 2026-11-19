@@ -19,7 +19,7 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
 
   const access=await getServerModuleAccess(moduleKey);
   if(!access.ok)return NextResponse.json({error:access.error},{status:access.status});
-  const {supabase}=access;
+  const {supabase,roles}=access;
 
   const search=request.nextUrl.searchParams;
   const from=search.get("from")||"2000-01-01";

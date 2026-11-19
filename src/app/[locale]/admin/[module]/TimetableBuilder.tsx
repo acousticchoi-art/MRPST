@@ -8,6 +8,7 @@ const blankCourse={day_of_week:"1",start_time:"08:00",end_time:"09:30",course_id
 const blankEvent={day_of_week:"1",start_time:"07:00",end_time:"07:30",title:"",notes:""};
 const time=(v:string)=>String(v||"").slice(0,5);
 const dayName=(n:number)=>["","월요일","화요일","수요일","목요일","금요일","토요일"][n]||"";
+const groupKey=(v:any)=>String(v||"").trim().toLowerCase();
 
 export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage:boolean;mutationsEnabled:boolean}){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
@@ -65,7 +66,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
    const common={term_id:termId,department_id:departmentId,day_of_week:Number(form.day_of_week),start_time:form.start_time,end_time:form.end_time};
    const overlaps=(row:any)=>time(row.start_time)<time(form.end_time)&&time(row.end_time)>time(form.start_time);
    const [existingEntries,existingEvents]=await Promise.all([
-    db.from("academic_timetable_entries").select("id,department_id,instructor_id,room,start_time,end_time").eq("term_id",termId).eq("day_of_week",Number(form.day_of_week)).eq("is_active",true),
+    db.from("academic_timetable_entries").select("id,department_id,instructor_id,room,class_group,start_time,end_time").eq("term_id",termId).eq("day_of_week",Number(form.day_of_week)).eq("is_active",true),
     db.from("academic_timetable_events").select("id,start_time,end_time,title").eq("term_id",termId).eq("department_id",departmentId).eq("day_of_week",Number(form.day_of_week))
    ]);
    if(existingEntries.error||existingEvents.error)throw existingEntries.error||existingEvents.error;
@@ -74,7 +75,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
     if(entriesForDay.some(x=>x.department_id===departmentId&&overlaps(x)))throw new Error("같은 학과의 강의 시간과 겹칩니다. 강의 또는 일정 시간을 조정해 주세요.");
     if(eventsForDay.some(x=>x.id!==editing&&overlaps(x)))throw new Error("같은 학과의 다른 일정과 시간이 겹칩니다.");
    }else{
-    if(entriesForDay.some(x=>x.id!==editing&&x.department_id===departmentId&&overlaps(x)))throw new Error("같은 학과의 다른 강의와 시간이 겹칩니다.");
+    if(entriesForDay.some(x=>x.id!==editing&&x.department_id===departmentId&&groupKey(x.class_group)===groupKey(form.class_group)&&overlaps(x)))throw new Error("같은 학과의 다른 강의와 시간이 겹칩니다.");
     if(eventsForDay.some(x=>overlaps(x)))throw new Error("같은 학과의 공통 일정과 시간이 겹칩니다.");
     if(form.instructor_id&&entriesForDay.some(x=>x.id!==editing&&x.instructor_id===form.instructor_id&&overlaps(x)))throw new Error("담당 교수가 같은 시간에 다른 강의를 맡고 있습니다.");
     if(form.room.trim()&&entriesForDay.some(x=>x.id!==editing&&String(x.room||"").trim()===form.room.trim()&&overlaps(x)))throw new Error("선택한 강의실이 같은 시간에 이미 사용 중입니다.");
@@ -85,7 +86,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
     const payload={...common,title:form.title.trim(),notes:form.notes.trim()||null};
     result=editing?await db.from("academic_timetable_events").update(payload).eq("id",editing).select("id").single():await db.from("academic_timetable_events").insert({...payload,created_by:user.id}).select("id").single();
    }else{
-    if(!form.course_id)throw new Error("과목을 선택해 주세요.");
+    if(!form.course_id)throw new Error("과목을 선택해 주세요.");if(!form.class_group.trim())throw new Error("학년 / 반을 입력해 주세요.");
     const payload={...common,course_id:form.course_id,instructor_id:form.instructor_id||null,class_group:form.class_group.trim(),room:form.room.trim()||null,notes:form.notes.trim()||null};
     result=editing?await db.from("academic_timetable_entries").update(payload).eq("id",editing).select("id").single():await db.from("academic_timetable_entries").insert({...payload,created_by:user.id}).select("id").single();
    }
@@ -129,8 +130,8 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
    const acceptedCourses:any[]=[];
    for(const row of courseRows){
     if(existingEvents.some(x=>overlaps(row,x)))throw new Error("시간표 복사 중단: 복사할 강의가 현재 학기의 공통 일정과 겹칩니다.");
-    if(existingCourses.some(x=>overlaps(row,x)&&(x.department_id===departmentId||!!row.instructor_id&&x.instructor_id===row.instructor_id||!!row.room&&String(x.room||"").trim()===String(row.room||"").trim())))throw new Error("시간표 복사 중단: 학과 강의, 담당 교수 또는 강의실 시간 충돌이 발견되었습니다.");
-    if(acceptedCourses.some(x=>overlaps(row,x)&&(x.department_id===departmentId||!!row.instructor_id&&x.instructor_id===row.instructor_id||!!row.room&&String(x.room||"").trim()===String(row.room||"").trim())))throw new Error("시간표 복사 중단: 복사되는 강의들끼리 시간 충돌이 발견되었습니다.");
+    if(existingCourses.some(x=>overlaps(row,x)&&((x.department_id===departmentId&&groupKey(x.class_group)===groupKey(row.class_group))||!!row.instructor_id&&x.instructor_id===row.instructor_id||!!row.room&&String(x.room||"").trim()===String(row.room||"").trim())))throw new Error("시간표 복사 중단: 학과 강의, 담당 교수 또는 강의실 시간 충돌이 발견되었습니다.");
+    if(acceptedCourses.some(x=>overlaps(row,x)&&((x.department_id===departmentId&&groupKey(x.class_group)===groupKey(row.class_group))||!!row.instructor_id&&x.instructor_id===row.instructor_id||!!row.room&&String(x.room||"").trim()===String(row.room||"").trim())))throw new Error("시간표 복사 중단: 복사되는 강의들끼리 시간 충돌이 발견되었습니다.");
     acceptedCourses.push(row);
    }
    const acceptedEvents:any[]=[];
@@ -178,6 +179,6 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
     <label>강의실<input value={form.room} onChange={e=>setForm({...form,room:e.target.value})}/></label>
    </>}
    <label className="full">비고<input value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}/></label>
-  </div>{error&&<div className="academics-alert error">{error}</div>}<div className="academics-modal-actions"><button onClick={()=>setModal(false)}>취소</button><button className="academics-primary" disabled={saving||!form.start_time||!form.end_time||form.end_time<=form.start_time||(editingType==="course"&&!form.course_id)||(editingType==="event"&&!form.title.trim())} onClick={()=>void save()}>{saving?"저장 중…":"저장"}</button></div></section></div>}
+  </div>{error&&<div className="academics-alert error">{error}</div>}<div className="academics-modal-actions"><button onClick={()=>setModal(false)}>취소</button><button className="academics-primary" disabled={saving||!form.start_time||!form.end_time||form.end_time<=form.start_time||(editingType==="course"&&(!form.course_id||!form.class_group.trim()))||(editingType==="event"&&!form.title.trim())} onClick={()=>void save()}>{saving?"저장 중…":"저장"}</button></div></section></div>}
  </div>;
 }

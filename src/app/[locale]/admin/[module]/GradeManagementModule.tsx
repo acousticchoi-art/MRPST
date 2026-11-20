@@ -139,7 +139,7 @@ export default function GradeManagementModule({canManage}:{canManage:boolean}){
   </div>
   <div className={styles.filters}>
    <label>학년도 / 학기<select value={termId} onChange={e=>setTermId(e.target.value)}><option value="">학기 선택</option>{terms.map(x=><option key={x.id} value={x.id}>{x.name} ({x.academic_year})</option>)}</select></label>
-   <label>학과<select value={departmentId} onChange={e=>{setDepartmentId(e.target.value);setSelectedStudentId("");}}><option value="">전체 학과</option>{departments.map(x=><option key={x.id} value={x.id}>{x.name_ko||x.name_en||x.code}</option>)}</select></label>
+   <label>조회할 학과<select value={departmentId} onChange={e=>{setDepartmentId(e.target.value);setSelectedStudentId("");}}><option value="">전체 학과</option>{departments.map(x=><option key={x.id} value={x.id}>{x.name_ko||x.name_en||x.code}</option>)}</select></label>
    <label>학년<select value={level} onChange={e=>{setLevel(e.target.value);setSelectedStudentId("");}}><option value="">전체 학년</option>{levels.map(x=><option key={x} value={x}>{x}</option>)}</select></label>
   </div>
   <div className={styles.stats}>
@@ -153,19 +153,19 @@ export default function GradeManagementModule({canManage}:{canManage:boolean}){
   {!canManage&&db&&<div className={styles.alert}>성적관리 권한이 확인되지 않았습니다. Super Admin 또는 행정 담당자 계정으로 로그인해 주세요.</div>}
   <div className={styles.tabs}><button className={tab==="lookup"?styles.activeTab:""} onClick={()=>setTab("lookup")}>성적 조회</button><button className={tab==="entry"?styles.activeTab:""} onClick={()=>setTab("entry")}>과목별 성적 입력</button></div>
   {tab==="lookup"&&<section className={styles.panel}>
-   <div className={styles.panelHead}><div><h3>학생별 성적 조회</h3><p>학생을 선택하면 과목별 점수와 미입력 과목을 확인할 수 있습니다.</p></div><div className={styles.actions}><button onClick={exportCsv} disabled={!visibleStudents.length}>엑셀용 CSV</button><button onClick={()=>window.print()}>인쇄</button></div></div>
+   <div className={styles.panelHead}><div><h3>학생별 성적 조회</h3><p>조회할 학과를 고른 뒤 학생 이름을 누르면, 과목별 점수와 미입력 과목이 별도 창으로 열립니다.</p></div><div className={styles.actions}><button onClick={exportCsv} disabled={!visibleStudents.length}>엑셀용 CSV</button><button onClick={()=>window.print()}>인쇄</button></div></div>
    <input className={styles.search} value={search} onChange={e=>setSearch(e.target.value)} placeholder="학생 이름 또는 순번 검색"/>
    {loading?<p className={styles.empty}>데이터를 불러오는 중입니다…</p>:<div className={styles.tableWrap}><table><thead><tr><th>순번</th><th>학생 이름</th><th>학년</th><th>입력 과목</th><th>평균 점수</th><th></th></tr></thead><tbody>
     {visibleStudents.map(student=>{const enrolledCourses=visibleCourses.filter(course=>enrollments.some(e=>e.student_id===student.id&&e.course_id===course.id&&e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status)));const scores=enrolledCourses.map(course=>gradeByKey.get(student.id+"|"+course.id)?.score).filter((v):v is number=>v!==null&&v!==undefined);const average=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null;return <tr key={student.id} className={selectedStudentId===student.id?styles.selectedRow:""}><td>{student.student_number}</td><td><button className={styles.nameButton} onClick={()=>setSelectedStudentId(student.id)}>{student.full_name}</button></td><td>{student.cohort||"—"}</td><td>{scores.length} / {enrolledCourses.length}</td><td>{average===null?"—":average.toFixed(2)}</td><td><button className={styles.smallButton} onClick={()=>setSelectedStudentId(student.id)}>상세</button></td></tr>;})}
     {!visibleStudents.length&&<tr><td colSpan={6} className={styles.empty}>선택한 조건에 해당하는 학생이 없습니다.</td></tr>}
    </tbody></table></div>}
-   {selectedStudent&&<div className={styles.detail}>
+   {selectedStudent&&<div className={styles.detailBackdrop} role="dialog" aria-modal="true" aria-label="학생 성적 상세" onMouseDown={()=>setSelectedStudentId("")}><div className={styles.detail} onMouseDown={event=>event.stopPropagation()}>
     <div className={styles.panelHead}><div><h3>{selectedStudent.full_name}</h3><p>순번 {selectedStudent.student_number} · {department?.name_ko||department?.name_en||selectedStudent.program_code||""} · {selectedStudent.cohort||""}</p></div><div className={styles.actions}><button onClick={()=>window.print()}>성적표 출력 / PDF 저장</button><button onClick={()=>setSelectedStudentId("")}>닫기</button></div></div><div className={styles.printReport}><header><h1>MRPST</h1><h2>STUDENT REPORT CARD</h2><p>{terms.find(x=>x.id===termId)?.name||"Academic Term"}</p></header><div className={styles.printStudent}><span><b>Student Name</b>{selectedStudent.full_name}</span><span><b>Student Number</b>{selectedStudent.student_number}</span><span><b>Department</b>{department?.name_en||selectedStudent.program_code||"—"}</span><span><b>Academic Year</b>{selectedStudent.cohort||"—"}</span></div><table><thead><tr><th>Course Code</th><th>Course Title</th><th>Score</th></tr></thead><tbody>{studentCourses.map(({course,grade})=><tr key={course.id}><td>{course.course_code}</td><td>{course.title}</td><td>{grade?.score??"—"}</td></tr>)}</tbody></table><div className={styles.printSummary}><span>Entered Subjects: {studentCourses.filter(x=>x.grade?.score!==null&&x.grade?.score!==undefined).length} / {studentCourses.length}</span><b>Average Score: {(()=>{const scores=studentCourses.map(x=>x.grade?.score).filter((v):v is number=>v!==null&&v!==undefined);return scores.length?(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(2):"—";})()}</b></div><footer><span>Academic Officer</span><span>Principal</span></footer></div>
     <div className={styles.tableWrap}><table><thead><tr><th>과목 코드</th><th>과목명</th><th>점수</th><th>상태</th></tr></thead><tbody>
      {studentCourses.map(({course,grade})=><tr key={course.id}><td>{course.course_code}</td><td>{course.title}</td><td>{grade?.score??"—"}</td><td>{grade?.score===null||grade?.score===undefined?<span className={styles.missing}>미입력</span>:<span className={styles.complete}>입력 완료</span>}</td></tr>)}
      {!studentCourses.length&&<tr><td colSpan={4} className={styles.empty}>등록된 과목이 없습니다.</td></tr>}
     </tbody></table></div>
-   </div>}
+   </div></div>}
   </section>}
   {tab==="entry"&&<section className={styles.panel}>
    <div className={styles.panelHead}><div><h3>과목별 일괄 입력</h3><p>과목을 선택하면 선택한 학과·학년의 학생 목록이 표시됩니다. 점수는 0~100점, 소수점 입력을 지원합니다.</p></div></div>

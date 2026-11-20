@@ -1824,8 +1824,9 @@ input,select,textarea,button{max-width:100%}
 .academics-workflow-steps strong{font-size:12px}
 .academics-workflow-steps small{margin-top:5px;color:var(--muted);font-size:10px;line-height:1.35}
 .academics-workflow-steps i{font-style:normal;color:#8aa0ad;font-size:17px}
+.academics-assignment-flow{display:flex;align-items:center;gap:7px;margin:0 0 14px;padding:10px 12px;border:1px solid #dfe8ed;border-radius:9px;background:#f7fafb;overflow:auto}.academics-assignment-flow span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;color:#28495e;font-size:11px;font-weight:700}.academics-assignment-flow b{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#214f69;color:#fff;font-size:10px}.academics-assignment-flow i{font-style:normal;color:#8aa0ad;font-size:14px}
 @media(max-width:900px){.academics-workflow-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:600px){.academics-workflow{padding:14px}.academics-workflow-steps{grid-template-columns:1fr}.academics-workflow-steps button{min-height:68px}}
+@media(max-width:600px){.academics-workflow{padding:14px}.academics-workflow-steps{grid-template-columns:1fr}.academics-workflow-steps button{min-height:68px}.academics-assignment-flow{gap:5px;padding:9px}.academics-assignment-flow span{font-size:10px}.academics-assignment-flow i{font-size:12px}}
 @media(max-width:650px){
  .student-detail-overlay{padding:0;align-items:stretch;background:rgba(17,34,48,.42)}
  .student-detail-floating{width:100%;max-width:none;height:100%;max-height:100%;max-height:100dvh;border-radius:0;padding:16px!important;box-sizing:border-box}

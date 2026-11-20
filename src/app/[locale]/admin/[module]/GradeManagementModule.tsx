@@ -134,7 +134,7 @@ export default function GradeManagementModule({canManage}:{canManage:boolean}){
 
  return <div className={styles.workspace}>
   <div className={styles.heading}>
-   <div><span className={styles.eyebrow}>학업 성적 관리</span><h2>성적관리</h2><p>학과·학년·학기별 성적을 조회하고 과목별 점수를 일괄 입력합니다. 공식 학번은 추후 등록하며, 현재는 순번으로 구분합니다.</p></div>
+   <div><span className={styles.eyebrow}>학업 성적 관리</span><h2>성적관리</h2><p>학기를 고르고, 학생별 성적을 확인한 뒤, 과목별로 점수를 입력합니다. 성적 입력은 해당 학기에 수강 중인 학생에게만 적용됩니다.</p></div>
    <span className={styles.permission}>행정 담당자 전용 입력</span>
   </div>
   <div className={styles.filters}>
@@ -142,6 +142,7 @@ export default function GradeManagementModule({canManage}:{canManage:boolean}){
    <label>조회할 학과<select value={departmentId} onChange={e=>{setDepartmentId(e.target.value);setSelectedStudentId("");}}><option value="">전체 학과</option>{departments.map(x=><option key={x.id} value={x.id}>{x.name_ko||x.name_en||x.code}</option>)}</select></label>
    <label>학년<select value={level} onChange={e=>{setLevel(e.target.value);setSelectedStudentId("");}}><option value="">전체 학년</option>{levels.map(x=><option key={x} value={x}>{x}</option>)}</select></label>
   </div>
+  <div className={styles.workflow}><article className={tab==="lookup"?styles.currentStep:""}><b>1</b><div><strong>성적 확인</strong><span>학과·학년별 학생 성적과 미입력 과목을 확인합니다.</span></div></article><article className={tab==="entry"?styles.currentStep:""}><b>2</b><div><strong>점수 입력</strong><span>과목을 고르고 수강생 점수를 한 번에 저장합니다.</span></div></article><article><b>3</b><div><strong>이수 처리</strong><span>성적 입력 뒤 학사관리에서 수강 완료를 확정합니다.</span></div></article></div>
   <div className={styles.stats}>
    <article><span>학생</span><strong>{stats.students}</strong></article>
    <article><span>과목</span><strong>{stats.courses}</strong></article>
@@ -151,7 +152,7 @@ export default function GradeManagementModule({canManage}:{canManage:boolean}){
   {error&&<div className={styles.alertError}>{error}</div>}{notice&&<div className={styles.alertSuccess}>{notice}</div>}{!academicMutationsEnabled&&<div className={styles.alert}>성적 변경 기능이 안전 모드로 잠겨 있습니다. 조회와 출력은 사용할 수 있습니다.</div>}
   {!db&&<div className={styles.alert}>Supabase 연결 설정이 필요합니다.</div>}
   {!canManage&&db&&<div className={styles.alert}>성적관리 권한이 확인되지 않았습니다. Super Admin 또는 행정 담당자 계정으로 로그인해 주세요.</div>}
-  <div className={styles.tabs}><button className={tab==="lookup"?styles.activeTab:""} onClick={()=>setTab("lookup")}>성적 조회</button><button className={tab==="entry"?styles.activeTab:""} onClick={()=>setTab("entry")}>과목별 성적 입력</button></div>
+  <div className={styles.tabs}><button className={tab==="lookup"?styles.activeTab:""} onClick={()=>setTab("lookup")}>1. 학생 성적 확인</button><button className={tab==="entry"?styles.activeTab:""} onClick={()=>setTab("entry")}>2. 과목별 점수 입력</button></div>
   {tab==="lookup"&&<section className={styles.panel}>
    <div className={styles.panelHead}><div><h3>학생별 성적 조회</h3><p>조회할 학과를 고른 뒤 학생 이름을 누르면, 과목별 점수와 미입력 과목이 별도 창으로 열립니다.</p></div><div className={styles.actions}><button onClick={exportCsv} disabled={!visibleStudents.length}>엑셀용 CSV</button><button onClick={()=>window.print()}>인쇄</button></div></div>
    <input className={styles.search} value={search} onChange={e=>setSearch(e.target.value)} placeholder="학생 이름 또는 순번 검색"/>

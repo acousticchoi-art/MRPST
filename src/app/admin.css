@@ -1534,7 +1534,6 @@ input,select,textarea,button{max-width:100%}
     align-items:center!important;
     gap:0!important;
     padding:0 10px 4px!important;
-    overflow:hidden!important;
   }
   html body .admin>.sidebar>.mobile-sidebar-brand{
     grid-column:1!important;grid-row:1!important;
@@ -1871,4 +1870,69 @@ input,select,textarea,button{max-width:100%}
 /* Mobile navigation keeps only the requested brand, language, and menu rows. */
 @media screen and (max-width:650px){
   html body .admin > .sidebar > .sidebar-mobile-tools > :not(.admin-language){display:none!important}
+}
+
+/* Compact, complete mobile administration navigation — no clipped menu items. */
+@media screen and (max-width:650px){
+  html body .admin > .sidebar{
+    grid-template-rows:64px auto!important;
+    align-items:start!important;
+    padding:7px 12px 12px!important;
+    overflow:visible!important;
+  }
+  html body .admin > .sidebar > .mobile-sidebar-brand{align-self:center!important}
+  html body .admin > .sidebar > .sidebar-mobile-tools{
+    align-self:center!important;
+    width:auto!important;
+    max-width:none!important;
+    overflow:visible!important;
+  }
+  html body .admin > .sidebar > .admin-menu-details,
+  html body .admin > .sidebar > .admin-menu-details > .sidebar-nav{display:block!important}
+  html body .admin > .sidebar > .admin-menu-details > summary{display:none!important}
+  html body .admin > .sidebar > .admin-menu-details > .sidebar-nav{
+    display:grid!important;
+    grid-template-columns:repeat(auto-fit,minmax(92px,1fr))!important;
+    gap:7px!important;
+    width:100%!important;
+    height:auto!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:7px!important;
+    overflow:visible!important;
+    white-space:normal!important;
+    background:#173c53!important;
+    border-radius:10px!important;
+  }
+  html body .admin > .sidebar > .admin-menu-details > .sidebar-nav .sidebar-group{display:contents!important}
+  html body .admin > .sidebar > .admin-menu-details > .sidebar-nav .side-label{display:none!important}
+  html body .admin > .sidebar > .admin-menu-details > .sidebar-nav .side-link{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-width:0!important;
+    min-height:38px!important;
+    margin:0!important;
+    padding:7px 8px!important;
+    overflow:hidden!important;
+    border:1px solid rgba(255,255,255,.24)!important;
+    border-radius:7px!important;
+    background:rgba(255,255,255,.06)!important;
+    color:#edf3f6!important;
+    font-size:11px!important;
+    font-weight:700!important;
+    line-height:1.2!important;
+    text-align:center!important;
+    white-space:normal!important;
+  }
+  html body .admin > .sidebar > .admin-menu-details > .sidebar-nav .side-link.active{
+    background:#d1b36d!important;
+    border-color:#e2cb91!important;
+    color:#173c53!important;
+  }
+}
+@media screen and (max-width:390px){
+  html body .admin > .sidebar{grid-template-rows:58px auto!important;padding-inline:8px!important}
+  html body .admin > .sidebar > .admin-menu-details > .sidebar-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;padding:6px!important}
+  html body .admin > .sidebar > .admin-menu-details > .sidebar-nav .side-link{min-height:36px!important;padding-inline:5px!important;font-size:10px!important}
 }

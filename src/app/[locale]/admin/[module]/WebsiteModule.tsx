@@ -79,6 +79,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
    <article><span>게시 중</span><strong>{notices.filter(x=>x.is_published).length}</strong><small>홈페이지 공개</small></article>
    <article><span>비공개</span><strong>{notices.filter(x=>!x.is_published).length}</strong><small>임시 보관</small></article>
   </div>
+  <div className="website-workflow"><article><b>1</b><div><strong>언어 선택</strong><span>수정할 홈페이지 언어를 고릅니다.</span></div></article><article><b>2</b><div><strong>내용 저장</strong><span>문구 또는 공지사항을 작성해 저장합니다.</span></div></article><article><b>3</b><div><strong>홈페이지 확인</strong><span>미리보기에서 실제 공개 화면을 확인합니다.</span></div></article></div>
   {error&&<div className="website-alert error" role="alert">{error}</div>}
   {notice&&<div className="website-alert success" role="status">{notice}</div>}
   <nav className="website-tabs website-tabs-v2" aria-label="홈페이지 콘텐츠 종류">
@@ -86,7 +87,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
    <button className={tab==="notices"?"active":""} onClick={()=>setTab("notices")}><span>02</span> 공지사항 <b>{notices.length}</b></button>
   </nav>
   {tab==="pages"&&<section className="website-panel website-panel-v2">
-   <div className="website-section-intro"><div><span className="website-kicker">PAGE EDITOR</span><h3>홈페이지 문구 편집</h3><p>수정할 언어를 선택하고 내용을 변경한 뒤 저장해 주세요. 저장된 내용은 해당 언어 홈페이지에 반영됩니다.</p></div>
+   <div className="website-section-intro"><div><span className="website-kicker">PAGE EDITOR</span><h3>홈페이지 문구 편집</h3><p>언어를 고르고 문구를 수정한 뒤 저장하세요. 마지막으로 위 미리보기에서 공개 화면을 확인합니다.</p></div>
     <FormField label="편집 언어" className="website-language-select"><select value={locale} onChange={e=>setLocale(e.target.value)} disabled={!canManage||saving}>{locales.map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select></FormField>
    </div>
    {loading?<div className="website-loading">콘텐츠를 불러오는 중입니다…</div>:<div className="website-fields website-fields-v2">{pageFields.map((field,index)=><article className="website-field website-field-v2" key={field.key}>
@@ -118,3 +119,4 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
   </div>}
  </div>;
 }
+

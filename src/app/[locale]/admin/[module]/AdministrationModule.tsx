@@ -121,6 +121,7 @@ export default function AdministrationModule(){
    <article><span>비활성 회원</span><strong>{users.filter(x=>!x.is_active).length}</strong></article>
    <article><span>부여된 권한</span><strong>{users.reduce((n,x)=>n+x.roles.length,0)}</strong></article>
   </div>
+  <div className="settings-workflow"><article><b>1</b><div><strong>계정 선택</strong><span>이름·이메일로 찾고 현재 상태를 확인합니다.</span></div></article><article><b>2</b><div><strong>역할과 페이지 설정</strong><span>업무 역할을 부여한 뒤 필요한 관리 페이지만 표시합니다.</span></div></article><article><b>3</b><div><strong>변경 이력 확인</strong><span>저장 후 변경 이력에서 누가 무엇을 바꿨는지 확인합니다.</span></div></article></div>
   {error&&<div className="settings-alert error">{error}</div>}{notice&&<div className="settings-alert success">{notice}</div>}
   <nav className="settings-tabs">{tabs.map(([k,v])=><button key={k} className={tab===k?"active":""} onClick={()=>{setTab(k);setSelectedId("");}}>{v}</button>)}</nav>
   {tab==="users"&&<section className="settings-panel">
@@ -132,20 +133,19 @@ export default function AdministrationModule(){
      </button>)}{!loading&&!filtered.length&&<Empty>검색 조건에 맞는 회원이 없습니다.</Empty>}</div>
     {selected?<div className="settings-member-detail">
       <div className="settings-detail-head"><div><span className="eyebrow">MEMBER PROFILE</span><h3>{selected.full_name||"이름 미등록"}</h3><small>{selected.email||"이메일 미등록"} · 등록일 {new Date(selected.created_at).toLocaleDateString()}</small></div><span className={selected.is_active?"settings-status active":"settings-status inactive"}>{selected.is_active?"활성 계정":"비활성 계정"}</span></div>
-      <div className="settings-account-id">{selected.user_id}</div>
       <div className="settings-form-grid">
        <FormField label="회원 이름"><input value={fullName} onChange={e=>setFullName(e.target.value)}/></FormField>
        <FormField label="기본 언어"><select value={preferredLocale} onChange={e=>setPreferredLocale(e.target.value)}><option value="ko">한국어</option><option value="my">မြန်မာ</option></select></FormField>
       </div>
       <button className="settings-primary" disabled={saving||!fullName.trim()} onClick={()=>void run(async()=>{const {data,error}=await db!.from("user_profiles").update({full_name:fullName.trim(),preferred_locale:preferredLocale}).eq("user_id",selected.user_id).select("user_id").maybeSingle();if(error)throw error;if(!data?.user_id)throw new Error("회원 정보가 수정되지 않았습니다. 권한과 계정 상태를 확인해 주세요.");return data;},"회원 정보를 저장했습니다.")}>회원 정보 저장</button>
       <div className="settings-detail-section"><h4>비밀번호 변경</h4><p className="settings-form-hint">새 비밀번호를 설정하면 기존 비밀번호는 즉시 사용할 수 없게 됩니다.</p><div className="settings-password-row"><input type="password" autoComplete="new-password" minLength={8} placeholder="새 비밀번호 (8자 이상)" value={newPassword} onChange={e=>setNewPassword(e.target.value)}/><button className="settings-primary" disabled={saving||newPassword.length<8} onClick={()=>void run(()=>invokeAdmin({action:"update_password",user_id:selected.user_id,password:newPassword}),"비밀번호를 변경했습니다.")}>비밀번호 변경</button></div></div>
-      <div className="settings-detail-section"><h4>현재 권한 <small>{selected.roles.length}개</small></h4>
+      <div className="settings-detail-section"><h4>1. 현재 역할 <small>{selected.roles.length}개</small></h4>
        {selected.roles.length?selected.roles.map(r=><div className="settings-role-row" key={r.id}><span><strong>{names[r.role]||r.role}</strong><small>{r.department_id?(deps.find(d=>d.id===r.department_id)?.name_ko||deps.find(d=>d.id===r.department_id)?.name_en||"부서"):"전체 부서"}</small></span><button disabled={saving||r.role==="super_admin"} title={r.role==="super_admin"?"최고 관리자 권한은 이 화면에서 해제할 수 없습니다.":""} onClick={()=>{if(!window.confirm("이 계정의 해당 권한을 해제할까요?"))return;void run(async()=>{const {data,error}=await db!.from("user_roles").delete().eq("id",r.id).select("id").maybeSingle();if(error)throw error;if(!data?.id)throw new Error("권한이 해제되지 않았습니다.");return data;},"권한을 해제했습니다.");}}>권한 해제</button></div>):<Empty>아직 부여된 권한이 없습니다.</Empty>}
       </div>
-      <div className="settings-detail-section"><h4>새 권한 부여</h4><div className="settings-role-form"><select value={role} onChange={e=>setRole(e.target.value)}>{roles.filter(r=>r!=="super_admin"&&r!=="student").map(r=><option key={r} value={r}>{names[r]}</option>)}</select><SearchSelect value={depId} placeholder="전체 부서" searchPlaceholder="부서명 검색" options={deps.filter(d=>d.is_active).map(d=>({value:d.id,label:d.name_ko||d.name_en,keywords:`${d.code} ${d.name_ko||""} ${d.name_en||""}`}))} onChange={setDepId} clearLabel="부서 선택 해제"/><button className="settings-primary" disabled={saving||selected.roles.some(r=>r.role===role&&r.department_id===(depId||null))} onClick={assign}>권한 추가</button></div></div>
+      <div className="settings-detail-section"><h4>2. 역할 추가</h4><div className="settings-role-form"><select value={role} onChange={e=>setRole(e.target.value)}>{roles.filter(r=>r!=="super_admin"&&r!=="student").map(r=><option key={r} value={r}>{names[r]}</option>)}</select><SearchSelect value={depId} placeholder="전체 부서" searchPlaceholder="부서명 검색" options={deps.filter(d=>d.is_active).map(d=>({value:d.id,label:d.name_ko||d.name_en,keywords:`${d.code} ${d.name_ko||""} ${d.name_en||""}`}))} onChange={setDepId} clearLabel="부서 선택 해제"/><button className="settings-primary" disabled={saving||selected.roles.some(r=>r.role===role&&r.department_id===(depId||null))} onClick={assign}>권한 추가</button></div></div>
       <div className="settings-detail-section">
-       <h4>보여줄 페이지 <small>{selectedPageKeys.length}/{pageOptions.length}</small></h4>
-       <p className="settings-form-hint">이 회원에게 보여줄 페이지만 선택하세요.</p>
+       <h4>3. 관리 페이지 표시 <small>{selectedPageKeys.length}/{pageOptions.length}</small></h4>
+       <p className="settings-form-hint">역할을 추가한 뒤 실제로 사용할 관리 페이지만 선택하세요.</p>
        <div className="settings-page-permissions">
         {pageOptions.map(option=><label className="settings-page-permission" key={option.key}>
          <input type="checkbox" checked={selectedPageKeys.includes(option.key)} disabled={selected.roles.some(r=>r.role==="super_admin"||r.role==="administrator")} onChange={e=>setSelectedPageKeys(current=>e.target.checked?[...current,option.key]:current.filter(key=>key!==option.key))}/>
@@ -168,3 +168,4 @@ export default function AdministrationModule(){
  </div>;
 }
 function Empty({children}:{children:React.ReactNode}){return <p className="settings-empty">{children}</p>}
+

@@ -14,7 +14,7 @@ type Grade={id:string;student_id:string;course_id:string;term_id:string;score:nu
 const csvCell=(value:unknown)=>'"'+String(value??"").replace(/"/g,'""')+'"';
 
 export default function GradeManagementModule({canManage}:{canManage:boolean}){
- const db=useMemo(()=>createSupabaseBrowserClient(),[]); const academicMutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED==="true";
+ const db=useMemo(()=>createSupabaseBrowserClient(),[]); const academicMutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const [departments,setDepartments]=useState<Department[]>([]);
  const [terms,setTerms]=useState<Term[]>([]);
  const [students,setStudents]=useState<Student[]>([]);

@@ -1969,6 +1969,7 @@ input,select,textarea,button{max-width:100%}
   }
   html body .admin > .sidebar > .sidebar-mobile-tools .admin-language{gap:1px!important;padding:2px!important}
   html body .admin > .sidebar > .sidebar-mobile-tools .admin-language a{padding:5px 6px!important}
+  html body .admin > .sidebar > .sidebar-mobile-tools .admin-language a:not(.selected){color:#173c53!important}
   html body .admin > .sidebar > .sidebar-mobile-tools .admin-signout{display:block!important;padding:0!important;border:0!important;background:transparent!important}
   html body .admin > .sidebar > .admin-menu-details{
     display:block!important;
@@ -2034,4 +2035,28 @@ input,select,textarea,button{max-width:100%}
     text-shadow:none!important;
   }
   html body .admin > .sidebar .side-link.active::after{display:none!important}
+}
+
+/* Desktop navigation groups: tighter hierarchy with consistent menu rows. */
+@media screen and (min-width:651px){
+  html body .admin > .sidebar .sidebar-nav{display:flex!important;flex-direction:column!important;gap:2px!important}
+  html body .admin > .sidebar .sidebar-nav > .side-label{margin:6px 8px 5px!important}
+  html body .admin > .sidebar .sidebar-nav > .sidebar-group{
+    display:block!important;
+    margin:9px 0 0!important;
+    padding:0 0 0 9px!important;
+    border-left:1px solid rgba(255,255,255,.16)!important;
+  }
+  html body .admin > .sidebar .sidebar-group > .side-label{margin:0 0 4px!important;color:#a9bdc9!important}
+  html body .admin > .sidebar .sidebar-nav .side-link{
+    min-height:38px!important;
+    padding:9px 10px!important;
+    background:rgba(255,255,255,.035)!important;
+    color:#dce7ed!important;
+  }
+  html body .admin > .sidebar .sidebar-nav .side-link.active{
+    background:#345a72!important;
+    box-shadow:inset 3px 0 0 #d6b77b!important;
+    color:#fff!important;
+  }
 }

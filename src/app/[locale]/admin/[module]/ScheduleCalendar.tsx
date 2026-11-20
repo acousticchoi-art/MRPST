@@ -6,7 +6,7 @@ const types=[["academic","학사 일정"],["admission","입학"],["exam","시험
 const blank={title:"",description:"",event_type:"academic",start_date:"",end_date:"",start_time:"",end_time:"",location:"",is_published:true};
 export default function ScheduleCalendar({publicOnly=false,canManage=false}:{publicOnly?:boolean;canManage?:boolean}){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
- const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED==="true";
+ const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const [rows,setRows]=useState<EventRow[]>([]),[month,setMonth]=useState(new Date(new Date().getFullYear(),new Date().getMonth(),1)),[form,setForm]=useState<any>(blank),[editing,setEditing]=useState(""),[show,setShow]=useState(false),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState("");
  const monthKey=month.getFullYear()+"-"+String(month.getMonth()+1).padStart(2,"0");
  const monthStart=monthKey+"-01";

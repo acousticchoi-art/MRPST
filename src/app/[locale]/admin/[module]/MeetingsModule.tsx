@@ -6,7 +6,7 @@ type Row={id:string;[key:string]:any};
 const today=()=>new Date().toISOString().slice(0,10);
 const TYPES=[["academic_committee","Academic Committee"],["faculty","Faculty Meeting"],["staff","Staff Meeting"]];
 export default function MeetingsModule({canManage}:{canManage:boolean}){
- const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED==="true";
+ const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [meetings,setMeetings]=useState<Row[]>([]),[selected,setSelected]=useState<Row|null>(null),[participants,setParticipants]=useState<Row[]>([]),[actions,setActions]=useState<Row[]>([]),[materials,setMaterials]=useState<Row[]>([]);
  const [tab,setTab]=useState("meetings"),[detailTab,setDetailTab]=useState("overview"),[filter,setFilter]=useState("all"),[search,setSearch]=useState(""),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState(""),[modal,setModal]=useState(""),[editingMeetingId,setEditingMeetingId]=useState("");

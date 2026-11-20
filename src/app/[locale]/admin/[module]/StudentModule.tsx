@@ -14,7 +14,7 @@ const emptyProfile={student_number:"",full_name:"",full_name_en:"",full_name_my:
 
 export default function StudentModule(){
  const supabase=useMemo(()=>createSupabaseBrowserClient(),[]);
- const academicMutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED==="true";
+ const academicMutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const [students,setStudents]=useState<Student[]>([]),[records,setRecords]=useState<any[]>([]),[awards,setAwards]=useState<Award[]>([]),[graduations,setGraduations]=useState<Graduation[]>([]),[statusHistory,setStatusHistory]=useState<StatusHistory[]>([]);
  const [terms,setTerms]=useState<any[]>([]),[termRows,setTermRows]=useState<any[]>([]),[courseRows,setCourseRows]=useState<any[]>([]),[gradeRows,setGradeRows]=useState<any[]>([]),[selectedTermId,setSelectedTermId]=useState(""),[termBusy,setTermBusy]=useState(false);
  const [selectedId,setSelectedId]=useState(""),[tab,setTab]=useState("profiles"),[search,setSearch]=useState(""),[filter,setFilter]=useState("all");

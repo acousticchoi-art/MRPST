@@ -19,7 +19,7 @@ const today=()=>new Date().toISOString().slice(0,10);
 const accountTypeLabels:Record<string,string>={asset:"자산",liability:"부채",net_asset:"순자산",income:"수입",expense:"지출"};
 const donorTypeLabels:Record<string,string>={individual:"개인",church:"교회",organization:"기관"};
 export default function FinanceModule(){
- const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED==="true";
+ const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const supabase=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [tab,setTab]=useState("overview"),[funds,setFunds]=useState<Fund[]>([]),[accounts,setAccounts]=useState<Account[]>([]),[entries,setEntries]=useState<Entry[]>([]),[donors,setDonors]=useState<Donor[]>([]),[budgets,setBudgets]=useState<Budget[]>([]),[actuals,setActuals]=useState<BudgetActual[]>([]),[donations,setDonations]=useState<Donation[]>([]),[students,setStudents]=useState<Student[]>([]),[awards,setAwards]=useState<Award[]>([]),[disbursements,setDisbursements]=useState<Disbursement[]>([]);
  const [loading,setLoading]=useState(true),[error,setError]=useState(""),[notice,setNotice]=useState(""),[saving,setSaving]=useState(false),[canApprove,setCanApprove]=useState(false);

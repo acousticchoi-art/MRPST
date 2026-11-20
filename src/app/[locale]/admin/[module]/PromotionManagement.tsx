@@ -9,7 +9,7 @@ export default function PromotionManagement(){
  const [terms,setTerms]=useState<Row[]>([]),[batches,setBatches]=useState<Row[]>([]),[items,setItems]=useState<Row[]>([]);
  const [batchId,setBatchId]=useState(""),[year,setYear]=useState(String(new Date().getFullYear()));
  const [canManage,setCanManage]=useState(false),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
- const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED==="true";
+ const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const [graduationItem,setGraduationItem]=useState<Row|null>(null),[graduationForm,setGraduationForm]=useState<any>({graduation_year:String(new Date().getFullYear()),graduation_term:"2",graduation_date:"",degree_name:"",graduation_number:"",honors:"",notes:""});
  const load=useCallback(async()=>{
   if(!db){setLoading(false);return;}

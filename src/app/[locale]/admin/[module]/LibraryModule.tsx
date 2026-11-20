@@ -11,7 +11,7 @@ const emptyBook={isbn:"",title:"",author:"",publisher:"",publication_year:"",cat
 const emptyMember={member_number:"",full_name:"",member_type:"student",phone:"",email:"",department:"",student_id:""};
 const today=()=>new Date().toISOString().slice(0,10);
 export default function LibraryModule({canManage}:{canManage:boolean}){
- const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED==="true";
+ const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const supabase=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [books,setBooks]=useState<Book[]>([]),[members,setMembers]=useState<Member[]>([]),[loans,setLoans]=useState<Loan[]>([]),[students,setStudents]=useState<Student[]>([]),[studentLinks,setStudentLinks]=useState<StudentLink[]>([]);
  const [tab,setTab]=useState("catalog"),[search,setSearch]=useState(""),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false);

@@ -13,7 +13,7 @@ const pageFields=[
 ] as const;
 const locales=[{value:"ko",label:"한국어"},{value:"my",label:"မြန်မာ"}];
 export default function WebsiteModule({canManage}:{canManage:boolean}){
- const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED==="true";
+ const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [items,setItems]=useState<Entry[]>([]);
  const [locale,setLocale]=useState("ko");

@@ -5,7 +5,7 @@ import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 type Row={id:string;[key:string]:any};
 const dateNow=()=>new Date().toISOString().slice(0,10);
 export default function FacilitiesModule({canManage}:{canManage:boolean}){
- const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED==="true";
+ const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [buildings,setBuildings]=useState<Row[]>([]),[items,setItems]=useState<Row[]>([]),[vehicles,setVehicles]=useState<Row[]>([]),[repairs,setRepairs]=useState<Row[]>([]),[logs,setLogs]=useState<Row[]>([]);
  const [tab,setTab]=useState("overview"),[search,setSearch]=useState(""),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState(""),[modal,setModal]=useState(""),[editingId,setEditingId]=useState("");

@@ -170,7 +170,7 @@ export default function GradeManagementModule({canManage}:{canManage:boolean}){
   {tab==="entry"&&<section className={styles.panel}>
    <div className={styles.panelHead}><div><h3>과목별 일괄 입력</h3><p>과목을 선택하면 선택한 학과·학년의 학생 목록이 표시됩니다. 점수는 0~100점, 소수점 입력을 지원합니다.</p></div></div>
    <div className={styles.entryFilters}>
-    <label>과목<SearchSelect value={courseId} placeholder="과목 검색" searchPlaceholder="과목 코드, 과목명 검색" options={entryCourses.map(x=>({value:x.id,label:`${x.course_code} · ${x.title}`,keywords:`${x.course_code} ${x.title} ${x.title_my||""}`}))} onChange={setCourseId}/></label>
+    <label>과목<SearchSelect value={courseId} placeholder="과목 검색" searchPlaceholder="과목 코드, 과목명 검색" options={entryCourses.map(x=>({value:x.id,label:`${x.course_code} · ${x.title}`,keywords:`${x.course_code} ${x.title}`}))} onChange={setCourseId}/></label>
    </div>
    {currentCourse&&<div className={styles.entryTitle}><strong>{currentCourse.title}</strong><span>{currentCourse.course_code} · {terms.find(x=>x.id===termId)?.name||"학기 미선택"}</span></div>}
    <div className={styles.tableWrap}><table><thead><tr><th>순번</th><th>학생 이름</th><th>점수</th><th>기존 점수</th><th>작업</th></tr></thead><tbody>

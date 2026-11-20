@@ -17,10 +17,11 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [items,setItems]=useState<Entry[]>([]);
  const [locale,setLocale]=useState("ko");
- const [tab,setTab]=useState<"pages"|"notices">("pages");
+ const [tab,setTab]=useState<"pages"|"translation"|"notices">("pages");
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false);
  const [error,setError]=useState(""),[notice,setNotice]=useState("");
  const [pageValues,setPageValues]=useState<Record<string,{title:string;body:string}>>({});
+ const [translationValues,setTranslationValues]=useState<Record<string,Record<string,{title:string;body:string}>>>({});
  const [editingId,setEditingId]=useState("");
  const [noticeTitle,setNoticeTitle]=useState(""),[noticeBody,setNoticeBody]=useState(""),[noticeLocale,setNoticeLocale]=useState("ko"),[noticePublished,setNoticePublished]=useState(true);
  const load=useCallback(async()=>{setLoading(true);setError("");try{
@@ -30,8 +31,10 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
   if(data.items?.error)throw new Error("홈페이지 콘텐츠를 불러오지 못했습니다: "+data.items.error);
   const rows=(data.items?.data||[]) as Entry[];setItems(rows);
   const values:Record<string,{title:string;body:string}>={};
+  const translations:Record<string,Record<string,{title:string;body:string}>>={};
   for(const field of pageFields){const row=rows.find(x=>x.content_type==="page"&&x.content_key===field.key&&x.locale===locale);values[field.key]={title:row?.title||"",body:row?.body||""};}
-  setPageValues(values);
+  for(const field of pageFields){translations[field.key]={};for(const language of locales){const row=rows.find(x=>x.content_type==="page"&&x.content_key===field.key&&x.locale===language.value);translations[field.key][language.value]={title:row?.title||"",body:row?.body||""};}}
+  setPageValues(values);setTranslationValues(translations);
  }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[locale]);
  useEffect(()=>{void load();},[load]);
  async function savePages(){
@@ -46,6 +49,20 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
    if(!saved||saved.length!==rows.length||saved.some(row=>{const expected=rows.find(x=>x.content_key===row.content_key&&x.locale===row.locale);return !expected||row.title!==expected.title||row.body!==expected.body||row.is_published!==true;}))throw new Error("일부 홈페이지 콘텐츠 저장 결과를 확인할 수 없습니다.");
    setNotice("페이지 콘텐츠 저장 및 게시 결과를 확인했습니다.");await load();
   }catch(e:any){setError(e?.message||"저장하지 못했습니다.");}
+  finally{setSaving(false);}
+ }
+ async function saveTranslations(){
+  if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}
+  if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}
+  if(!db)return;setSaving(true);setError("");setNotice("");
+  try{
+   const {data:{user}}=await db.auth.getUser();
+   const rows=pageFields.flatMap((field,index)=>locales.map(language=>({content_type:"page",content_key:field.key,locale:language.value,title:translationValues[field.key]?.[language.value]?.title||"",body:translationValues[field.key]?.[language.value]?.body||"",is_published:true,sort_order:index,updated_by:user?.id??null})));
+   const {data:saved,error}=await db.from("website_contents").upsert(rows,{onConflict:"content_type,content_key,locale"}).select("content_key,locale,title,body");
+   if(error)throw error;
+   if(!saved||saved.length!==rows.length||saved.some(row=>{const expected=rows.find(x=>x.content_key===row.content_key&&x.locale===row.locale);return !expected||row.title!==expected.title||row.body!==expected.body;}))throw new Error("번역 콘텐츠 저장 결과를 확인할 수 없습니다.");
+   setNotice("한국어와 미얀마어 페이지 콘텐츠를 저장했습니다.");await load();
+  }catch(e:any){setError(e?.message||"번역 콘텐츠를 저장하지 못했습니다.");}
   finally{setSaving(false);}
  }
  async function saveNotice(){
@@ -84,7 +101,8 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
   {notice&&<div className="website-alert success" role="status">{notice}</div>}
   <nav className="website-tabs website-tabs-v2" aria-label="홈페이지 콘텐츠 종류">
    <button className={tab==="pages"?"active":""} onClick={()=>setTab("pages")}><span>01</span> 페이지 콘텐츠</button>
-   <button className={tab==="notices"?"active":""} onClick={()=>setTab("notices")}><span>02</span> 공지사항 <b>{notices.length}</b></button>
+   <button className={tab==="translation"?"active":""} onClick={()=>setTab("translation")}><span>02</span> 번역 비교·수정</button>
+   <button className={tab==="notices"?"active":""} onClick={()=>setTab("notices")}><span>03</span> 공지사항 <b>{notices.length}</b></button>
   </nav>
   {tab==="pages"&&<section className="website-panel website-panel-v2">
    <div className="website-section-intro"><div><span className="website-kicker">PAGE EDITOR</span><h3>홈페이지 문구 편집</h3><p>언어를 고르고 문구를 수정한 뒤 저장하세요. 마지막으로 위 미리보기에서 공개 화면을 확인합니다.</p></div>
@@ -96,6 +114,14 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
      <FormField label={field.key==="address"?"주소":"본문 및 소개 문구"}><textarea disabled={!canManage||saving} rows={field.key==="about"?5:3} value={pageValues[field.key]?.body||""} onChange={e=>setPageValues(v=>({...v,[field.key]:{...v[field.key],body:e.target.value}}))} placeholder="홈페이지에 표시할 내용을 입력하세요."/></FormField></div>
    </article>)}</div>}
    <div className="website-footer-actions"><span>변경한 내용은 저장 후 홈페이지에 게시됩니다.</span><button className="website-primary" disabled={!canManage||saving||loading} onClick={()=>void savePages()}>{saving?"저장 중…":"변경 내용 저장 및 게시"}</button></div>
+  </section>}
+  {tab==="translation"&&<section className="website-panel website-panel-v2 website-translation-panel">
+   <div className="website-section-intro"><div><span className="website-kicker">BILINGUAL PAGE EDITOR</span><h3>한국어·미얀마어 번역 비교</h3><p>같은 홈페이지 항목을 두 언어로 나란히 확인하고 수정합니다. 저장하면 두 언어 페이지에 각각 반영됩니다.</p></div></div>
+   {loading?<div className="website-loading">콘텐츠를 불러오는 중입니다…</div>:<div className="website-translation-list">{pageFields.map((field,index)=><article className="website-translation-item" key={field.key}>
+    <div className="website-field-title"><span>{String(index+1).padStart(2,"0")}</span><div><h4>{field.label}</h4><p>{field.hint}</p></div></div>
+    <div className="website-translation-columns">{locales.map(language=><section key={language.value} className="website-translation-language"><h5>{language.label}</h5>{field.key!=="address"&&<FormField label="제목"><input disabled={!canManage||saving} value={translationValues[field.key]?.[language.value]?.title||""} onChange={e=>setTranslationValues(values=>({...values,[field.key]:{...values[field.key],[language.value]:{...values[field.key]?.[language.value],title:e.target.value}}}))}/></FormField>}<FormField label={field.key==="address"?"주소":"본문 및 소개 문구"}><textarea disabled={!canManage||saving} rows={field.key==="about"?6:4} value={translationValues[field.key]?.[language.value]?.body||""} onChange={e=>setTranslationValues(values=>({...values,[field.key]:{...values[field.key],[language.value]:{...values[field.key]?.[language.value],body:e.target.value}}}))}/></FormField></section>)}</div>
+   </article>)}</div>}
+   <div className="website-footer-actions"><span>두 언어를 함께 저장합니다. 비어 있는 항목도 그대로 저장되니 내용을 확인해 주세요.</span><button className="website-primary" disabled={!canManage||saving||loading} onClick={()=>void saveTranslations()}>{saving?"저장 중…":"두 언어 저장 및 게시"}</button></div>
   </section>}
   {tab==="notices"&&<div className="website-notice-layout website-notice-layout-v2">
    <section className="website-panel website-panel-v2 website-notice-editor">

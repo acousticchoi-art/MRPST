@@ -7,3 +7,14 @@
 .settings-workflow span,.website-workflow span{margin-top:3px;color:#687e8d;font-size:11px;line-height:1.45}
 @media(max-width:700px){.settings-workflow,.website-workflow{grid-template-columns:1fr;gap:7px}.settings-workflow article,.website-workflow article{padding:11px}}
 
+/* Side-by-side Korean and Myanmar content editing. */
+.website-translation-list{display:flex;flex-direction:column;gap:14px}
+.website-translation-item{padding:15px;border:1px solid #dfe8ed;border-radius:10px;background:#fff}
+.website-translation-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:13px}
+.website-translation-language{padding:13px;border:1px solid #e4ecf0;border-radius:8px;background:#f8fbfc}
+.website-translation-language h5{margin:0 0 10px;color:#244a62;font-size:12px}
+.website-translation-language label{display:flex;flex-direction:column;gap:5px;margin-top:9px;color:#567080;font-size:11px}
+.website-translation-language input,.website-translation-language textarea{box-sizing:border-box;width:100%;margin-top:4px;padding:9px 10px;border:1px solid #cfdde5;border-radius:6px;background:#fff;font:inherit;line-height:1.5}
+.website-translation-language textarea{resize:vertical}
+@media(max-width:700px){.website-translation-item{padding:12px}.website-translation-columns{grid-template-columns:1fr;gap:8px}.website-translation-language{padding:11px}}
+

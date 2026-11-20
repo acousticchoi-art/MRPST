@@ -1749,6 +1749,7 @@ input,select,textarea,button{max-width:100%}
 .student-page-head p{margin:0;color:var(--muted);font-size:13px}
 .student-page-head .student-primary{min-height:42px;padding:0 17px;white-space:nowrap}
 .student-overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.student-overview.student-overview-academic{grid-template-columns:repeat(3,minmax(0,1fr))}
 .student-overview article{display:flex;min-height:92px;flex-direction:column;justify-content:center;gap:4px;padding:14px 16px;border:1px solid #e4ebef;border-radius:10px;background:#fff;box-shadow:0 2px 10px rgba(24,52,70,.025)}
 .student-overview article:first-child{border-top:3px solid #1b455f}
 .student-overview span,.student-overview small{font-size:11px;color:var(--muted)}
@@ -1759,11 +1760,16 @@ input,select,textarea,button{max-width:100%}
 .student-directory-head h3 span{margin-left:5px;color:var(--muted);font-size:13px;font-weight:500}
 .student-directory-head p{margin:0;color:var(--muted);font-size:11px}
 .student-directory-head>span{padding:6px 9px;border-radius:20px;background:#edf4f7;color:#315a72;font-size:11px;font-weight:700;white-space:nowrap}
-.student-directory-tools{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:10px;padding:13px 20px;background:#fbfcfd;border-bottom:1px solid #e7edf0}
+.student-directory-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.8fr);gap:10px;padding:13px 20px;background:#fbfcfd;border-bottom:1px solid #e7edf0}
 .student-directory-tools label{display:flex;align-items:center;gap:9px;min-width:0}
 .student-directory-tools label>span{flex:0 0 auto;color:#657584;font-size:11px;font-weight:700}
 .student-directory-tools input,.student-directory-tools select{min-width:0;box-sizing:border-box;width:100%;height:38px;border:1px solid #d7e1e7;border-radius:7px;background:#fff;color:var(--navy);font:inherit;font-size:12px;padding:0 11px;outline:0}
 .student-directory-tools input:focus,.student-directory-tools select:focus{border-color:#6c93aa;box-shadow:0 0 0 3px rgba(49,90,114,.1)}
+.student-directory-switch{display:inline-flex;align-items:center;gap:4px;padding:4px;border:1px solid #d7e1e7;border-radius:8px;background:#fff}
+.student-directory-switch button{flex:1 1 auto;min-height:30px;border:0;border-radius:5px;background:transparent;color:#687a86;font:inherit;font-size:11px;font-weight:700;cursor:pointer;padding:6px 9px;white-space:nowrap}
+.student-directory-switch button:hover{background:#f0f5f7;color:var(--navy)}
+.student-directory-switch button.selected{background:#1b455f;color:#fff}
+.student-directory-switch button b{margin-left:4px;font-size:10px}
 .student-directory-table{width:100%;overflow-x:auto}
 .student-directory-table table{width:100%;min-width:760px;border-collapse:collapse;text-align:left}
 .student-directory-table th{padding:11px 20px;background:#f4f7f8;color:#6b7b87;font-size:10px;font-weight:750;letter-spacing:.02em}
@@ -1779,7 +1785,7 @@ input,select,textarea,button{max-width:100%}
 .student-directory-open{display:inline-flex;align-items:center;gap:6px;color:#285a78;font-size:11px;font-weight:700;white-space:nowrap}
 .student-directory-open b{font-size:15px;font-weight:500}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-@media(max-width:800px){.student-overview{grid-template-columns:repeat(2,minmax(0,1fr))}.student-directory-tools{grid-template-columns:1fr}}
+@media(max-width:800px){.student-overview,.student-overview.student-overview-academic{grid-template-columns:repeat(2,minmax(0,1fr))}.student-directory-tools{grid-template-columns:1fr}}
 @media(max-width:650px){.student-page-head{align-items:flex-start;flex-direction:column;gap:14px}.student-page-head .student-primary{width:100%}.student-overview{gap:8px}.student-overview article{min-height:78px;padding:12px}.student-directory-head{align-items:flex-start;flex-direction:column;padding:15px}.student-directory-tools{padding:10px 15px}.student-directory-tools label{align-items:stretch;flex-direction:column;gap:5px}.student-directory-table th,.student-directory-table td{padding-left:15px;padding-right:15px}}
 
 /* A student's records belong inside that student's detail view, not the directory. */

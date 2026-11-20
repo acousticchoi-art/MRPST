@@ -2061,3 +2061,15 @@ input,select,textarea,button{max-width:100%}
     color:#fff!important;
   }
 }
+
+/* Consistent action controls across administration tables and cards. */
+.admin-main .content button{font-family:inherit;transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.admin-main .content button:not(:disabled){cursor:pointer}
+.admin-main .content button:focus-visible{outline:0;box-shadow:0 0 0 3px rgba(72,112,139,.24)}
+.admin-main .content button:disabled{cursor:not-allowed}
+.admin-main .content :is(.finance-table,.student-table,.academics-table,.facility-table,.library-table,.settings-table) button:not(.finance-primary):not(.student-primary):not(.academics-primary):not(.facility-primary):not(.library-primary):not(.settings-primary){
+  min-height:32px;padding:6px 10px;border:1px solid #d6e0e6;border-radius:7px;background:#fff;color:#25485d;font-size:11px;font-weight:650;
+}
+.admin-main .content :is(.finance-table,.student-table,.academics-table,.facility-table,.library-table,.settings-table) button:not(:disabled):hover{background:#edf4f7;border-color:#9cb3c1;transform:translateY(-1px)}
+.admin-main .content :is(.facility-delete-action,.website-notice-actions .danger,.settings-activate button){border-color:#e5c2bd!important;background:#fff7f5!important;color:#a33f36!important}
+.admin-main .content :is(.facility-delete-action,.website-notice-actions .danger,.settings-activate button):not(:disabled):hover{background:#fff0ed!important;border-color:#dca99f!important}

@@ -1,6 +1,7 @@
 "use client";
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
+import {SearchSelect} from "./AdminUI";
 
 type Row={id:string;[key:string]:any};
 const days=[{value:1,label:"MON"},{value:2,label:"TUE"},{value:3,label:"WED"},{value:4,label:"THU"},{value:5,label:"FRI"},{value:6,label:"SAT"}];
@@ -150,7 +151,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
  const print=()=>window.print();
  return <div className="timetable-workspace">
   <div className="timetable-heading"><div><span className="eyebrow">ACADEMIC TIMETABLE</span><h2>강의 시간표 편성</h2><p>학기마다 요일과 시간을 자유롭게 편성합니다. 이전 학기 시간표는 복사한 뒤 수정할 수 있습니다.</p></div><div className="timetable-actions"><button className="timetable-secondary" onClick={print}>PDF / 인쇄</button>{canManage&&mutationsEnabled&&<><button className="timetable-secondary" onClick={()=>startEdit(undefined,"event")}>＋ 공통 일정</button><button className="timetable-primary" onClick={()=>startEdit()}>＋ 강의 배치</button></>}</div></div>
-  <div className="timetable-filters"><label>학기<select value={termId} onChange={e=>setTermId(e.target.value)}>{terms.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><label>학과<select value={departmentId} onChange={e=>setDepartmentId(e.target.value)}>{departments.map(x=><option key={x.id} value={x.id}>{x.name_ko||x.name_en||x.code}</option>)}</select></label></div>
+  <div className="timetable-filters"><label>학기<select value={termId} onChange={e=>setTermId(e.target.value)}>{terms.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><label>학과<SearchSelect value={departmentId} placeholder="학과 검색" searchPlaceholder="학과명 또는 코드 검색" options={departments.map(x=>({value:x.id,label:x.name_ko||x.name_en||x.code,keywords:`${x.code} ${x.name_ko||""} ${x.name_en||""} ${x.name_my||""}`}))} onChange={setDepartmentId}/></label></div>
   {canManage&&mutationsEnabled&&<div className="timetable-copy-row"><label>복사할 이전 학기<select value={copyFrom} onChange={e=>setCopyFrom(e.target.value)}><option value="">학기 선택</option>{terms.filter(x=>x.id!==termId).map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><button className="timetable-secondary" disabled={!copyFrom||saving} onClick={()=>void copySchedule()}>선택 학기 시간표 복사</button></div>}
   {!mutationsEnabled&&<div className="academics-alert">학사 데이터 변경 기능은 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다. 현재는 조회만 가능합니다.</div>}
 {error&&<div className="academics-alert error">{error}</div>}{notice&&<div className="academics-alert">{notice}</div>}
@@ -174,8 +175,8 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
    <label>시작 시간<input type="time" value={form.start_time} onChange={e=>setForm({...form,start_time:e.target.value})}/></label>
    <label>종료 시간<input type="time" value={form.end_time} onChange={e=>setForm({...form,end_time:e.target.value})}/></label>
    {editingType==="event"?<label className="full">일정명<input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="예: Chapel, Morning Devotion, Cleaning"/></label>:<>
-    <label className="full">과목<select value={form.course_id} onChange={e=>setForm({...form,course_id:e.target.value})}><option value="">과목 선택</option>{deptCourses.map(c=><option key={c.id} value={c.id}>{c.course_code} · {c.title}</option>)}</select></label>
-    <label>담당 교수<select value={form.instructor_id} onChange={e=>setForm({...form,instructor_id:e.target.value})}><option value="">담당 교수 미정 / 자율학습</option>{instructors.filter(i=>i.department_id===departmentId).map(i=><option key={i.id} value={i.id}>{i.full_name}</option>)}</select></label>
+    <label className="full">과목<SearchSelect value={form.course_id} placeholder="과목 검색" searchPlaceholder="과목 코드 또는 이름 검색" options={deptCourses.map(c=>({value:c.id,label:`${c.course_code} · ${c.title}`,keywords:`${c.course_code} ${c.title}`}))} onChange={id=>setForm({...form,course_id:id})}/></label>
+    <label>담당 교수<SearchSelect value={form.instructor_id} placeholder="교수 검색 (미정 가능)" searchPlaceholder="교수명 검색" options={instructors.filter(i=>i.department_id===departmentId).map(i=>({value:i.id,label:i.full_name,keywords:`${i.full_name} ${i.title||""}`}))} onChange={id=>setForm({...form,instructor_id:id})}/></label>
     <label>학년 / 반<input value={form.class_group} onChange={e=>setForm({...form,class_group:e.target.value})} placeholder="예: First Year, All Students, Level 1"/></label>
     <label>강의실<input value={form.room} onChange={e=>setForm({...form,room:e.target.value})}/></label>
    </>}

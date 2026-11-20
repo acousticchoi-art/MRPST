@@ -1933,10 +1933,6 @@ input,select,textarea,button{max-width:100%}
   }
 }
 @media screen and (max-width:390px){
-  html body .admin > .sidebar{grid-template-rows:auto auto auto!important;gap:6px!important;padding:8px!important}
-  html body .admin > .sidebar > .mobile-sidebar-brand{grid-column:1/-1!important;grid-row:1!important;justify-self:start!important;min-width:0!important}
-  html body .admin > .sidebar > .sidebar-mobile-tools{grid-column:1/-1!important;grid-row:2!important;width:100%!important;justify-content:space-between!important}
-  html body .admin > .sidebar > .admin-menu-details{grid-row:3!important}
   html body .admin > .sidebar > .admin-menu-details > .sidebar-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;padding:6px!important}
   html body .admin > .sidebar > .admin-menu-details > .sidebar-nav .side-link{min-height:36px!important;padding-inline:5px!important;font-size:10px!important}
 }
@@ -2013,6 +2009,14 @@ input,select,textarea,button{max-width:100%}
   html body .admin > .sidebar > .sidebar-mobile-tools > a,
   html body .admin > .sidebar > .sidebar-mobile-tools .admin-signout .top-action{min-height:32px!important;padding:5px 6px!important;font-size:9px!important}
   html body .admin > .sidebar > .admin-menu-details > summary{min-height:41px!important;padding-inline:11px!important}
+}
+
+/* At the narrowest phone widths, keep the brand and action controls on separate rows. */
+@media screen and (max-width:390px){
+  html body .admin > .sidebar{grid-template-rows:auto auto auto!important;gap:6px!important;padding:8px!important}
+  html body .admin > .sidebar > .mobile-sidebar-brand{grid-column:1/-1!important;grid-row:1!important;justify-self:start!important;min-width:0!important}
+  html body .admin > .sidebar > .sidebar-mobile-tools{grid-column:1/-1!important;grid-row:2!important;width:100%!important;justify-content:space-between!important}
+  html body .admin > .sidebar > .admin-menu-details{grid-row:3!important}
 }
 
 /* Desktop sidebar: compact rhythm and a quieter current-page state. */

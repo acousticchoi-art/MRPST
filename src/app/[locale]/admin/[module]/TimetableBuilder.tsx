@@ -20,6 +20,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
  const [editing,setEditing]=useState(""),[editingType,setEditingType]=useState<"course"|"event">("course");
  const [form,setForm]=useState<any>(blankCourse),[modal,setModal]=useState(false),[copyFrom,setCopyFrom]=useState("");
+ const [dragged,setDragged]=useState<{entry:Row;type:"course"|"event"}|null>(null),[undoAction,setUndoAction]=useState<{entry:Row;type:"course"|"event"}|null>(null);
 
  const load=useCallback(async()=>{
   if(!db){setLoading(false);return;} setLoading(true);setError("");
@@ -47,7 +48,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
  },[db,termId,departmentId]);
  useEffect(()=>{void load();},[load]);
  const selectedTerm=terms.find(x=>x.id===termId),selectedDepartment=departments.find(x=>x.id===departmentId);
- const deptCourses=courses.filter(x=>x.department_id===departmentId||(x.department==="Theology"&&selectedDepartment?.code==="THEOLOGY")||(x.department==="Early Childhood Education"&&selectedDepartment?.code==="ECE"));
+ const deptCourses=courses.filter(x=>x.course_kind==="general"||x.department_id===departmentId||(x.department==="Theology"&&selectedDepartment?.code==="THEOLOGY")||(x.department==="Early Childhood Education"&&selectedDepartment?.code==="ECE"));
  const instructorLabel=(id:string)=>instructors.find(x=>x.id===id)?.full_name||"";
  const courseLabel=(id:string)=>courses.find(x=>x.id===id)?.title||"과목 정보 없음";
  const timeSlots=useMemo(()=>{
@@ -55,7 +56,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
   [...entries,...events].forEach(x=>{const start=time(x.start_time),end=time(x.end_time);if(start&&end)keys.set(start+"|"+end,{start,end});});
   return [...keys.values()].sort((a,b)=>a.start.localeCompare(b.start)||a.end.localeCompare(b.end));
  },[entries,events]);
- const startEdit=(entry?:Row,type:"course"|"event"="course")=>{
+ const startEdit=(entry?:Partial<Row>,type:"course"|"event"="course")=>{
   setEditing(entry?.id||"");setEditingType(type);
   if(type==="event")setForm(entry?{day_of_week:String(entry.day_of_week),start_time:time(entry.start_time),end_time:time(entry.end_time),title:entry.title||"",notes:entry.notes||""}:{...blankEvent});
   else setForm(entry?{day_of_week:String(entry.day_of_week),start_time:time(entry.start_time),end_time:time(entry.end_time),course_id:entry.course_id,instructor_id:entry.instructor_id||"",class_group:entry.class_group||"",room:entry.room||"",notes:entry.notes||""}:{...blankCourse});
@@ -101,6 +102,27 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
   if(!db||!mutationsEnabled){setNotice("학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다.");return;}if(!window.confirm("이 항목을 삭제할까요?"))return;
   const {data:deleted,error:e}=await db.from(type==="event"?"academic_timetable_events":"academic_timetable_entries").delete().eq("id",id).select("id").maybeSingle();
   if(e)setError(e.message);else if(!deleted?.id||deleted.id!==id)setError("삭제된 시간표 항목을 확인할 수 없습니다.");else{setNotice("항목을 삭제했습니다.");await load();}
+ };
+ const moveEntry=async(targetDay:number,targetStart:string,targetEnd:string)=>{
+  if(!db||!dragged||!mutationsEnabled)return;
+  const original=dragged.entry;if(original.day_of_week===targetDay&&time(original.start_time)===targetStart&&time(original.end_time)===targetEnd){setDragged(null);return;}
+  setSaving(true);setError("");
+  try{
+   const table=dragged.type==="course"?"academic_timetable_entries":"academic_timetable_events";
+   const overlaps=(row:any)=>row.day_of_week===targetDay&&time(row.start_time)<targetEnd&&time(row.end_time)>targetStart;
+   if(dragged.type==="course"){
+    if(entries.some(x=>x.id!==original.id&&overlaps(x)&&((x.department_id===departmentId&&groupsConflict(x.class_group,original.class_group))||(original.instructor_id&&x.instructor_id===original.instructor_id)||(original.room&&String(x.room||"").trim()===String(original.room).trim()))))throw new Error("옮길 위치에 학과 수업, 담당 교수 또는 강의실 시간이 겹칩니다.");
+    if(events.some(x=>overlaps(x)))throw new Error("옮길 위치에 공통 일정이 있습니다.");
+   }else if(events.some(x=>x.id!==original.id&&overlaps(x))||entries.some(x=>x.department_id===departmentId&&overlaps(x)))throw new Error("옮길 위치에 이미 일정 또는 수업이 있습니다.");
+   const {data:updated,error:moveError}=await db.from(table).update({day_of_week:targetDay,start_time:targetStart,end_time:targetEnd}).eq("id",original.id).select("id,day_of_week,start_time,end_time").single();
+   if(moveError)throw moveError;
+   if(!updated||updated.id!==original.id)throw new Error("시간표 이동 결과를 확인할 수 없습니다.");
+   setUndoAction({entry:original,type:dragged.type});setNotice("시간표를 옮겼습니다. 실수였다면 ‘작업 취소’를 누르세요.");await load();
+  }catch(e:any){setError(e.message||"시간표를 옮기지 못했습니다.");}finally{setDragged(null);setSaving(false);}
+ };
+ const undoLastAction=async()=>{
+  if(!db||!undoAction||!mutationsEnabled)return;setSaving(true);setError("");
+  try{const table=undoAction.type==="course"?"academic_timetable_entries":"academic_timetable_events";const original=undoAction.entry;const {data:restored,error:undoError}=await db.from(table).update({day_of_week:original.day_of_week,start_time:original.start_time,end_time:original.end_time}).eq("id",original.id).select("id").single();if(undoError)throw undoError;if(restored?.id!==original.id)throw new Error("되돌린 시간표 항목을 확인할 수 없습니다.");setUndoAction(null);setNotice("직전 시간표 이동을 되돌렸습니다.");await load();}catch(e:any){setError(e.message||"작업을 되돌리지 못했습니다.");}finally{setSaving(false);}
  };
  const copySchedule=async()=>{
   if(!db||!mutationsEnabled){setNotice("학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다.");return;}if(!copyFrom||copyFrom===termId)return;
@@ -150,7 +172,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
  };
  const print=()=>window.print();
  return <div className="timetable-workspace">
-  <div className="timetable-heading"><div><span className="eyebrow">ACADEMIC TIMETABLE</span><h2>강의 시간표 편성</h2><p>학기마다 요일과 시간을 자유롭게 편성합니다. 이전 학기 시간표는 복사한 뒤 수정할 수 있습니다.</p></div><div className="timetable-actions"><button className="timetable-secondary" onClick={print}>PDF / 인쇄</button>{canManage&&mutationsEnabled&&<><button className="timetable-secondary" onClick={()=>startEdit(undefined,"event")}>＋ 공통 일정</button><button className="timetable-primary" onClick={()=>startEdit()}>＋ 강의 배치</button></>}</div></div>
+  <div className="timetable-heading"><div><span className="eyebrow">ACADEMIC TIMETABLE</span><h2>강의 시간표 편성</h2><p>칸을 눌러 새 수업을 넣고, 등록된 수업을 다른 칸으로 끌어 옮길 수 있습니다.</p></div><div className="timetable-actions"><button className="timetable-secondary" onClick={print}>PDF / 인쇄</button>{canManage&&mutationsEnabled&&<><button className="timetable-secondary" disabled={!undoAction||saving} onClick={()=>void undoLastAction()}>작업 취소</button><button className="timetable-secondary" onClick={()=>startEdit(undefined,"event")}>＋ 공통 일정</button><button className="timetable-primary" onClick={()=>startEdit()}>＋ 강의 배치</button></>}</div></div>
   <div className="timetable-filters"><label>학기<select value={termId} onChange={e=>setTermId(e.target.value)}>{terms.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><label>학과<SearchSelect value={departmentId} placeholder="학과 검색" searchPlaceholder="학과명 또는 코드 검색" options={departments.map(x=>({value:x.id,label:x.name_ko||x.name_en||x.code,keywords:`${x.code} ${x.name_ko||""} ${x.name_en||""} ${x.name_my||""}`}))} onChange={setDepartmentId}/></label></div>
   {canManage&&mutationsEnabled&&<div className="timetable-copy-row"><label>복사할 이전 학기<select value={copyFrom} onChange={e=>setCopyFrom(e.target.value)}><option value="">학기 선택</option>{terms.filter(x=>x.id!==termId).map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><button className="timetable-secondary" disabled={!copyFrom||saving} onClick={()=>void copySchedule()}>선택 학기 시간표 복사</button></div>}
   {!mutationsEnabled&&<div className="academics-alert">학사 데이터 변경 기능은 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다. 현재는 조회만 가능합니다.</div>}
@@ -161,9 +183,9 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
     {timeSlots.length===0?<tr><td colSpan={7} className="academics-empty">등록된 시간표가 없습니다. 강의 또는 공통 일정을 등록해 주세요.</td></tr>:timeSlots.map(slot=><tr key={slot.start+"|"+slot.end}><th className="timetable-time">{slot.start}–{slot.end}</th>{days.map(d=>{
       const items=entries.filter(x=>x.day_of_week===d.value&&time(x.start_time)===slot.start&&time(x.end_time)===slot.end);
       const dayEvents=events.filter(x=>x.day_of_week===d.value&&time(x.start_time)===slot.start&&time(x.end_time)===slot.end);
-      return <td key={d.value}>
-       {dayEvents.map((x:Row)=><article className="timetable-event" key={x.id}><strong>{x.title}</strong>{x.notes&&<small>{x.notes}</small>}{canManage&&<div className="timetable-entry-actions"><button onClick={()=>startEdit(x,"event")}>수정</button><button onClick={()=>void remove(x.id,"event")}>삭제</button></div>}</article>)}
-       {items.map((x:Row)=><article className={"timetable-course "+(x.display_order%2?"blue":"pink")} key={x.id}><strong>{courseLabel(x.course_id)}</strong><span>{instructorLabel(x.instructor_id)||"Self Study"}</span>{x.class_group&&<small>{x.class_group}</small>}{x.room&&<small>{x.room}</small>}{canManage&&<div className="timetable-entry-actions"><button onClick={()=>startEdit(x,"course")}>수정</button><button onClick={()=>void remove(x.id,"course")}>삭제</button></div>}</article>)}
+      return <td key={d.value} className="timetable-drop-zone" onClick={()=>canManage&&mutationsEnabled&&!dragged&&startEdit({day_of_week:d.value,start_time:slot.start,end_time:slot.end},"course")} onDragOver={e=>{if(canManage&&mutationsEnabled)e.preventDefault();}} onDrop={e=>{e.preventDefault();void moveEntry(d.value,slot.start,slot.end);}}>
+       {dayEvents.map((x:Row)=><article className="timetable-event" key={x.id} draggable={canManage&&mutationsEnabled} onDragStart={e=>{e.stopPropagation();setDragged({entry:x,type:"event"});}} onClick={e=>{e.stopPropagation();startEdit(x,"event");}}><strong>{x.title}</strong>{x.notes&&<small>{x.notes}</small>}{canManage&&<div className="timetable-entry-actions"><button onClick={e=>{e.stopPropagation();startEdit(x,"event");}}>수정</button><button onClick={e=>{e.stopPropagation();void remove(x.id,"event");}}>삭제</button></div>}</article>)}
+       {items.map((x:Row)=><article className={"timetable-course "+(x.display_order%2?"blue":"pink")} key={x.id} draggable={canManage&&mutationsEnabled} onDragStart={e=>{e.stopPropagation();setDragged({entry:x,type:"course"});}} onClick={e=>{e.stopPropagation();startEdit(x,"course");}}><strong>{courseLabel(x.course_id)}</strong><span>{instructorLabel(x.instructor_id)||"Self Study"}</span>{x.class_group&&<small>{x.class_group}</small>}{x.room&&<small>{x.room}</small>}{canManage&&<div className="timetable-entry-actions"><button onClick={e=>{e.stopPropagation();startEdit(x,"course");}}>수정</button><button onClick={e=>{e.stopPropagation();void remove(x.id,"course");}}>삭제</button></div>}</article>)}
       </td>;
     })}</tr>)}
    </tbody></table></div>}
@@ -176,7 +198,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
    <label>종료 시간<input type="time" value={form.end_time} onChange={e=>setForm({...form,end_time:e.target.value})}/></label>
    {editingType==="event"?<label className="full">일정명<input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="예: Chapel, Morning Devotion, Cleaning"/></label>:<>
     <label className="full">과목<SearchSelect value={form.course_id} placeholder="과목 검색" searchPlaceholder="과목 코드 또는 이름 검색" options={deptCourses.map(c=>({value:c.id,label:`${c.course_code} · ${c.title}`,keywords:`${c.course_code} ${c.title}`}))} onChange={id=>setForm({...form,course_id:id})}/></label>
-    <label>담당 교수<SearchSelect value={form.instructor_id} placeholder="교수 검색 (미정 가능)" searchPlaceholder="교수명 검색" options={instructors.filter(i=>i.department_id===departmentId).map(i=>({value:i.id,label:i.full_name,keywords:`${i.full_name} ${i.title||""}`}))} onChange={id=>setForm({...form,instructor_id:id})}/></label>
+    <label>담당 교수<SearchSelect value={form.instructor_id} placeholder="교수 검색 (미정 가능)" searchPlaceholder="교수명·직위 검색" options={instructors.map(i=>({value:i.id,label:i.full_name,keywords:`${i.full_name} ${i.title||""}`}))} onChange={id=>setForm({...form,instructor_id:id})}/></label>
     <label>학년 / 반<input value={form.class_group} onChange={e=>setForm({...form,class_group:e.target.value})} placeholder="예: First Year, All Students, Level 1"/></label>
     <label>강의실<input value={form.room} onChange={e=>setForm({...form,room:e.target.value})}/></label>
    </>}

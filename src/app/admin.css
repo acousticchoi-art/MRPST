@@ -1604,7 +1604,11 @@ input,select,textarea,button{max-width:100%}
   .timetable-grid th:first-child{width:82px}
   .timetable-time{white-space:nowrap;font-size:10px;background:#f8f8f6}
   .timetable-grid td{min-width:100px}
+  .timetable-drop-zone{cursor:copy;transition:background .15s ease}
+  .timetable-drop-zone:hover{background:#f7fafc}
   .timetable-course,.timetable-event{display:flex;flex-direction:column;gap:4px;padding:7px;margin:2px 0;border-radius:5px;background:#f3f6f9;overflow-wrap:anywhere}
+  .timetable-course[draggable="true"],.timetable-event[draggable="true"]{cursor:grab}
+  .timetable-course[draggable="true"]:active,.timetable-event[draggable="true"]:active{cursor:grabbing;opacity:.65}
   .timetable-course.blue{background:#eaf2f8}
   .timetable-course.pink{background:#f8edf0}
   .timetable-course strong,.timetable-event strong{font-size:10px;line-height:1.45}

@@ -97,7 +97,7 @@ export default function GradeManagementModule({canManage}:{canManage:boolean}){
    return [student.student_number,student.full_name,studentDepartment?.name_en||studentDepartment?.code||student.program_code,student.cohort,average===null?"":average.toFixed(2),scores.length,enrolledCourseIds.length];
   })];
   const blob=new Blob(["\uFEFF"+rows.map(row=>row.map(csvCell).join(",")).join("\r\n")],{type:"text/csv;charset=utf-8"});
-  const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="MRPST_"+(terms.find(x=>x.id===termId)?.term_code||"grades")+"_grades.csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="MRPST_"+(terms.find(x=>x.id===termId)?.term_code||"grades")+"_grades.csv";document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
  };
 
  const saveScores=async()=>{

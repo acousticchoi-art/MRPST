@@ -14,6 +14,7 @@ export default function FacilitiesModule({canManage}:{canManage:boolean}){
  const [v,setV]=useState<any>({vehicle_code:"",registration_number:"",make:"",model:"",vehicle_type:"",manufacture_year:"",capacity:"",current_mileage:"",insurance_expiry:"",inspection_expiry:"",vehicle_status:"active",notes:""});
  const [r,setR]=useState<any>({title:"",description:"",target_type:"location",place_to_repair:"",building_id:"",inventory_id:"",vehicle_id:"",priority:"normal",reported_date:dateNow(),scheduled_date:"",estimated_cost:"",currency:"MMK",vendor:"",assigned_to:"Tun Tun Aung",check_status:"pending",result:"",status:"reported"});
  const [log,setLog]=useState<any>({vehicle_id:"",trip_date:dateNow(),driver_name:"",departure_point:"MRPST",destination:"",purpose:"",departure_time:"",return_time:"",starting_odometer:"",ending_odometer:"",fuel_type:"95",fuel_liters:"",fuel_cost:"",fuel_paid_by:"school",remarks:""});
+ useEffect(()=>{if(!modal)return;const normalize=(form:any)=>Object.fromEntries(Object.entries(form).map(([key,value])=>[key,value??""]));if(modal==="building")setB(normalize);if(modal==="inventory")setI(normalize);if(modal==="vehicle")setV(normalize);if(modal==="repair")setR(normalize);if(modal==="log")setLog(normalize);},[modal]);
  const load=useCallback(async()=>{setLoading(true);setError("");try{
  const response=await fetch("/api/admin/data/facilities",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
  const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));

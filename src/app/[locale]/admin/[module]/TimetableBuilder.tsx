@@ -11,6 +11,7 @@ const time=(v:string)=>String(v||"").slice(0,5);
 const dayName=(n:number)=>["","월요일","화요일","수요일","목요일","금요일","토요일"][n]||"";
 const groupKey=(v:any)=>String(v||"").trim().toLowerCase();
 const groupsConflict=(a:any,b:any)=>{const x=groupKey(a),y=groupKey(b);return !x||!y||x==="all students"||y==="all students"||x===y;}
+const escapeHtml=(v:any)=>String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]||ch));
 
 export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage:boolean;mutationsEnabled:boolean}){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
@@ -170,7 +171,13 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
    setNotice("이전 학기 시간표 복사가 완료되었습니다. 새 학기 일정에 맞게 자유롭게 수정하세요.");await load();
   }catch(e:any){setError(e.message||"시간표 복사에 실패했습니다.");}finally{setSaving(false);}
  };
- const print=()=>window.print();
+ const print=()=>{
+  const popup=window.open("","_blank","width=1180,height=820");
+  if(!popup){setError("인쇄 창을 열지 못했습니다. 브라우저의 팝업 차단을 해제한 뒤 다시 시도해 주세요.");return;}
+  const rows=timeSlots.map(slot=>`<tr><th>${escapeHtml(slot.start)}–${escapeHtml(slot.end)}</th>${days.map(day=>{const courseCards=entries.filter(x=>x.day_of_week===day.value&&time(x.start_time)===slot.start&&time(x.end_time)===slot.end).map(x=>`<div class="course"><b>${escapeHtml(courseLabel(x.course_id))}</b><span>${escapeHtml(instructorLabel(x.instructor_id)||"Self Study")}</span><small>${escapeHtml([x.class_group,x.room].filter(Boolean).join(" · "))}</small></div>`).join("");const eventCards=events.filter(x=>x.day_of_week===day.value&&time(x.start_time)===slot.start&&time(x.end_time)===slot.end).map(x=>`<div class="event"><b>${escapeHtml(x.title)}</b><small>${escapeHtml(x.notes||"")}</small></div>`).join("");return `<td>${eventCards}${courseCards}</td>`;}).join("")}</tr>`).join("");
+  popup.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>MRPST Lecture Schedule</title><style>@page{size:landscape;margin:12mm}body{font-family:Arial,"Noto Sans",sans-serif;color:#172b3c}h1{text-align:center;font-size:21px;margin:0 0 10px}.meta{display:flex;justify-content:space-between;font-size:12px;margin-bottom:16px}table{width:100%;border-collapse:collapse;table-layout:fixed}th,td{border:1px solid #bfc9d1;padding:7px;vertical-align:top;font-size:10px}th{background:#edf2f5;text-align:center}th:first-child{width:82px}.course,.event{display:flex;flex-direction:column;gap:3px;padding:6px;margin:2px 0;border-radius:4px}.course{background:#eaf2f8}.event{background:#fbf1d8}.course b,.event b{font-size:10px}.course span,.course small,.event small{font-size:9px;color:#445563}footer{margin-top:12px;text-align:right;font-size:10px;color:#607080}</style></head><body><h1>MRPST LECTURE SCHEDULE (${escapeHtml(selectedDepartment?.code==="ECE"?"E.C.E":"Theology")})</h1><div class="meta"><strong>${escapeHtml(selectedTerm?.name||"")}</strong><span>${escapeHtml(selectedDepartment?.name_en||"")}</span></div><table><thead><tr><th>TIME / DAY</th>${days.map(day=>`<th>${day.label}</th>`).join("")}</tr></thead><tbody>${rows||`<tr><td colspan="7">등록된 시간표가 없습니다.</td></tr>`}</tbody></table><footer>Myanmar Reformed Presbyterian School of Theology</footer></body></html>`);
+  popup.document.close();popup.focus();window.setTimeout(()=>popup.print(),250);
+ };
  return <div className="timetable-workspace">
   <div className="timetable-heading"><div><span className="eyebrow">ACADEMIC TIMETABLE</span><h2>강의 시간표 편성</h2><p>칸을 눌러 새 수업을 넣고, 등록된 수업을 다른 칸으로 끌어 옮길 수 있습니다.</p></div><div className="timetable-actions"><button className="timetable-secondary" onClick={print}>PDF / 인쇄</button>{canManage&&mutationsEnabled&&<><button className="timetable-secondary" disabled={!undoAction||saving} onClick={()=>void undoLastAction()}>작업 취소</button><button className="timetable-secondary" onClick={()=>startEdit(undefined,"event")}>＋ 공통 일정</button><button className="timetable-primary" onClick={()=>startEdit()}>＋ 강의 배치</button></>}</div></div>
   <div className="timetable-filters"><label>학기<select value={termId} onChange={e=>setTermId(e.target.value)}>{terms.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><label>학과<SearchSelect value={departmentId} placeholder="학과 검색" searchPlaceholder="학과명 또는 코드 검색" options={departments.map(x=>({value:x.id,label:x.name_ko||x.name_en||x.code,keywords:`${x.code} ${x.name_ko||""} ${x.name_en||""} ${x.name_my||""}`}))} onChange={setDepartmentId}/></label></div>

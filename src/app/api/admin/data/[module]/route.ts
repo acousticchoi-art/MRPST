@@ -115,7 +115,7 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
       const keys=["books","members","loans","students","studentLinks"] as const;
       const queries=[
         supabase.from("library_books").select("id,isbn,title,author,publisher,publication_year,category,language,shelf_location,total_copies,description,created_at").order("title"),
-        supabase.from("library_members").select("id,member_number,full_name,member_type,phone,email,department,student_id,is_active").eq("is_active",true).order("full_name"),
+        supabase.from("library_members").select("id,member_number,full_name,member_type,phone,email,department,student_id,is_active").order("full_name"),
         supabase.from("library_loans").select("id,book_id,member_id,checkout_date,due_date,returned_at,status,book:library_books(id,title,isbn,author),member:library_members(id,member_number,full_name,member_type)").order("checkout_date",{ascending:false}),
         supabase.from("students").select("id,student_number,full_name,program,program_code,cohort,phone,email,student_status").order("student_number"),
         supabase.from("library_members").select("id,student_id").not("student_id","is",null)

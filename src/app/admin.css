@@ -1747,6 +1747,17 @@ input,select,textarea,button{max-width:100%}
 }
 
 
+/* Mobile admin header fix: prevent the second admin topbar from duplicating the sidebar header. */
+@media screen and (max-width:900px){
+  html body .admin-main>.topbar{display:none!important}
+  html body .admin-main>.content{padding-top:18px!important}
+}
+@media screen and (max-width:650px){
+  html body .admin>.sidebar{height:auto!important;min-height:0!important}
+  html body .admin>.sidebar>.mobile-sidebar-brand,
+  html body .admin>.sidebar>.sidebar-mobile-tools{display:flex!important}
+  html body .admin>.sidebar>.admin-menu-details>.sidebar-nav{display:flex!important}
+}
 /* Mobile admin header and navigation: one source of truth; desktop unchanged. */
 @media screen and (max-width:650px){
   html body .admin{display:block!important;width:100%!important;min-height:100vh!important;overflow-x:clip!important}

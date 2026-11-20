@@ -902,6 +902,17 @@ const MY:Record<string,string>={
   "보고서 새로고침": "အစီရင်ခံစာကို ပြန်လည်ဖွင့်ရန်",
   "학생 로그인 계정을 발급하고 학생 정보와 연결했습니다.": "ကျောင်းသားဝင်ရောက်ရန် အကောင့်ကို ထုတ်ပေးပြီး ကျောင်းသားအချက်အလက်နှင့် ချိတ်ဆက်ပြီးပါပြီ။",
   "학생 계정 발급에 실패했습니다.": "ကျောင်းသားအကောင့် ထုတ်ပေးမှု မအောင်မြင်ပါ။",
+  "재학 상태": "လက်ရှိကျောင်းတက်နေမှု အခြေအနေ",
+  "상세 보기": "အသေးစိတ်ကြည့်ရန်",
+  "과정 · 학년": "သင်တန်း · အတန်း",
+  "학사 대시보드": "ပညာရေး ဒက်ရှ်ဘုတ်",
+  "학사 현황": "ပညာရေး အခြေအနေ",
+  "수강 및 성적": "သင်ယူမှုနှင့် အမှတ်",
+  "학사 일정": "ပညာရေး ပြက္ခဒိန်",
+  "수업 운영": "သင်တန်း လည်ပတ်မှု",
+  "교육과정": "သင်ရိုးညွှန်းတမ်း",
+  "수업 시간표": "သင်တန်း အချိန်ဇယား",
+  "교수·강의 배정": "ဆရာနှင့် သင်ကြားမှု တာဝန်ပေးခြင်း",
   "과정 미지정": "သင်တန်း မသတ်မှတ်ရသေးပါ",
   "입학연도 미상": "ဝင်ခွင့်နှစ် မသိရသေးပါ",
   "발급 중…": "ထုတ်ပေးနေသည်…",
@@ -1032,13 +1043,18 @@ function translateText(node:Text){
   if(translated&&translated!==key) node.nodeValue=raw.replace(key,translated);
 }
 
-function translateElement(el:Element){
-  if(el instanceof HTMLElement && !el.closest("script,style,[contenteditable=true],.notranslate,[data-no-translate]")){
-    for(const attr of ["placeholder","title","aria-label"]){
-      const value=el.getAttribute(attr);
-      if(value&&MY[value]) el.setAttribute(attr,MY[value]);
-    }
+function translateAttributes(el:Element){
+  if(!(el instanceof HTMLElement)||el.closest("script,style,[contenteditable=true],.notranslate,[data-no-translate]")) return;
+  for(const attr of ["placeholder","title","aria-label"]){
+    const value=el.getAttribute(attr);
+    if(value&&MY[value]) el.setAttribute(attr,MY[value]);
   }
+}
+
+function translateElement(el:Element){
+  translateAttributes(el);
+  const elements=document.createTreeWalker(el,NodeFilter.SHOW_ELEMENT);
+  while(elements.nextNode()) translateAttributes(elements.currentNode as Element);
   const walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
   while(walker.nextNode()) translateText(walker.currentNode as Text);
 }

@@ -1808,6 +1808,20 @@ input,select,textarea,button{max-width:100%}
 .student-summary-grid article{min-height:62px;display:flex;flex-direction:column;justify-content:center;padding:11px 13px;background:#fafbf9}
 .student-detail-tabs{margin-top:16px}
 @media(max-width:900px){.student-detail-floating{width:min(900px,calc(100vw - 36px))}.student-profile-head{grid-template-columns:42px minmax(0,1fr)}.student-profile-actions{grid-column:1/-1;max-width:none;justify-content:flex-start;padding-left:58px}}
+
+/* Academic management: guide staff through the semester workflow in order. */
+.academics-workflow{grid-column:1/-1;padding:20px}
+.academics-workflow>div>p{margin:5px 0 16px;color:var(--muted);font-size:12px}
+.academics-workflow-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.academics-workflow-steps button{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:9px;min-height:86px;border:1px solid #dfe8ed;border-radius:9px;background:#fff;color:var(--navy);text-align:left;padding:12px;cursor:pointer}
+.academics-workflow-steps button:hover{border-color:#8da7b6;background:#f6fafb}
+.academics-workflow-steps b{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#e8f0f4;color:#245069;font-size:12px}
+.academics-workflow-steps strong,.academics-workflow-steps small{display:block}
+.academics-workflow-steps strong{font-size:12px}
+.academics-workflow-steps small{margin-top:5px;color:var(--muted);font-size:10px;line-height:1.35}
+.academics-workflow-steps i{font-style:normal;color:#8aa0ad;font-size:17px}
+@media(max-width:900px){.academics-workflow-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.academics-workflow{padding:14px}.academics-workflow-steps{grid-template-columns:1fr}.academics-workflow-steps button{min-height:68px}}
 @media(max-width:650px){
  .student-detail-overlay{padding:0;align-items:stretch;background:rgba(17,34,48,.42)}
  .student-detail-floating{width:100%;max-width:none;height:100%;max-height:100%;max-height:100dvh;border-radius:0;padding:16px!important;box-sizing:border-box}

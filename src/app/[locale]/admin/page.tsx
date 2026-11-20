@@ -119,7 +119,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
     <aside className="sidebar">
       <Link href={`/${locale}`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
-      <details className="admin-menu-details" open>
+      <details className="admin-menu-details">
         <summary>{lang==="ko"?"관리 메뉴":"Menu"}</summary>
         <nav className="sidebar-nav">
           

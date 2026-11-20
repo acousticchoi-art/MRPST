@@ -1,6 +1,7 @@
 import "../globals.css";
 import "../auth.css";
 import "../admin.css";
+import "../admin-workflows.css";
 import "../admin-design-system.css";
 import "../registration.css";
 import {notFound,redirect} from "next/navigation";
@@ -13,3 +14,4 @@ export default async function LocaleLayout({children,params}:{children:React.Rea
  if(!locales.includes(locale))notFound();
  return <div lang={locale}><LocalePreference locale={locale}/>{children}</div>;
 }
+

@@ -1,0 +1,9 @@
+/* Focused guidance cards for account and public-site workflows. */
+.settings-workflow,.website-workflow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0 18px}
+.settings-workflow article,.website-workflow article{display:flex;align-items:flex-start;gap:9px;padding:13px;border:1px solid #dfe8ed;border-radius:10px;background:#fff;box-shadow:0 5px 14px rgba(27,62,83,.04)}
+.settings-workflow b,.website-workflow b{display:grid;place-items:center;flex:0 0 25px;width:25px;height:25px;border-radius:50%;background:#e7f0f4;color:#245069;font-size:11px}
+.settings-workflow strong,.settings-workflow span,.website-workflow strong,.website-workflow span{display:block}
+.settings-workflow strong,.website-workflow strong{font-size:12px;color:#173f58}
+.settings-workflow span,.website-workflow span{margin-top:3px;color:#687e8d;font-size:11px;line-height:1.45}
+@media(max-width:700px){.settings-workflow,.website-workflow{grid-template-columns:1fr;gap:7px}.settings-workflow article,.website-workflow article{padding:11px}}
+

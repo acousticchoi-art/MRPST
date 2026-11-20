@@ -1867,3 +1867,8 @@ input,select,textarea,button{max-width:100%}
 @media screen and (max-width:900px){
   html body .admin > .admin-main > .admin-desktop-topbar{display:none!important}
 }
+
+/* Mobile navigation keeps only the requested brand, language, and menu rows. */
+@media screen and (max-width:650px){
+  html body .admin > .sidebar > .sidebar-mobile-tools > :not(.admin-language){display:none!important}
+}

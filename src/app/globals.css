@@ -1974,3 +1974,6 @@ html body .admin .sidebar .side-link.active::after{
 }
 [lang="my"] .hero h1{line-height:1.62!important;letter-spacing:0!important}
 [lang="my"] .hero p,[lang="my"] .section p{line-height:2!important}
+[lang="my"] .about-hero h1{
+  font-weight:800!important;
+}

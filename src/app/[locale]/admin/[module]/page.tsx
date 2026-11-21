@@ -5,6 +5,7 @@ import {notFound,redirect} from "next/navigation";
 import {getServerModuleAccess} from "@/lib/auth/server-access";
 import {MODULES,getModuleKey,canAccessModule} from "@/lib/auth/permissions";
 import AdminActions from "../AdminActions";
+import AdminPrintButton from "../AdminPrintButton";
 import AdminMenuDetails from "../AdminMenuDetails";
 import InlineAdminEditor from "../InlineAdminEditor";
 import InlinePageEditor from "../../InlinePageEditor";
@@ -72,7 +73,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
           <a className={lang==="ko"?"selected":""} href={`/ko/admin/${module}`}>한국어</a>
         </nav>
         
-        <Link href={`/${locale}`}>{t.view}</Link>
+        <Link href={`/${locale}`}>{t.view}</Link><AdminPrintButton/>
         {supabase&&<AdminActions locale={locale}/>}
       </div></header>
       <div className="content">

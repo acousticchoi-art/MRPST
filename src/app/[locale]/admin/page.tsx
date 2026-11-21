@@ -6,6 +6,7 @@ import {createSupabaseServerClient} from "@/lib/supabase/server";
 import {isSupabaseConfigured} from "@/lib/supabase/config";
 import {MODULES,canAccessModule,type MrpstRole} from "@/lib/auth/permissions";
 import AdminActions from "./AdminActions";
+import AdminPrintButton from "./AdminPrintButton";
 import AdminMenuDetails from "./AdminMenuDetails";
 import InlineAdminEditor from "./InlineAdminEditor";
 import InlinePageEditor from "../InlinePageEditor";
@@ -141,7 +142,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
           <a className={locale==="my"?"selected":""} href="/my/admin">မြန်မာ</a><a className={locale==="ko"?"selected":""} href="/ko/admin">한국어</a>
         </nav>
         
-        <Link href={`/${locale}`}>{t.view}</Link>
+        <Link href={`/${locale}`}>{t.view}</Link><AdminPrintButton/>
         {supabase&&<AdminActions locale={locale}/>}
       </div></header>
       <div className="content">{dashboardQueryErrors.length>0&&<div className="notice" role="alert">{lang==="ko"?"일부 대시보드 데이터를 불러오지 못했습니다: "+dashboardQueryErrors.join(", "):"ဒက်ရှ်ဘုတ်ဒေတာအချို့ကို မရယူနိုင်ပါ: "+dashboardQueryErrors.join(", ")}</div>}<span className="eyebrow">{t.eyebrow}</span><h1 className="admin-heading">{t.title}</h1><p className="admin-subtitle">{t.subtitle}</p>

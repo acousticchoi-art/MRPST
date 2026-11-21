@@ -942,7 +942,7 @@ button,a,input,select,textarea{transition-color:.16s}
 .about-section-head h2,.about-purpose h2,.chair-greeting h2{margin:9px 0 0;color:var(--navy);font:500 clamp(25px,3vw,34px)/1.35 Georgia,serif;letter-spacing:-.025em}
 .about-purpose>p{margin:0;color:#586872;font-size:14px;line-height:2.05;white-space:pre-line}
 .chair-greeting{display:grid;grid-template-columns:220px minmax(0,1fr);gap:52px;background:#f7f8f6}
-.chair-mark{display:grid;place-items:center;aspect-ratio:1;border:1px solid #d9d5c8;color:#9b865e;font:500 30px Georgia,serif;letter-spacing:.12em}
+.chair-mark{display:grid;place-items:center;aspect-ratio:1;padding:20px;border:1px solid #d9d5c8;background:#fff}.chair-mark img{display:block;max-width:100%;max-height:100%;object-fit:contain}
 .chair-greeting blockquote{margin:22px 0 18px;color:#4f606a;font:400 15px/2.05 Georgia,serif}
 .chair-greeting strong{color:var(--navy);font-size:13px}
 .about-section-head{margin-bottom:27px}

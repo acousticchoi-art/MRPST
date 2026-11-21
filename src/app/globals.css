@@ -225,6 +225,7 @@ body{color:var(--ink);background:#fff;line-height:1.6}
 .login-form label{line-height:1.6}
 .student-table,.library-table,.facility-table{font-variant-numeric:tabular-nums}
 .student-table th,.library-table th,.facility-table th{position:sticky;top:0;z-index:1}
+.student-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:28px 0}.student-summary>div,.student-schedule article{border:1px solid var(--line);background:#fff;border-radius:12px;padding:18px}.student-summary span,.student-schedule span{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}.student-summary strong,.student-schedule strong{display:block;font-size:17px;line-height:1.55}.student-section{margin-top:36px}.student-section h2{font-size:23px;margin-bottom:14px}.student-schedule{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.student-schedule b{display:block;color:var(--navy);font-size:14px;margin-bottom:10px}.student-schedule strong{font-size:16px}.student-schedule span{margin:5px 0 0}.student-table small{display:block;color:var(--muted);font-weight:500;margin-top:3px}
 button,a,input,select,textarea{transition-color:.16s}
 @media(max-width:900px){
  .hero{min-height:auto;grid-template-columns:1fr;padding:64px 7%}
@@ -260,6 +261,7 @@ button,a,input,select,textarea{transition-color:.16s}
  .module-page-content{padding:28px 14px 42px}
  .module-page-content h1{font-size:28px}
  .module-page-tools{width:100%;justify-content:space-between}
+ .student-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.student-schedule{grid-template-columns:1fr}
  .admin-language a{min-width:0;padding:6px 8px}
  .login-card{padding:24px 20px}
 }

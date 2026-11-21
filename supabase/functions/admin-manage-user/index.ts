@@ -76,12 +76,12 @@ Deno.serve(async (req: Request) => {
       if (student.auth_user_id) return json({ error: "이미 로그인 계정이 연결된 학생입니다." }, 409);
       const { data: created, error: createError } = await createProvisionedUser({
         email, password, email_confirm: true,
-        user_metadata: { full_name: student.full_name, student_number: student.student_number, preferred_locale: "en" },
+        user_metadata: { full_name: student.full_name, student_number: student.student_number, preferred_locale: "my" },
       });
       if (createError || !created.user) return json({ error: createError?.message || "계정을 생성하지 못했습니다." }, 400);
       const userId = created.user.id;
       const { error: profileError } = await admin.from("user_profiles").upsert({
-        user_id: userId, full_name: student.full_name, email, preferred_locale: "en", is_active: true,
+        user_id: userId, full_name: student.full_name, email, preferred_locale: "my", is_active: true,
       });
       if (profileError) { await admin.auth.admin.deleteUser(userId); return json({ error: profileError.message }, 400); }
       const { error: roleError } = await admin.from("user_roles").insert({ user_id: userId, role: "student", assigned_by: caller.id });

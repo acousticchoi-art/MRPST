@@ -1158,7 +1158,44 @@ const MY:Record<string,string>={
   "현재 주행거리": "လက်ရှိ မောင်းနှင်အကွာအဝေး",
   "운행일지": "မောင်းနှင်မှတ်တမ်း",
   "차량 삭제": "ယာဉ် ဖျက်ရန်",
+  "등록된": "မှတ်ပုံတင်ထားသော",
+  "홈페이지 보기": "ဝဘ်ဆိုဒ် ကြည့်ရန်",
+  "로그아웃": "အကောင့်မှ ထွက်ရန်",
+  "저장 중": "သိမ်းဆည်းနေသည်",
+  "수정 중": "ပြင်ဆင်နေသည်",
+  "삭제 중": "ဖျက်နေသည်",
+  "선택한": "ရွေးချယ်ထားသော",
+  "이번 학기": "ဤစာသင်ကာလ",
+  "현재 학기": "လက်ရှိစာသင်ကာလ",
+  "성적관리": "အမှတ်စီမံခန့်ခွဲမှု",
+  "계정·권한 관리": "အကောင့်နှင့် ခွင့်ပြုချက် စီမံခန့်ခွဲမှု",
+  "운영 중": "ဖွင့်လှစ်ထားသည်",
+  "미입력": "မထည့်ရသေးပါ",
+  "입력 완료": "ထည့်သွင်းပြီးပါပြီ",
+  "목록": "စာရင်း",
+  "검색 결과": "ရှာဖွေမှု ရလဒ်",
+  "명/건": "ဦး/ခု",
 };;
+
+// Components sometimes split a sentence into static labels and live values. Keep
+// an exact match first, then translate only known interface fragments. Unknown
+// record data such as names, course titles, and notes stays untouched.
+const MY_FRAGMENTS=Object.entries(MY)
+  .filter(([source,target])=>/[가-힣]/.test(source)&&source.length>1&&source!==target)
+  .sort(([a],[b])=>b.length-a.length);
+
+function localizedValue(raw:string){
+  const key=raw.trim();
+  if(!key) return raw;
+  const exact=MY[key]||MY[key.replace(/\s+/g," ")];
+  if(exact) return raw.replace(key,exact);
+  if(!/[가-힣]/.test(raw)) return raw;
+  let localized=raw;
+  for(const [source,target] of MY_FRAGMENTS){
+    if(localized.includes(source)) localized=localized.split(source).join(target);
+  }
+  return localized;
+}
 
 
 
@@ -1166,17 +1203,18 @@ function translateText(node:Text){
   const parent=node.parentElement;
   if(!parent||parent.closest("script,style,textarea,[contenteditable=true],.notranslate,[data-no-translate]")) return;
   const raw=node.nodeValue??"";
-  const key=raw.trim();
-  if(!key) return;
-  const translated=MY[key];
-  if(translated&&translated!==key) node.nodeValue=raw.replace(key,translated);
+  const translated=localizedValue(raw);
+  if(translated!==raw) node.nodeValue=translated;
 }
 
 function translateAttributes(el:Element){
   if(!(el instanceof HTMLElement)||el.closest("script,style,[contenteditable=true],.notranslate,[data-no-translate]")) return;
   for(const attr of ["placeholder","title","aria-label"]){
     const value=el.getAttribute(attr);
-    if(value&&MY[value]) el.setAttribute(attr,MY[value]);
+    if(value){
+      const translated=localizedValue(value);
+      if(translated!==value) el.setAttribute(attr,translated);
+    }
   }
 }
 
@@ -1221,4 +1259,3 @@ export default function AdminMyanmarTranslator({locale}:{locale:string}){
   },[locale]);
   return null;
 }
-

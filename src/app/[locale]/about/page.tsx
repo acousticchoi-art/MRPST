@@ -1,6 +1,7 @@
 import SiteHeader from "../SiteHeader";
 import Link from "next/link";
 import {getPublishedWebsiteContent,websiteCopy} from "@/lib/website-content";
+import InlinePageEditor from "../InlinePageEditor";
 
 const text = {
   ko: {
@@ -123,7 +124,7 @@ export default async function AboutPage({params}:{params:Promise<{locale:string}
   const facts=websiteCopy(content,"about-facts",{title:t.factsTitle,body:""});
   const history=websiteCopy(content,"about-history",{title:t.historyTitle,body:""});
   const contact=websiteCopy(content,"about-contact",{title:t.contactTitle,body:t.contactText});
-  return <>
+  return <InlinePageEditor pageKey="about" locale={locale}>
     <SiteHeader locale={locale} active="about" />
     <main className="about-page">
       <section className="about-hero"><span className="eyebrow">{t.eyebrow} · MYANMAR · YANGON</span><h1>{hero.title}</h1><p>{hero.body}</p></section>
@@ -134,5 +135,5 @@ export default async function AboutPage({params}:{params:Promise<{locale:string}
       <section className="about-contact"><div><span className="eyebrow">09 — CONTACT</span><h2>{contact.title}</h2><p>{contact.body}</p></div><div><b>{t.phone}</b><p>{t.phoneText}</p><b>{t.address}</b><p>{t.addressText}</p><a className="btn light" href="https://maps.app.goo.gl/rqupUXw5JiumcrMv9?g_st=ic" target="_blank" rel="noopener noreferrer">{t.map} ↗</a><Link className="btn light" href={`/${locale}/contact`}>{t.more} ↗</Link></div></section>
     </main>
     <footer className="footer"><span>Myanmar Reformed Presbyterian School of Theology</span><span><Link href={`/${locale}`}>{t.home}</Link> · © {new Date().getFullYear()} MRPST</span></footer>
-  </>;
+  </InlinePageEditor>;
 }

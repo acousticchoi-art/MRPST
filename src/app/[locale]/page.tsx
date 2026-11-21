@@ -1,6 +1,7 @@
 import SiteHeader from "./SiteHeader";
 import Link from "next/link";
 import {createSupabaseServerClient} from "@/lib/supabase/server";
+import InlinePageEditor from "./InlinePageEditor";
 
 const copy = {
   en: {
@@ -98,7 +99,7 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
     addressText:page("address")?.body||base.addressText
   };
   const announcements=cmsRows.filter(x=>x.content_type==="announcement").sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
-  return <>
+  return <InlinePageEditor pageKey="home" locale={locale}>
     <SiteHeader locale={locale} active="home" />
     <main className="homepage">
       <section className="hero hero-redesign">
@@ -164,5 +165,5 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
       </section>
     </main>
     <footer className="footer"><span>{officialName}</span><span><Link href={`/${locale}/contact`}>{t.contact}</Link> · © {new Date().getFullYear()} MRPST</span></footer>
-  </>;
+  </InlinePageEditor>;
 }

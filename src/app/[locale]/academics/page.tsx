@@ -1,6 +1,7 @@
 import SiteHeader from "../SiteHeader";
 import Link from "next/link";
 import {getPublishedWebsiteContent,websiteCopy} from "@/lib/website-content";
+import InlinePageEditor from "../InlinePageEditor";
 
 const contentByLocale = {
   ko: {
@@ -88,7 +89,7 @@ export default async function AcademicsPage({params}:{params:Promise<{locale:str
   const calendar=websiteCopy(content,"academics-calendar",{title:t.calendarTitle,body:t.note});
   const admission=websiteCopy(content,"academics-admission",{title:t.admissionTitle,body:""});
   const contact=websiteCopy(content,"academics-contact",{title:t.ctaTitle,body:t.ctaText});
-  return <>
+  return <InlinePageEditor pageKey="academics" locale={locale}>
     <SiteHeader locale={locale} active="academics" />
     <main className="academics-page">
       <section className="academics-hero"><span className="eyebrow">{t.eyebrow}</span><h1>{hero.title}</h1><p>{hero.body}</p></section>
@@ -99,5 +100,5 @@ export default async function AcademicsPage({params}:{params:Promise<{locale:str
       <section className="academics-contact"><div><span className="eyebrow">05 — CONTACT</span><h2>{contact.title}</h2><p>{contact.body}</p></div><Link className="btn light" href={`/${locale}/contact`}>{t.ctaButton} ↗</Link></section>
     </main>
     <footer className="footer"><span>Myanmar Reformed Presbyterian School of Theology</span><span><Link href={`/${locale}`}>{lang==="ko"?"홈페이지":"ပင်မစာမျက်နှာ"}</Link> · © {new Date().getFullYear()} MRPST</span></footer>
-  </>;
+  </InlinePageEditor>;
 }

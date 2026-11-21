@@ -60,7 +60,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
  useEffect(()=>{void load();},[load]);
  const translationFields=useMemo(()=>{
   const known=new Map<string,{key:string;label:string;hint:string}>(pageFields.map(field=>[field.key,{...field}]));
-  const keys=Array.from(new Set([...pageFields.map(field=>field.key),...items.filter(item=>item.content_type==="page"&&item.content_key!=="admin-translations").map(item=>item.content_key)]));
+  const keys=Array.from(new Set([...pageFields.map(field=>field.key),...items.filter(item=>item.content_type==="page"&&item.content_key!=="admin-translations"&&!item.content_key.startsWith("inline-page-")).map(item=>item.content_key)]));
   return keys.map(key=>known.get(key)||{key,label:key.replace(/[-_]/g," "),hint:"홈페이지에 등록된 추가 문구"});
  },[items]);
  async function savePages(){

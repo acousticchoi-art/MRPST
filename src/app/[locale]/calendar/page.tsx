@@ -2,6 +2,7 @@ import SiteHeader from "../SiteHeader";
 import Link from "next/link";
 import ScheduleCalendar from "../admin/[module]/ScheduleCalendar";
 import {getPublishedWebsiteContent,websiteCopy} from "@/lib/website-content";
+import InlinePageEditor from "../InlinePageEditor";
 
 export default async function CalendarPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: rawLocale } = await params;
@@ -14,7 +15,7 @@ export default async function CalendarPage({ params }: { params: Promise<{ local
   });
 
   return (
-    <>
+    <InlinePageEditor pageKey="calendar" locale={locale}>
       <SiteHeader locale={locale} active="calendar" />
       <main className="academics-workspace" style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 20px" }}>
         <div className="academics-heading" style={{ marginTop: 36 }}>
@@ -24,6 +25,6 @@ export default async function CalendarPage({ params }: { params: Promise<{ local
         </div>
         <ScheduleCalendar publicOnly />
       </main>
-    </>
+    </InlinePageEditor>
   );
 }

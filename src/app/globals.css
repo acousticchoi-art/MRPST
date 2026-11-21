@@ -1684,6 +1684,10 @@ textarea {
 .admin .admin-topbar-brand{display:flex;align-items:center;gap:10px;flex:0 0 auto;color:var(--navy)}
 .admin .admin-topbar-brand .brand-logo{width:44px;height:44px}
 .admin .admin-topbar-brand small{display:block;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:4px}
+.inline-editor-controls{position:fixed;top:18px;right:18px;z-index:100;display:flex;align-items:center;gap:8px;padding:8px;border:1px solid #d5dce2;border-radius:10px;background:#fff;box-shadow:0 8px 24px rgba(16,45,66,.18);font-size:13px}
+.inline-editor-controls button{border:0;border-radius:7px;padding:8px 11px;background:#173e59;color:#fff;font:inherit;font-weight:700;cursor:pointer}.inline-editor-controls button:first-of-type:not(:last-child){background:#667785}.inline-editor-controls button:disabled{opacity:.6;cursor:wait}.inline-editable-text{outline:2px solid #d1a74d!important;outline-offset:3px;border-radius:3px;background:#fffdf5!important;min-width:1em}
+@media (min-width:769px){.admin .admin-desktop-topbar .admin-topbar-brand{display:none}.admin .admin-desktop-topbar{justify-content:flex-end}}
+@media (max-width:768px){.inline-editor-controls{top:10px;right:10px;font-size:12px}.inline-editor-controls button{padding:7px 9px}}
 .admin .admin-user{margin-left:auto;flex:1 1 auto}
 @media(max-width:760px){
   html body .admin .topbar{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;height:auto!important;min-height:64px!important;padding:10px 14px!important}

@@ -1,6 +1,7 @@
 import SiteHeader from "../SiteHeader";
 import Link from "next/link";
 import ContactForm from "./ContactForm";
+import {getPublishedWebsiteContent,websiteCopy} from "@/lib/website-content";
 
 const copy = {
   ko: {
@@ -26,14 +27,17 @@ const copy = {
 export default async function ContactPage({params}:{params:Promise<{locale:string}>}) {
   const {locale}=await params;
   const t=copy[locale as keyof typeof copy]??copy.ko;
+  const content=await getPublishedWebsiteContent(locale);
+  const hero=websiteCopy(content,"contact-hero",{title:t.title,body:t.intro});
+  const info=websiteCopy(content,"contact-info",{title:"Myanmar Reformed Presbyterian School of Theology",body:t.address});
   return <>
     <SiteHeader locale={locale} active="contact" />
     <main className="contact-page">
-      <section className="contact-page-heading"><span className="eyebrow">{t.eyebrow}</span><h1>{t.title}</h1><p>{t.intro}</p></section>
+      <section className="contact-page-heading"><span className="eyebrow">{t.eyebrow}</span><h1>{hero.title}</h1><p>{hero.body}</p></section>
       <div className="contact-page-grid">
         <section className="contact-info-card">
-          <span className="eyebrow">VISIT MRPST</span><h2>Myanmar Reformed Presbyterian School of Theology</h2>
-          <p>{t.address}</p>
+          <span className="eyebrow">VISIT MRPST</span><h2>{info.title}</h2>
+          <p>{info.body}</p>
           <a className="btn primary" href="https://maps.app.goo.gl/rqupUXw5JiumcrMv9?g_st=ic" target="_blank" rel="noopener noreferrer">{t.map} ↗</a>
           <div className="contact-info-divider"></div>
           <span className="contact-info-label">{t.email}</span>

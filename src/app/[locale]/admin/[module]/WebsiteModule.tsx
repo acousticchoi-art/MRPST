@@ -2,6 +2,7 @@
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {FormField} from "./AdminUI";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
+import {MY} from "../AdminMyanmarTranslator";
 
 type Entry={id:string;content_type:"page"|"announcement";content_key:string;locale:string;title:string;body:string;is_published:boolean;sort_order:number;updated_at:string};
 const pageFields=[
@@ -9,7 +10,22 @@ const pageFields=[
  {key:"about",label:"학교 소개",hint:"학교 소개 제목과 본문"},
  {key:"history",label:"학교 연혁",hint:"연혁 섹션의 제목과 소개 문구"},
  {key:"contact",label:"연락처 영역",hint:"문의 섹션 제목과 안내 문구"},
- {key:"address",label:"학교 주소",hint:"메인 화면 하단에 표시할 주소"}
+ {key:"address",label:"학교 주소",hint:"메인 화면 하단에 표시할 주소"},
+ {key:"about-hero",label:"소개 페이지 · 첫 화면",hint:"학교 소개 페이지의 제목과 요약"},
+ {key:"about-foundation",label:"소개 페이지 · 설립 이념",hint:"설립 목적과 교육 이념"},
+ {key:"about-greeting",label:"소개 페이지 · 인사말",hint:"학과장 인사말 제목과 본문"},
+ {key:"about-facts",label:"소개 페이지 · 일반 현황",hint:"일반 현황 섹션의 제목과 안내 문구"},
+ {key:"about-history",label:"소개 페이지 · 교육 과정 연혁",hint:"교육 과정 연혁 섹션의 제목과 안내 문구"},
+ {key:"about-contact",label:"소개 페이지 · 문의",hint:"소개 페이지 하단 문의 제목과 안내"},
+ {key:"academics-hero",label:"학과 페이지 · 첫 화면",hint:"학과 안내 페이지의 제목과 요약"},
+ {key:"academics-programs",label:"학과 페이지 · 과정 안내",hint:"교육과정 섹션의 제목과 소개"},
+ {key:"academics-approach",label:"학과 페이지 · 교육 방향",hint:"교육 방향 섹션의 제목과 안내"},
+ {key:"academics-calendar",label:"학과 페이지 · 학사 일정",hint:"학사 일정 섹션의 제목과 안내"},
+ {key:"academics-admission",label:"학과 페이지 · 입학 안내",hint:"입학 자격 섹션의 제목과 안내"},
+ {key:"academics-contact",label:"학과 페이지 · 문의",hint:"학과 페이지 하단 문의 제목과 안내"},
+ {key:"contact-hero",label:"연락처 페이지 · 첫 화면",hint:"연락처 페이지의 제목과 소개"},
+ {key:"contact-info",label:"연락처 페이지 · 방문 안내",hint:"주소와 지도 버튼 위에 표시할 안내"},
+ {key:"calendar-hero",label:"학사 일정 페이지 · 첫 화면",hint:"학사 일정 페이지의 제목과 소개"}
 ] as const;
 const locales=[{value:"ko",label:"한국어"},{value:"my",label:"မြန်မာ"}];
 export default function WebsiteModule({canManage}:{canManage:boolean}){
@@ -17,19 +33,23 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [items,setItems]=useState<Entry[]>([]);
  const [locale,setLocale]=useState("ko");
- const [tab,setTab]=useState<"pages"|"translation"|"notices">("pages");
+ const [tab,setTab]=useState<"pages"|"translation"|"notices"|"admin">("pages");
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false);
  const [error,setError]=useState(""),[notice,setNotice]=useState("");
  const [pageValues,setPageValues]=useState<Record<string,{title:string;body:string}>>({});
  const [translationValues,setTranslationValues]=useState<Record<string,Record<string,{title:string;body:string}>>>({});
  const [editingId,setEditingId]=useState("");
  const [noticeTitle,setNoticeTitle]=useState(""),[noticeBody,setNoticeBody]=useState(""),[noticeLocale,setNoticeLocale]=useState("ko"),[noticePublished,setNoticePublished]=useState(true);
+ const [adminTranslations,setAdminTranslations]=useState<Record<string,string>>({});
+ const [adminQuery,setAdminQuery]=useState(""),[adminKey,setAdminKey]=useState("");
  const load=useCallback(async()=>{setLoading(true);setError("");try{
   const response=await fetch("/api/admin/data/website",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
   const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
   if(!response.ok)throw new Error(data.error||`홈페이지 콘텐츠 조회 실패 (HTTP ${response.status})`);
   if(data.items?.error)throw new Error("홈페이지 콘텐츠를 불러오지 못했습니다: "+data.items.error);
   const rows=(data.items?.data||[]) as Entry[];setItems(rows);
+  const adminRow=rows.find(row=>row.content_type==="page"&&row.content_key==="admin-translations"&&row.locale==="my");
+  try{setAdminTranslations(adminRow?.body?JSON.parse(adminRow.body):{});}catch{setAdminTranslations({});}
   const values:Record<string,{title:string;body:string}>={};
   const translations:Record<string,Record<string,{title:string;body:string}>>={};
   for(const field of pageFields){const row=rows.find(x=>x.content_type==="page"&&x.content_key===field.key&&x.locale===locale);values[field.key]={title:row?.title||"",body:row?.body||""};}
@@ -40,7 +60,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
  useEffect(()=>{void load();},[load]);
  const translationFields=useMemo(()=>{
   const known=new Map<string,{key:string;label:string;hint:string}>(pageFields.map(field=>[field.key,{...field}]));
-  const keys=Array.from(new Set([...pageFields.map(field=>field.key),...items.filter(item=>item.content_type==="page").map(item=>item.content_key)]));
+  const keys=Array.from(new Set([...pageFields.map(field=>field.key),...items.filter(item=>item.content_type==="page"&&item.content_key!=="admin-translations").map(item=>item.content_key)]));
   return keys.map(key=>known.get(key)||{key,label:key.replace(/[-_]/g," "),hint:"홈페이지에 등록된 추가 문구"});
  },[items]);
  async function savePages(){
@@ -86,6 +106,24 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
   }catch(e:any){setError(e?.message||"공지사항을 저장하지 못했습니다.");}
   finally{setSaving(false);}
  }
+ async function saveAdminTranslation(){
+  if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}
+  if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}
+  if(!db||!adminKey)return;
+  const next={...adminTranslations};
+  const value=(next[adminKey]??MY[adminKey]??"").trim();
+  if(value)next[adminKey]=value;else delete next[adminKey];
+  setSaving(true);setError("");setNotice("");
+  try{
+   const {data:{user}}=await db.auth.getUser();
+   const row={content_type:"page",content_key:"admin-translations",locale:"my",title:"Administrator UI translations",body:JSON.stringify(next),is_published:true,sort_order:999,updated_by:user?.id??null};
+   const {data:saved,error}=await db.from("website_contents").upsert(row,{onConflict:"content_type,content_key,locale"}).select("id,body").single();
+   if(error)throw error;
+   if(!saved?.id||saved.body!==row.body)throw new Error("관리자 번역 저장 결과를 확인할 수 없습니다.");
+   setAdminTranslations(next);setNotice("관리자 화면 번역을 저장했습니다. 미얀마어 관리자 화면을 새로고침하면 적용됩니다.");await load();
+  }catch(e:any){setError(e?.message||"관리자 번역을 저장하지 못했습니다.");}
+  finally{setSaving(false);}
+ }
  function resetNotice(){setEditingId("");setNoticeTitle("");setNoticeBody("");setNoticeLocale("ko");setNoticePublished(true);}
  function editNotice(item:Entry){setEditingId(item.id);setNoticeTitle(item.title);setNoticeBody(item.body);setNoticeLocale(item.locale);setNoticePublished(item.is_published);}
  async function toggleNotice(item:Entry){if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!db)return;setSaving(true);setError("");try{const {data:verified,error}=await db.from("website_contents").update({is_published:!item.is_published}).eq("id",item.id).select("id,is_published").single();if(error)throw error;if(!verified||verified.id!==item.id||verified.is_published===item.is_published)throw new Error("공지 게시 상태 변경 결과를 확인할 수 없습니다.");setNotice(item.is_published?"공지사항 게시를 중단했습니다.":"공지사항을 게시했습니다.");await load();}catch(e:any){setError(e?.message||"상태를 변경하지 못했습니다.");}finally{setSaving(false);}}
@@ -109,6 +147,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
    <button className={tab==="pages"?"active":""} onClick={()=>setTab("pages")}><span>01</span> 페이지 콘텐츠</button>
    <button className={tab==="translation"?"active":""} onClick={()=>setTab("translation")}><span>02</span> 번역 비교·수정</button>
    <button className={tab==="notices"?"active":""} onClick={()=>setTab("notices")}><span>03</span> 공지사항 <b>{notices.length}</b></button>
+   <button className={tab==="admin"?"active":""} onClick={()=>setTab("admin")}><span>04</span> 관리자 화면 번역</button>
   </nav>
   {tab==="pages"&&<section className="website-panel website-panel-v2">
    <div className="website-section-intro"><div><span className="website-kicker">PAGE EDITOR</span><h3>홈페이지 문구 편집</h3><p>언어를 고르고 문구를 수정한 뒤 저장하세요. 마지막으로 위 미리보기에서 공개 화면을 확인합니다.</p></div>
@@ -149,6 +188,13 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
     </article>)}{!notices.length&&!loading&&<div className="website-empty website-empty-v2"><strong>아직 등록된 공지사항이 없습니다.</strong><span>왼쪽 작성 영역에서 첫 공지사항을 등록해 보세요.</span></div>}</div>
    </section>
   </div>}
+  {tab==="admin"&&<section className="website-panel website-panel-v2 website-translation-panel">
+   <div className="website-section-intro"><div><span className="website-kicker">ADMINISTRATOR UI</span><h3>관리자 화면 미얀마어 교정</h3><p>한국어 원문을 검색해 미얀마어 표현을 직접 교정합니다. 저장한 문구는 미얀마어 관리자 화면에 우선 적용됩니다.</p></div></div>
+   <div className="website-form website-form-v2"><FormField label="한국어 원문 검색"><input value={adminQuery} onChange={e=>setAdminQuery(e.target.value)} placeholder="예: 저장, 학생 관리"/></FormField>
+    <FormField label="수정할 문구"><select value={adminKey} onChange={e=>setAdminKey(e.target.value)} disabled={!canManage||saving}><option value="">문구를 선택하세요</option>{Object.keys(MY).filter(key=>key.toLowerCase().includes(adminQuery.toLowerCase())||MY[key].toLowerCase().includes(adminQuery.toLowerCase())).sort((a,b)=>a.localeCompare(b,"ko")).slice(0,200).map(key=><option key={key} value={key}>{key}</option>)}</select></FormField>
+    {adminKey&&<><FormField label="한국어 원문"><textarea rows={3} value={adminKey} readOnly/></FormField><FormField label="미얀마어 번역"><textarea rows={4} disabled={!canManage||saving} value={adminTranslations[adminKey]??MY[adminKey]??""} onChange={e=>setAdminTranslations(values=>({...values,[adminKey]:e.target.value}))}/></FormField><div className="website-actions website-actions-v2"><button className="website-primary" disabled={!canManage||saving} onClick={()=>void saveAdminTranslation()}>{saving?"저장 중…":"미얀마어 번역 저장"}</button></div></>}
+   </div>
+  </section>}
  </div>;
 }
 

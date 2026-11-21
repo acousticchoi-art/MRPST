@@ -1,5 +1,6 @@
 import SiteHeader from "../SiteHeader";
 import Link from "next/link";
+import {getPublishedWebsiteContent,websiteCopy} from "@/lib/website-content";
 
 const contentByLocale = {
   ko: {
@@ -80,15 +81,22 @@ export default async function AcademicsPage({params}:{params:Promise<{locale:str
   const {locale}=await params;
   const lang=locale==="my"?"my":"ko";
   const t=contentByLocale[lang];
+  const content=await getPublishedWebsiteContent(locale);
+  const hero=websiteCopy(content,"academics-hero",{title:t.title,body:t.lead});
+  const programs=websiteCopy(content,"academics-programs",{title:t.programsTitle,body:t.programsLead});
+  const approach=websiteCopy(content,"academics-approach",{title:t.approachTitle,body:""});
+  const calendar=websiteCopy(content,"academics-calendar",{title:t.calendarTitle,body:t.note});
+  const admission=websiteCopy(content,"academics-admission",{title:t.admissionTitle,body:""});
+  const contact=websiteCopy(content,"academics-contact",{title:t.ctaTitle,body:t.ctaText});
   return <>
     <SiteHeader locale={locale} active="academics" />
     <main className="academics-page">
-      <section className="academics-hero"><span className="eyebrow">{t.eyebrow}</span><h1>{t.title}</h1><p>{t.lead}</p></section>
-      <section className="academics-programs"><div className="about-section-head"><span className="eyebrow">01 — PROGRAMS</span><h2>{t.programsTitle}</h2><p>{t.programsLead}</p></div><div className="program-detail-grid">{t.programs.map((program,index)=><article className="program-detail-card" key={program.no}><div className="program-card-top"><span>0{index+1} / {program.category}</span><strong>{program.period}</strong></div><h3>{program.name}</h3><b className="program-degree">{program.degree}</b><p>{program.intro}</p><p className="program-detail-copy">{program.detail}</p><small>{program.opened}</small></article>)}</div></section>
-      <section className="academics-approach"><div className="about-section-head"><span className="eyebrow">02 — EDUCATIONAL APPROACH</span><h2>{t.approachTitle}</h2></div><div className="academics-approach-grid">{t.approach.map(([title,desc],i)=><article key={title}><span>0{i+1}</span><div><h3>{title}</h3><p>{desc}</p></div></article>)}</div></section>
-      <section className="academics-calendar"><div className="about-section-head"><span className="eyebrow">03 — ACADEMIC CALENDAR</span><h2>{t.calendarTitle}</h2></div><div className="semester-grid">{t.semesters.map(([name,period])=><article key={name}><span>{name}</span><strong>{period}</strong></article>)}</div><p className="academics-note">{t.note}</p></section>
-      <section className="academics-admission"><div className="about-section-head"><span className="eyebrow">04 — ADMISSIONS</span><h2>{t.admissionTitle}</h2></div><ol>{t.admission.map(item=><li key={item}>{item}</li>)}</ol></section>
-      <section className="academics-contact"><div><span className="eyebrow">05 — CONTACT</span><h2>{t.ctaTitle}</h2><p>{t.ctaText}</p></div><Link className="btn light" href={`/${locale}/contact`}>{t.ctaButton} ↗</Link></section>
+      <section className="academics-hero"><span className="eyebrow">{t.eyebrow}</span><h1>{hero.title}</h1><p>{hero.body}</p></section>
+      <section className="academics-programs"><div className="about-section-head"><span className="eyebrow">01 — PROGRAMS</span><h2>{programs.title}</h2><p>{programs.body}</p></div><div className="program-detail-grid">{t.programs.map((program,index)=><article className="program-detail-card" key={program.no}><div className="program-card-top"><span>0{index+1} / {program.category}</span><strong>{program.period}</strong></div><h3>{program.name}</h3><b className="program-degree">{program.degree}</b><p>{program.intro}</p><p className="program-detail-copy">{program.detail}</p><small>{program.opened}</small></article>)}</div></section>
+      <section className="academics-approach"><div className="about-section-head"><span className="eyebrow">02 — EDUCATIONAL APPROACH</span><h2>{approach.title}</h2>{approach.body&&<p>{approach.body}</p>}</div><div className="academics-approach-grid">{t.approach.map(([title,desc],i)=><article key={title}><span>0{i+1}</span><div><h3>{title}</h3><p>{desc}</p></div></article>)}</div></section>
+      <section className="academics-calendar"><div className="about-section-head"><span className="eyebrow">03 — ACADEMIC CALENDAR</span><h2>{calendar.title}</h2></div><div className="semester-grid">{t.semesters.map(([name,period])=><article key={name}><span>{name}</span><strong>{period}</strong></article>)}</div><p className="academics-note">{calendar.body}</p></section>
+      <section className="academics-admission"><div className="about-section-head"><span className="eyebrow">04 — ADMISSIONS</span><h2>{admission.title}</h2>{admission.body&&<p>{admission.body}</p>}</div><ol>{t.admission.map(item=><li key={item}>{item}</li>)}</ol></section>
+      <section className="academics-contact"><div><span className="eyebrow">05 — CONTACT</span><h2>{contact.title}</h2><p>{contact.body}</p></div><Link className="btn light" href={`/${locale}/contact`}>{t.ctaButton} ↗</Link></section>
     </main>
     <footer className="footer"><span>Myanmar Reformed Presbyterian School of Theology</span><span><Link href={`/${locale}`}>{lang==="ko"?"홈페이지":"ပင်မစာမျက်နှာ"}</Link> · © {new Date().getFullYear()} MRPST</span></footer>
   </>;

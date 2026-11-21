@@ -1,5 +1,6 @@
 import SiteHeader from "../SiteHeader";
 import Link from "next/link";
+import {getPublishedWebsiteContent,websiteCopy} from "@/lib/website-content";
 
 const text = {
   ko: {
@@ -115,15 +116,22 @@ const text = {
 export default async function AboutPage({params}:{params:Promise<{locale:string}>}) {
   const {locale}=await params;
   const t=text[locale==="my"?"my":"ko"];
+  const content=await getPublishedWebsiteContent(locale);
+  const hero=websiteCopy(content,"about-hero",{title:t.title,body:t.lead});
+  const foundation=websiteCopy(content,"about-foundation",{title:t.purposeTitle,body:t.purpose});
+  const greeting=websiteCopy(content,"about-greeting",{title:t.greetingTitle,body:t.greeting});
+  const facts=websiteCopy(content,"about-facts",{title:t.factsTitle,body:""});
+  const history=websiteCopy(content,"about-history",{title:t.historyTitle,body:""});
+  const contact=websiteCopy(content,"about-contact",{title:t.contactTitle,body:t.contactText});
   return <>
     <SiteHeader locale={locale} active="about" />
     <main className="about-page">
-      <section className="about-hero"><span className="eyebrow">{t.eyebrow} · MYANMAR · YANGON</span><h1>{t.title}</h1><p>{t.lead}</p></section>
-      <section className="about-purpose"><div><span className="eyebrow">01 — OUR FOUNDATION</span><h2>{t.purposeTitle}</h2></div><p>{t.purpose}</p></section>
-      <section className="chair-greeting"><div className="chair-mark">MRPST</div><div><span className="eyebrow">02 — MESSAGE</span><h2>{t.greetingTitle}</h2><blockquote>{t.greeting}</blockquote><strong>{t.greetingSign}</strong></div></section>
-      <section className="about-facts"><div className="about-section-head"><span className="eyebrow">03 — AT A GLANCE</span><h2>{t.factsTitle}</h2></div><div className="about-fact-grid"><article><span>01</span><h3>{t.location}</h3><p>{t.locationText}</p></article><article><span>02</span><h3>{t.land}</h3><p>{t.landText}</p></article><article className="wide"><span>03</span><h3>{t.facilities}</h3><p>{t.facilitiesText}</p></article></div></section>
-      <section className="about-history"><div className="about-section-head"><span className="eyebrow">08 — HISTORY</span><h2>{t.historyTitle}</h2></div><div className="about-history-list">{t.history.map(([date,event])=><article key={date}><strong>{date}</strong><span>{event}</span></article>)}</div></section>
-      <section className="about-contact"><div><span className="eyebrow">09 — CONTACT</span><h2>{t.contactTitle}</h2><p>{t.contactText}</p></div><div><b>{t.phone}</b><p>{t.phoneText}</p><b>{t.address}</b><p>{t.addressText}</p><a className="btn light" href="https://maps.app.goo.gl/rqupUXw5JiumcrMv9?g_st=ic" target="_blank" rel="noopener noreferrer">{t.map} ↗</a><Link className="btn light" href={`/${locale}/contact`}>{t.more} ↗</Link></div></section>
+      <section className="about-hero"><span className="eyebrow">{t.eyebrow} · MYANMAR · YANGON</span><h1>{hero.title}</h1><p>{hero.body}</p></section>
+      <section className="about-purpose"><div><span className="eyebrow">01 — OUR FOUNDATION</span><h2>{foundation.title}</h2></div><p>{foundation.body}</p></section>
+      <section className="chair-greeting"><div className="chair-mark">MRPST</div><div><span className="eyebrow">02 — MESSAGE</span><h2>{greeting.title}</h2><blockquote>{greeting.body}</blockquote><strong>{t.greetingSign}</strong></div></section>
+      <section className="about-facts"><div className="about-section-head"><span className="eyebrow">03 — AT A GLANCE</span><h2>{facts.title}</h2>{facts.body&&<p>{facts.body}</p>}</div><div className="about-fact-grid"><article><span>01</span><h3>{t.location}</h3><p>{t.locationText}</p></article><article><span>02</span><h3>{t.land}</h3><p>{t.landText}</p></article><article className="wide"><span>03</span><h3>{t.facilities}</h3><p>{t.facilitiesText}</p></article></div></section>
+      <section className="about-history"><div className="about-section-head"><span className="eyebrow">08 — HISTORY</span><h2>{history.title}</h2>{history.body&&<p>{history.body}</p>}</div><div className="about-history-list">{t.history.map(([date,event])=><article key={date}><strong>{date}</strong><span>{event}</span></article>)}</div></section>
+      <section className="about-contact"><div><span className="eyebrow">09 — CONTACT</span><h2>{contact.title}</h2><p>{contact.body}</p></div><div><b>{t.phone}</b><p>{t.phoneText}</p><b>{t.address}</b><p>{t.addressText}</p><a className="btn light" href="https://maps.app.goo.gl/rqupUXw5JiumcrMv9?g_st=ic" target="_blank" rel="noopener noreferrer">{t.map} ↗</a><Link className="btn light" href={`/${locale}/contact`}>{t.more} ↗</Link></div></section>
     </main>
     <footer className="footer"><span>Myanmar Reformed Presbyterian School of Theology</span><span><Link href={`/${locale}`}>{t.home}</Link> · © {new Date().getFullYear()} MRPST</span></footer>
   </>;

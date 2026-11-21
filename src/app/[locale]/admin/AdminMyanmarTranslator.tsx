@@ -6,7 +6,7 @@ import {useEffect} from "react";
  * Shared UI phrase localization for legacy admin modules.
  * Only exact interface labels are translated; user-entered names and records are untouched.
  */
-const MY:Record<string,string>={
+export const MY:Record<string,string>={
   "WORKSPACE": "စီမံခန့်ခွဲမှု",
   "Preview mode": "အစမ်းကြည့်ရှုမှု",
   "Module foundation": "ကဏ္ဍအခြေခံ",
@@ -1298,6 +1298,17 @@ export default function AdminMyanmarTranslator({locale}:{locale:string}){
     if(locale!=="my") return;
     const root=document.querySelector(".admin")??document.body;
     translateElement(root);
+    void fetch("/api/admin/data/website",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}})
+      .then(async response=>({response,data:await response.json().catch(()=>null)}))
+      .then(({response,data})=>{
+        if(!response.ok)return;
+        const row=data?.items?.data?.find((item:{content_type?:string;content_key?:string;locale?:string})=>item.content_type==="page"&&item.content_key==="admin-translations"&&item.locale==="my");
+        if(!row?.body)return;
+        const overrides=JSON.parse(row.body);
+        if(!overrides||typeof overrides!=="object")return;
+        for(const [source,target] of Object.entries(overrides))if(typeof target==="string"&&target.trim())MY[source]=target;
+        translateElement(root);
+      }).catch(()=>{});
     let frame=0;
     const pending=new Set<Node>();
     const flush=()=>{

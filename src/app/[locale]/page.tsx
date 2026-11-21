@@ -2,6 +2,7 @@ import SiteHeader from "./SiteHeader";
 import Link from "next/link";
 import {createSupabaseServerClient} from "@/lib/supabase/server";
 import InlinePageEditor from "./InlinePageEditor";
+import PublicAnnouncements from "./PublicAnnouncements";
 
 const copy = {
   en: {
@@ -81,9 +82,9 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
   const {locale}=await params;
   const base=copy[locale as keyof typeof copy]??copy.ko;
   const supabase=await createSupabaseServerClient();
-  let cmsRows:{content_type:string;content_key:string;title:string;body:string;is_published:boolean;updated_at:string}[]=[];
+  let cmsRows:{content_type:string;content_key:string;title:string;body:string;is_published:boolean;created_at:string;updated_at:string}[]=[];
   if(supabase){
-    const {data}=await supabase.from("website_contents").select("content_type,content_key,title,body,is_published,updated_at").eq("locale",locale).eq("is_published",true);
+    const {data}=await supabase.from("website_contents").select("content_type,content_key,title,body,is_published,created_at,updated_at").eq("locale",locale).eq("is_published",true);
     cmsRows=(data??[]) as typeof cmsRows;
   }
   const page=(key:string)=>cmsRows.find(x=>x.content_type==="page"&&x.content_key===key);
@@ -128,7 +129,7 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
         </div>
       </section>
 
-      <section className="public-announcements"><div className="public-announcements-heading"><span className="eyebrow">{locale==="ko"?"MRPST 소식":"MRPST NEWS"}</span><h2>{locale==="ko"?"공지사항":"ကြေညာချက်များ"}</h2></div><div className="public-announcements-list">{announcements.length>0?announcements.map(item=><article className="public-announcement" key={item.content_key}><h3>{item.title}</h3><p>{item.body}</p></article>):<p className="public-announcements-empty">{locale==="ko"?"등록된 공지사항이 없습니다.":"ကြေညာချက် မရှိသေးပါ။"}</p>}</div></section>
+      <PublicAnnouncements locale={locale} announcements={announcements}/>
 
       <section id="about" className="section intro-section home-intro-summary">
         <div className="intro-heading">

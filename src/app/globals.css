@@ -781,10 +781,12 @@ button,a,input,select,textarea{transition-color:.16s}
 .website-empty{color:var(--muted);font-size:13px;padding:15px 0}
 .public-announcements{padding:35px 9%;background:#f6f8f9;display:grid;grid-template-columns:220px minmax(0,1fr);gap:30px}
 .public-announcements-heading h2{margin:8px 0;color:var(--navy);font:500 27px Georgia,serif}
-.public-announcements-list{display:grid;gap:12px}
-.public-announcement{padding:14px 17px;background:#fff;border:1px solid var(--line);border-radius:9px}
-.public-announcement h3{margin:0 0 5px;color:var(--navy);font-size:15px}
-.public-announcement p{margin:0;color:var(--muted);font-size:13px;line-height:1.7;white-space:pre-wrap}
+.public-announcements-list{display:grid;gap:8px}
+.public-announcement{width:100%;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:15px 17px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--navy);text-align:left;cursor:pointer;font:inherit}
+.public-announcement:hover{border-color:#bfcdd5;background:#f9fbfc}.public-announcement strong{font-size:15px;line-height:1.5}.public-announcement time{flex:none;color:var(--muted);font-size:12px}
+.announcement-modal-backdrop{position:fixed;inset:0;z-index:100;background:rgba(16,45,66,.48);display:grid;place-items:center;padding:22px}
+.announcement-modal{position:relative;width:min(620px,100%);max-height:min(78vh,700px);overflow:auto;padding:34px;background:#fff;border-radius:14px;box-shadow:0 22px 60px rgba(16,45,66,.3)}
+.announcement-modal-close{position:absolute;top:13px;right:15px;width:34px;height:34px;border:0;border-radius:50%;background:#edf2f4;color:var(--navy);font-size:24px;line-height:1;cursor:pointer}.announcement-modal h3{margin:9px 38px 8px 0;color:var(--navy);font-size:24px;line-height:1.45}.announcement-modal time{display:block;color:var(--muted);font-size:13px;padding-bottom:18px;border-bottom:1px solid var(--line)}.announcement-modal p{margin:20px 0 0;color:#40515c;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:760px){.website-notice-layout{grid-template-columns:1fr}.website-field{grid-template-columns:1fr}.website-field>div{grid-row:auto}.public-announcements{grid-template-columns:1fr;gap:14px;padding:28px 6%}.website-panel{padding:15px}.website-panel-head{align-items:flex-start;flex-direction:column}.website-panel-head select{width:100%}}
 
 

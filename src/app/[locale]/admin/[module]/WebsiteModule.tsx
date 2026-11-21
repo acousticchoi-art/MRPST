@@ -126,7 +126,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
   {error&&<div className="website-alert error" role="alert">{error}</div>}
   {notice&&<div className="website-alert success" role="status">{notice}</div>}
   <nav className="website-tabs website-tabs-v2" aria-label="홈페이지 콘텐츠 종류">
-   <button className={tab==="notices"?"active":""} onClick={()=>setTab("notices")}><span>01</span> 공지사항 <b>{notices.length}</b></button>
+   <button className={tab==="notices"?"active":""} onClick={()=>setTab("notices")}><span>01</span> 공지사항</button>
    <button className={tab==="translation"?"active":""} onClick={()=>setTab("translation")}><span>02</span> 홈페이지 문구</button>
    <button className={tab==="admin"?"active":""} onClick={()=>setTab("admin")}><span>03</span> 관리자 화면 번역</button>
   </nav>

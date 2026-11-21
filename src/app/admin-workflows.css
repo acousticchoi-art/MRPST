@@ -18,3 +18,13 @@
 .website-translation-language textarea{resize:vertical}
 @media(max-width:700px){.website-translation-item{padding:12px}.website-translation-columns{grid-template-columns:1fr;gap:8px}.website-translation-language{padding:11px}}
 
+/* Myanmar glyphs need a taller baseline than Korean or Latin text. */
+:lang(my) .admin{font-family:"Noto Sans Myanmar","Myanmar Text",Arial,sans-serif;letter-spacing:0}
+:lang(my) .admin :is(button,input,select,textarea,label,th,td,p,small,span,strong,h1,h2,h3,h4,h5,h6){letter-spacing:0!important}
+:lang(my) .admin :is(button,label,th,td,p,small,span,strong,h1,h2,h3,h4,h5,h6){line-height:1.7!important}
+:lang(my) .admin :is(input,select,textarea){line-height:1.65!important}
+:lang(my) .admin button{min-height:38px}
+:lang(my) .admin textarea{line-height:1.8!important}
+:lang(my) .admin .top-action{min-height:40px!important;line-height:1.6!important}
+@media(max-width:700px){:lang(my) .admin .side-link{line-height:1.7!important}:lang(my) .admin .sidebar-group .side-label{line-height:1.65!important}}
+

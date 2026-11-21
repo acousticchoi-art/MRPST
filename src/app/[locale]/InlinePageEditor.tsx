@@ -9,7 +9,7 @@ const editableSelector="h1,h2,h3,h4,p,span,strong,small,blockquote,li,a,button,l
 function textElements(root:HTMLElement){
   return Array.from(root.querySelectorAll<HTMLElement>(editableSelector)).filter(element=>
     element.textContent?.trim()&&
-    !element.closest("[data-inline-editor-controls]")&&
+    !element.closest("[data-inline-editor-controls],[data-no-inline-edit]")&&
     !Array.from(element.querySelectorAll(editableSelector)).some(child=>child!==element&&Boolean(child.textContent?.trim()))
   );
 }
@@ -105,6 +105,6 @@ export default function InlinePageEditor({pageKey,locale,initialValues={},childr
     finally{setSaving(false);}
   };
 
-  const bootstrap=hasInitialValues?`(()=>{const root=document.currentScript&&document.currentScript.parentElement;if(!root)return;const values=${JSON.stringify(initialValues).replace(/</g,"\\u003c")};const selector=${JSON.stringify(editableSelector)};const elements=Array.from(root.querySelectorAll(selector)).filter(element=>element.textContent&&element.textContent.trim()&&!element.closest('[data-inline-editor-controls]')&&!Array.from(element.querySelectorAll(selector)).some(child=>child!==element&&child.textContent&&child.textContent.trim()));const key=element=>{const parts=[];let current=element;while(current&&current!==root){const parent=current.parentElement;if(!parent)break;parts.unshift(String(Array.from(parent.children).indexOf(current)));current=parent;}return parts.join('.');};elements.forEach(element=>{const value=values[key(element)];if(value!==undefined)element.textContent=value;});})();`:"";
+  const bootstrap=hasInitialValues?`(()=>{const root=document.currentScript&&document.currentScript.parentElement;if(!root)return;const values=${JSON.stringify(initialValues).replace(/</g,"\\u003c")};const selector=${JSON.stringify(editableSelector)};const elements=Array.from(root.querySelectorAll(selector)).filter(element=>element.textContent&&element.textContent.trim()&&!element.closest('[data-inline-editor-controls],[data-no-inline-edit]')&&!Array.from(element.querySelectorAll(selector)).some(child=>child!==element&&child.textContent&&child.textContent.trim()));const key=element=>{const parts=[];let current=element;while(current&&current!==root){const parent=current.parentElement;if(!parent)break;parts.unshift(String(Array.from(parent.children).indexOf(current)));current=parent;}return parts.join('.');};elements.forEach(element=>{const value=values[key(element)];if(value!==undefined)element.textContent=value;});})();`:"";
   return <div ref={rootRef} data-inline-page={pageKey}>{children}{hasInitialValues&&<script dangerouslySetInnerHTML={{__html:bootstrap}}/>}{canManage&&<div className="inline-editor-controls" data-inline-editor-controls style={position?{left:position.x,top:position.y,right:"auto"}:undefined}><span className="inline-editor-drag" onPointerDown={startDrag} title="끌어서 이동">⋮⋮</span><span>{message}</span>{editing?<><button type="button" onClick={()=>stopEditing(true)} disabled={saving}>취소</button><button type="button" onClick={()=>void save()} disabled={saving}>{saving?"저장 중…":"저장"}</button></>:<button type="button" onClick={startEditing}>편집 모드</button>}</div>}</div>;
 }

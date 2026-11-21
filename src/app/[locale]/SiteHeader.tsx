@@ -17,7 +17,7 @@ export default function SiteHeader({ locale, active }: { locale: string; active:
     { key: "contact", href: `/${lang}/contact`, label: t.contact }
   ] as const;
   return (
-    <header className="header">
+    <header className="header" data-no-inline-edit>
       <Link href={`/${lang}`} className="brand">
         <span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST official logo" /></span>
         <span>MRPST<small>MYANMAR REFORMED PRESBYTERIAN SCHOOL OF THEOLOGY</small></span>

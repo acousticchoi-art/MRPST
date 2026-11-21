@@ -36,7 +36,6 @@ export default function InlinePageEditor({pageKey,locale,initialValues={},childr
   const [position,setPosition]=useState<{x:number;y:number}|null>(null);
   const storageKey=`inline-page-${pageKey}`;
   const hasInitialValues=Object.keys(initialValues).length>0;
-  const [initialApplied,setInitialApplied]=useState(!hasInitialValues);
 
   const applyValues=useCallback((values:InlineValues)=>{
     const root=rootRef.current;if(!root)return;
@@ -46,7 +45,6 @@ export default function InlinePageEditor({pageKey,locale,initialValues={},childr
   useLayoutEffect(()=>{
     if(!hasInitialValues)return;
     applyValues(initialValues);
-    setInitialApplied(true);
   },[applyValues,hasInitialValues,initialValues]);
 
   useEffect(()=>{
@@ -107,5 +105,6 @@ export default function InlinePageEditor({pageKey,locale,initialValues={},childr
     finally{setSaving(false);}
   };
 
-  return <div ref={rootRef} data-inline-page={pageKey} style={!initialApplied?{visibility:"hidden"}:undefined}>{children}{canManage&&<div className="inline-editor-controls" data-inline-editor-controls style={position?{left:position.x,top:position.y,right:"auto"}:undefined}><span className="inline-editor-drag" onPointerDown={startDrag} title="끌어서 이동">⋮⋮</span><span>{message}</span>{editing?<><button type="button" onClick={()=>stopEditing(true)} disabled={saving}>취소</button><button type="button" onClick={()=>void save()} disabled={saving}>{saving?"저장 중…":"저장"}</button></>:<button type="button" onClick={startEditing}>편집 모드</button>}</div>}</div>;
+  const bootstrap=hasInitialValues?`(()=>{const root=document.currentScript&&document.currentScript.parentElement;if(!root)return;const values=${JSON.stringify(initialValues).replace(/</g,"\\u003c")};const selector=${JSON.stringify(editableSelector)};const elements=Array.from(root.querySelectorAll(selector)).filter(element=>element.textContent&&element.textContent.trim()&&!element.closest('[data-inline-editor-controls]')&&!Array.from(element.querySelectorAll(selector)).some(child=>child!==element&&child.textContent&&child.textContent.trim()));const key=element=>{const parts=[];let current=element;while(current&&current!==root){const parent=current.parentElement;if(!parent)break;parts.unshift(String(Array.from(parent.children).indexOf(current)));current=parent;}return parts.join('.');};elements.forEach(element=>{const value=values[key(element)];if(value!==undefined)element.textContent=value;});})();`:"";
+  return <div ref={rootRef} data-inline-page={pageKey}>{children}{hasInitialValues&&<script dangerouslySetInnerHTML={{__html:bootstrap}}/>}{canManage&&<div className="inline-editor-controls" data-inline-editor-controls style={position?{left:position.x,top:position.y,right:"auto"}:undefined}><span className="inline-editor-drag" onPointerDown={startDrag} title="끌어서 이동">⋮⋮</span><span>{message}</span>{editing?<><button type="button" onClick={()=>stopEditing(true)} disabled={saving}>취소</button><button type="button" onClick={()=>void save()} disabled={saving}>{saving?"저장 중…":"저장"}</button></>:<button type="button" onClick={startEditing}>편집 모드</button>}</div>}</div>;
 }

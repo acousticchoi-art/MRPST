@@ -1,6 +1,6 @@
 "use client";
 
-import {useCallback,useEffect,useRef,useState,type PointerEvent as ReactPointerEvent,type ReactNode} from "react";
+import {useCallback,useEffect,useLayoutEffect,useRef,useState,type PointerEvent as ReactPointerEvent,type ReactNode} from "react";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 
 type InlineValues=Record<string,string>;
@@ -26,7 +26,7 @@ function elementKey(root:HTMLElement,element:HTMLElement){
   return parts.join(".");
 }
 
-export default function InlinePageEditor({pageKey,locale,children}:{pageKey:string;locale:string;children:ReactNode}){
+export default function InlinePageEditor({pageKey,locale,initialValues={},children}:{pageKey:string;locale:string;initialValues?:InlineValues;children:ReactNode}){
   const rootRef=useRef<HTMLDivElement>(null);
   const original=useRef<InlineValues>({});
   const [canManage,setCanManage]=useState(false);
@@ -35,11 +35,19 @@ export default function InlinePageEditor({pageKey,locale,children}:{pageKey:stri
   const [message,setMessage]=useState("");
   const [position,setPosition]=useState<{x:number;y:number}|null>(null);
   const storageKey=`inline-page-${pageKey}`;
+  const hasInitialValues=Object.keys(initialValues).length>0;
+  const [initialApplied,setInitialApplied]=useState(!hasInitialValues);
 
   const applyValues=useCallback((values:InlineValues)=>{
     const root=rootRef.current;if(!root)return;
     textElements(root).forEach(element=>{const value=values[elementKey(root,element)];if(value!==undefined)element.textContent=value;});
   },[]);
+
+  useLayoutEffect(()=>{
+    if(!hasInitialValues)return;
+    applyValues(initialValues);
+    setInitialApplied(true);
+  },[applyValues,hasInitialValues,initialValues]);
 
   useEffect(()=>{
     const root=rootRef.current;if(!root)return;
@@ -49,9 +57,10 @@ export default function InlinePageEditor({pageKey,locale,children}:{pageKey:stri
       .catch(()=>setCanManage(false));
     const db=createSupabaseBrowserClient();
     if(!db)return;
+    if(hasInitialValues)return;
     void db.from("website_contents").select("body").eq("content_type","page").eq("content_key",storageKey).eq("locale",locale).eq("is_published",true).maybeSingle()
       .then(({data})=>{try{if(data?.body)applyValues(JSON.parse(data.body));}catch{}});
-  },[applyValues,locale,storageKey]);
+  },[applyValues,hasInitialValues,locale,storageKey]);
 
   useEffect(()=>{try{const saved=localStorage.getItem("mrpst-inline-editor-position");if(saved)setPosition(JSON.parse(saved));}catch{}},[]);
   const startDrag=(event:ReactPointerEvent<HTMLSpanElement>)=>{
@@ -98,5 +107,5 @@ export default function InlinePageEditor({pageKey,locale,children}:{pageKey:stri
     finally{setSaving(false);}
   };
 
-  return <div ref={rootRef} data-inline-page={pageKey}>{children}{canManage&&<div className="inline-editor-controls" data-inline-editor-controls style={position?{left:position.x,top:position.y,right:"auto"}:undefined}><span className="inline-editor-drag" onPointerDown={startDrag} title="끌어서 이동">⋮⋮</span><span>{message}</span>{editing?<><button type="button" onClick={()=>stopEditing(true)} disabled={saving}>취소</button><button type="button" onClick={()=>void save()} disabled={saving}>{saving?"저장 중…":"저장"}</button></>:<button type="button" onClick={startEditing}>편집 모드</button>}</div>}</div>;
+  return <div ref={rootRef} data-inline-page={pageKey} style={!initialApplied?{visibility:"hidden"}:undefined}>{children}{canManage&&<div className="inline-editor-controls" data-inline-editor-controls style={position?{left:position.x,top:position.y,right:"auto"}:undefined}><span className="inline-editor-drag" onPointerDown={startDrag} title="끌어서 이동">⋮⋮</span><span>{message}</span>{editing?<><button type="button" onClick={()=>stopEditing(true)} disabled={saving}>취소</button><button type="button" onClick={()=>void save()} disabled={saving}>{saving?"저장 중…":"저장"}</button></>:<button type="button" onClick={startEditing}>편집 모드</button>}</div>}</div>;
 }

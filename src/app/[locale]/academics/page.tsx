@@ -1,6 +1,6 @@
 import SiteHeader from "../SiteHeader";
 import Link from "next/link";
-import {getPublishedWebsiteContent,websiteCopy} from "@/lib/website-content";
+import {getPublishedWebsiteContent,inlinePageValues,websiteCopy} from "@/lib/website-content";
 import InlinePageEditor from "../InlinePageEditor";
 
 const contentByLocale = {
@@ -89,7 +89,7 @@ export default async function AcademicsPage({params}:{params:Promise<{locale:str
   const calendar=websiteCopy(content,"academics-calendar",{title:t.calendarTitle,body:t.note});
   const admission=websiteCopy(content,"academics-admission",{title:t.admissionTitle,body:""});
   const contact=websiteCopy(content,"academics-contact",{title:t.ctaTitle,body:t.ctaText});
-  return <InlinePageEditor pageKey="academics" locale={locale}>
+  return <InlinePageEditor pageKey="academics" locale={locale} initialValues={inlinePageValues(content,"academics")}>
     <SiteHeader locale={locale} active="academics" />
     <main className="academics-page">
       <section className="academics-hero"><span className="eyebrow">{t.eyebrow}</span><h1>{hero.title}</h1><p>{hero.body}</p></section>

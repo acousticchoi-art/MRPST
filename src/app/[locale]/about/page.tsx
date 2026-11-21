@@ -1,6 +1,6 @@
 import SiteHeader from "../SiteHeader";
 import Link from "next/link";
-import {getPublishedWebsiteContent,websiteCopy} from "@/lib/website-content";
+import {getPublishedWebsiteContent,inlinePageValues,websiteCopy} from "@/lib/website-content";
 import InlinePageEditor from "../InlinePageEditor";
 
 const text = {
@@ -124,7 +124,7 @@ export default async function AboutPage({params}:{params:Promise<{locale:string}
   const facts=websiteCopy(content,"about-facts",{title:t.factsTitle,body:""});
   const history=websiteCopy(content,"about-history",{title:t.historyTitle,body:""});
   const contact=websiteCopy(content,"about-contact",{title:t.contactTitle,body:t.contactText});
-  return <InlinePageEditor pageKey="about" locale={locale}>
+  return <InlinePageEditor pageKey="about" locale={locale} initialValues={inlinePageValues(content,"about")}>
     <SiteHeader locale={locale} active="about" />
     <main className="about-page">
       <section className="about-hero"><span className="eyebrow">{t.eyebrow} · MYANMAR · YANGON</span><h1>{hero.title}</h1><p>{hero.body}</p></section>

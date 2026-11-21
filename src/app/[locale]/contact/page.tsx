@@ -1,7 +1,7 @@
 import SiteHeader from "../SiteHeader";
 import Link from "next/link";
 import ContactForm from "./ContactForm";
-import {getPublishedWebsiteContent,websiteCopy} from "@/lib/website-content";
+import {getPublishedWebsiteContent,inlinePageValues,websiteCopy} from "@/lib/website-content";
 import InlinePageEditor from "../InlinePageEditor";
 
 const copy = {
@@ -31,7 +31,7 @@ export default async function ContactPage({params}:{params:Promise<{locale:strin
   const content=await getPublishedWebsiteContent(locale);
   const hero=websiteCopy(content,"contact-hero",{title:t.title,body:t.intro});
   const info=websiteCopy(content,"contact-info",{title:"Myanmar Reformed Presbyterian School of Theology",body:t.address});
-  return <InlinePageEditor pageKey="contact" locale={locale}>
+  return <InlinePageEditor pageKey="contact" locale={locale} initialValues={inlinePageValues(content,"contact")}>
     <SiteHeader locale={locale} active="contact" />
     <main className="contact-page">
       <section className="contact-page-heading"><span className="eyebrow">{t.eyebrow}</span><h1>{hero.title}</h1><p>{hero.body}</p></section>

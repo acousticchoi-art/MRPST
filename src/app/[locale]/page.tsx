@@ -87,6 +87,8 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
     cmsRows=(data??[]) as typeof cmsRows;
   }
   const page=(key:string)=>cmsRows.find(x=>x.content_type==="page"&&x.content_key===key);
+  let inlineValues:Record<string,string>={};
+  try{const parsed=JSON.parse(page("inline-page-home")?.body??"");if(parsed&&typeof parsed==="object"&&!Array.isArray(parsed))inlineValues=parsed;}catch{}
   const t={...base,
     title:page("hero")?.title||base.title,
     intro:page("hero")?.body||base.intro,
@@ -99,7 +101,7 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
     addressText:page("address")?.body||base.addressText
   };
   const announcements=cmsRows.filter(x=>x.content_type==="announcement").sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
-  return <InlinePageEditor pageKey="home" locale={locale}>
+  return <InlinePageEditor pageKey="home" locale={locale} initialValues={inlineValues}>
     <SiteHeader locale={locale} active="home" />
     <main className="homepage">
       <section className="hero hero-redesign">

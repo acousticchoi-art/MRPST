@@ -25,3 +25,10 @@ export function websiteCopy(content:Map<string,WebsitePageContent>,key:string,fa
     body:saved?.body.trim()||fallback.body
   };
 }
+
+export function inlinePageValues(content:Map<string,WebsitePageContent>,pageKey:string):Record<string,string>{
+  try{
+    const value=JSON.parse(content.get(`inline-page-${pageKey}`)?.body??"");
+    return value&&typeof value==="object"&&!Array.isArray(value)?value:{};
+  }catch{return {};}
+}

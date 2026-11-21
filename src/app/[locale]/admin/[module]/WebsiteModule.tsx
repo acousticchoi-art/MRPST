@@ -39,7 +39,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
  }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[locale]);
  useEffect(()=>{void load();},[load]);
  const translationFields=useMemo(()=>{
-  const known=new Map(pageFields.map(field=>[field.key,field]));
+  const known=new Map<string,{key:string;label:string;hint:string}>(pageFields.map(field=>[field.key,{...field}]));
   const keys=Array.from(new Set([...pageFields.map(field=>field.key),...items.filter(item=>item.content_type==="page").map(item=>item.content_key)]));
   return keys.map(key=>known.get(key)||{key,label:key.replace(/[-_]/g," "),hint:"홈페이지에 등록된 추가 문구"});
  },[items]);

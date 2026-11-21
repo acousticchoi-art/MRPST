@@ -1224,6 +1224,11 @@ const MY:Record<string,string>={
   "개강 집회": "စာသင်နှစ်ဖွင့် အစည်းအဝေး",
   "일정명 *": "အစီအစဉ်အမည် *",
   "홈페이지에 공개": "ဝဘ်ဆိုက်တွင် ဖော်ပြရန်",
+  "와": "နှင့်",
+  "과": "နှင့်",
+  "준비": "ပြင်ဆင်မှု",
+  "개": "ခု",
+  "건": "ခု",
 };;
 
 // Components sometimes split a sentence into static labels and live values. Keep

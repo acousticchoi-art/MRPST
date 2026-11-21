@@ -2193,3 +2193,4 @@ input,select,textarea,button{max-width:100%}
 .admin-main .content :is(.finance-table,.student-table,.academics-table,.facility-table,.library-table,.settings-table) button:not(:disabled):hover{background:#edf4f7;border-color:#9cb3c1;transform:translateY(-1px)}
 .admin-main .content :is(.facility-delete-action,.website-notice-actions .danger,.settings-activate button){border-color:#e5c2bd!important;background:#fff7f5!important;color:#a33f36!important}
 .admin-main .content :is(.facility-delete-action,.website-notice-actions .danger,.settings-activate button):not(:disabled):hover{background:#fff0ed!important;border-color:#dca99f!important}
+.settings-backup{max-width:680px;border:1px solid var(--line);border-radius:7px;background:#f7f7f4;padding:16px}.settings-backup strong{display:block;font-size:13px;color:var(--navy)}.settings-backup p{font-size:12px;line-height:1.7;color:var(--muted);margin:8px 0 14px}

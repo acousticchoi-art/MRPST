@@ -6,6 +6,7 @@ import {isSupabaseConfigured} from "@/lib/supabase/config";
 import {MODULES,canAccessModule,type MrpstRole} from "@/lib/auth/permissions";
 import AdminActions from "./AdminActions";
 import AdminMenuDetails from "./AdminMenuDetails";
+import InlineAdminEditor from "./InlineAdminEditor";
 const AdminMyanmarTranslator=dynamic(()=>import("./AdminMyanmarTranslator"));
 
 const copy = {
@@ -117,7 +118,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   const recentAnnouncements=announcementResult.data??[];
   const moduleGroups=[["academic",["students","academics"]],["finance",["finance"]],["operations",["facilities","library","meetings"]],["system",["administration","website"]]] as const;
   const visibleInGroup=(keys:readonly string[])=>visible.filter(([key])=>keys.includes(key));
-  return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<div className="admin">
+  return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<InlineAdminEditor locale={locale}><div className="admin">
     <aside className="sidebar">
       <Link href={`/${locale}/admin`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
       <AdminMenuDetails>
@@ -163,5 +164,5 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
         </div>
       </div>
     </main>
-  </div></>;
+  </div></InlineAdminEditor></>;
 }

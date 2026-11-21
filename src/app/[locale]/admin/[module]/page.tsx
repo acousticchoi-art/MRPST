@@ -53,7 +53,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
   const adminShell=(content:ReactNode)=>locale==="my"?<InlineAdminEditor locale={locale}>{content}</InlineAdminEditor>:<InlinePageEditor pageKey={`admin-${module}`} locale={locale}>{content}</InlinePageEditor>;
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>} {adminShell(<div className="admin">
     <aside className="sidebar">
-      <Link href={`/${locale}/admin`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
+      <Link href={`/${locale}/admin`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.svg" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
       <AdminMenuDetails>
         <summary>{lang==="ko"?"관리 메뉴":"Menu"}</summary>
         <nav className="sidebar-nav">
@@ -66,7 +66,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
       <div className="sidebar-mobile-tools"><nav className="admin-language" aria-label="Language"><a className={lang==="my"?"selected":""} href={`/my/admin/${module}`}>မြန်မာ</a><a className={lang==="ko"?"selected":""} href={`/ko/admin/${module}`}>한국어</a></nav><Link href={`/${locale}`}>{t.view}</Link>{supabase&&<AdminActions locale={locale}/>}</div>
       </aside>
     <main className="admin-main">
-      <header className="topbar admin-desktop-topbar"><Link href={`/${locale}/admin`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">
+      <header className="topbar admin-desktop-topbar"><Link href={`/${locale}/admin`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.svg" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">
         <nav className="admin-language" aria-label="Language">
           <a className={lang==="my"?"selected":""} href={`/my/admin/${module}`}>မြန်မာ</a>
           <a className={lang==="ko"?"selected":""} href={`/ko/admin/${module}`}>한국어</a>

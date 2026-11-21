@@ -1,7 +1,6 @@
 "use client";
 
 import {useCallback,useEffect,useLayoutEffect,useRef,useState,type PointerEvent as ReactPointerEvent,type ReactNode} from "react";
-import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 
 type InlineValues=Record<string,string>;
 const editableSelector="h1,h2,h3,h4,p,span,strong,small,blockquote,li,a,button,label";
@@ -26,7 +25,7 @@ function elementKey(root:HTMLElement,element:HTMLElement){
   return parts.join(".");
 }
 
-export default function InlinePageEditor({pageKey,locale,initialValues={},children}:{pageKey:string;locale:string;initialValues?:InlineValues;children:ReactNode}){
+export default function InlinePageEditor({pageKey,locale,initialValues,children}:{pageKey:string;locale:string;initialValues?:InlineValues;children:ReactNode}){
   const rootRef=useRef<HTMLDivElement>(null);
   const original=useRef<InlineValues>({});
   const [canManage,setCanManage]=useState(false);
@@ -35,7 +34,7 @@ export default function InlinePageEditor({pageKey,locale,initialValues={},childr
   const [message,setMessage]=useState("");
   const [position,setPosition]=useState<{x:number;y:number}|null>(null);
   const storageKey=`inline-page-${pageKey}`;
-  const hasInitialValues=Object.keys(initialValues).length>0;
+  const hasInitialValues=initialValues!==undefined;
 
   const applyValues=useCallback((values:InlineValues)=>{
     const root=rootRef.current;if(!root)return;
@@ -43,21 +42,25 @@ export default function InlinePageEditor({pageKey,locale,initialValues={},childr
   },[]);
 
   useLayoutEffect(()=>{
-    if(!hasInitialValues)return;
+    if(initialValues===undefined)return;
     applyValues(initialValues);
-  },[applyValues,hasInitialValues,initialValues]);
+  },[applyValues,initialValues]);
 
   useEffect(()=>{
-    const root=rootRef.current;if(!root)return;
-    void fetch("/api/admin/data/website",{cache:"no-store",credentials:"same-origin"})
-      .then(async response=>({response,data:await response.json().catch(()=>null)}))
-      .then(({response,data})=>setCanManage(response.ok&&data?.canManage===true))
-      .catch(()=>setCanManage(false));
-    const db=createSupabaseBrowserClient();
-    if(!db)return;
-    if(hasInitialValues)return;
-    void db.from("website_contents").select("body").eq("content_type","page").eq("content_key",storageKey).eq("locale",locale).eq("is_published",true).maybeSingle()
-      .then(({data})=>{try{if(data?.body)applyValues(JSON.parse(data.body));}catch{}});
+    if(!document.cookie.includes("sb-"))return;
+    void import("@/lib/supabase/client").then(({createSupabaseBrowserClient})=>{
+      const db=createSupabaseBrowserClient();if(!db)return;
+      return db.auth.getSession().then(({data:{session}})=>{
+        if(!session)return;
+        void fetch("/api/admin/data/website",{cache:"no-store",credentials:"same-origin"})
+          .then(async response=>({response,data:await response.json().catch(()=>null)}))
+          .then(({response,data})=>setCanManage(response.ok&&data?.canManage===true))
+          .catch(()=>setCanManage(false));
+        if(hasInitialValues)return;
+        return db.from("website_contents").select("body").eq("content_type","page").eq("content_key",storageKey).eq("locale",locale).eq("is_published",true).maybeSingle()
+          .then(({data})=>{try{if(data?.body)applyValues(JSON.parse(data.body));}catch{}});
+      });
+    });
   },[applyValues,hasInitialValues,locale,storageKey]);
 
   useEffect(()=>{try{const saved=localStorage.getItem("mrpst-inline-editor-position");if(saved)setPosition(JSON.parse(saved));}catch{}},[]);
@@ -92,10 +95,11 @@ export default function InlinePageEditor({pageKey,locale,initialValues={},childr
   };
 
   const save=async()=>{
-    const root=rootRef.current;const db=createSupabaseBrowserClient();if(!root||!db)return;
+    const root=rootRef.current;if(!root)return;
     const values:InlineValues={};textElements(root).forEach(element=>{values[elementKey(root,element)]=element.textContent??"";});
     setSaving(true);setMessage("");
     try{
+      const {createSupabaseBrowserClient}=await import("@/lib/supabase/client");const db=createSupabaseBrowserClient();if(!db)throw new Error();
       const {data:{user}}=await db.auth.getUser();
       const row={content_type:"page",content_key:storageKey,locale,title:`Inline text: ${pageKey}`,body:JSON.stringify(values),is_published:true,sort_order:998,updated_by:user?.id??null};
       const {error}=await db.from("website_contents").upsert(row,{onConflict:"content_type,content_key,locale"});

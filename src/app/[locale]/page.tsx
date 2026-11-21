@@ -84,8 +84,11 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
   const supabase=await createSupabaseServerClient();
   let cmsRows:{content_type:string;content_key:string;title:string;body:string;is_published:boolean;created_at:string;updated_at:string}[]=[];
   if(supabase){
-    const {data}=await supabase.from("website_contents").select("content_type,content_key,title,body,is_published,created_at,updated_at").eq("locale",locale).eq("is_published",true);
-    cmsRows=(data??[]) as typeof cmsRows;
+    const [{data:pageData},{data:announcementData}]=await Promise.all([
+      supabase.from("website_contents").select("content_type,content_key,title,body,is_published,created_at,updated_at").eq("content_type","page").eq("locale",locale).eq("is_published",true),
+      supabase.from("website_contents").select("content_type,content_key,title,body,is_published,created_at,updated_at").eq("content_type","announcement").in("locale",["all",locale]).eq("is_published",true)
+    ]);
+    cmsRows=[...(pageData??[]),...(announcementData??[])] as typeof cmsRows;
   }
   const page=(key:string)=>cmsRows.find(x=>x.content_type==="page"&&x.content_key===key);
   let inlineValues:Record<string,string>={};

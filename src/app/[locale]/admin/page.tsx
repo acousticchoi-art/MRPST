@@ -105,7 +105,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
     supabase?supabase.from("students").select("id",{count:"exact",head:true}).eq("student_status","graduated"):Promise.resolve({count:null,error:null}),
     supabase?supabase.from("academic_calendar_events").select("id,title,start_date,start_time,event_type,location").gte("start_date",weekStart).lte("start_date",weekEnd).order("start_date",{ascending:true}).limit(5):Promise.resolve({data:[],error:null}),
     supabase?supabase.from("academic_calendar_events").select("id",{count:"exact",head:true}).gte("start_date",weekStart).lte("start_date",weekEnd):Promise.resolve({count:null,error:null}),
-    supabase?supabase.from("website_contents").select("content_key,title,body,is_published,updated_at").eq("content_type","announcement").eq("locale",locale).order("updated_at",{ascending:false}).limit(3):Promise.resolve({data:[],error:null})
+    supabase?supabase.from("website_contents").select("content_key,title,body,is_published,updated_at").eq("content_type","announcement").in("locale",["all",locale]).order("updated_at",{ascending:false}).limit(3):Promise.resolve({data:[],error:null})
   ]);
   const dashboardQueryErrors=[
     activeStudentCount.error&&"재학생 통계",

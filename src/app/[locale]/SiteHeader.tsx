@@ -19,7 +19,7 @@ export default function SiteHeader({ locale, active }: { locale: string; active:
   return (
     <header className="header" data-no-inline-edit>
       <Link href={`/${lang}`} className="brand">
-        <span className="brand-logo"><img src="/mrpst-logo.svg" alt="MRPST official logo" /></span>
+        <span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST official logo" /></span>
         <span>MRPST<small>MYANMAR REFORMED PRESBYTERIAN SCHOOL OF THEOLOGY</small></span>
       </Link>
       <nav className="nav">

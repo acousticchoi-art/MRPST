@@ -33,10 +33,16 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
   const values:Record<string,{title:string;body:string}>={};
   const translations:Record<string,Record<string,{title:string;body:string}>>={};
   for(const field of pageFields){const row=rows.find(x=>x.content_type==="page"&&x.content_key===field.key&&x.locale===locale);values[field.key]={title:row?.title||"",body:row?.body||""};}
-  for(const field of pageFields){translations[field.key]={};for(const language of locales){const row=rows.find(x=>x.content_type==="page"&&x.content_key===field.key&&x.locale===language.value);translations[field.key][language.value]={title:row?.title||"",body:row?.body||""};}}
+  const allPageKeys=Array.from(new Set([...pageFields.map(field=>field.key),...rows.filter(row=>row.content_type==="page").map(row=>row.content_key)]));
+  for(const key of allPageKeys){translations[key]={};for(const language of locales){const row=rows.find(x=>x.content_type==="page"&&x.content_key===key&&x.locale===language.value);translations[key][language.value]={title:row?.title||"",body:row?.body||""};}}
   setPageValues(values);setTranslationValues(translations);
  }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[locale]);
  useEffect(()=>{void load();},[load]);
+ const translationFields=useMemo(()=>{
+  const known=new Map(pageFields.map(field=>[field.key,field]));
+  const keys=Array.from(new Set([...pageFields.map(field=>field.key),...items.filter(item=>item.content_type==="page").map(item=>item.content_key)]));
+  return keys.map(key=>known.get(key)||{key,label:key.replace(/[-_]/g," "),hint:"홈페이지에 등록된 추가 문구"});
+ },[items]);
  async function savePages(){
   if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}
   if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}
@@ -57,7 +63,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
   if(!db)return;setSaving(true);setError("");setNotice("");
   try{
    const {data:{user}}=await db.auth.getUser();
-   const rows=pageFields.flatMap((field,index)=>locales.map(language=>({content_type:"page",content_key:field.key,locale:language.value,title:translationValues[field.key]?.[language.value]?.title||"",body:translationValues[field.key]?.[language.value]?.body||"",is_published:true,sort_order:index,updated_by:user?.id??null})));
+   const rows=translationFields.flatMap((field,index)=>locales.map(language=>({content_type:"page",content_key:field.key,locale:language.value,title:translationValues[field.key]?.[language.value]?.title||"",body:translationValues[field.key]?.[language.value]?.body||"",is_published:true,sort_order:index,updated_by:user?.id??null})));
    const {data:saved,error}=await db.from("website_contents").upsert(rows,{onConflict:"content_type,content_key,locale"}).select("content_key,locale,title,body");
    if(error)throw error;
    if(!saved||saved.length!==rows.length||saved.some(row=>{const expected=rows.find(x=>x.content_key===row.content_key&&x.locale===row.locale);return !expected||row.title!==expected.title||row.body!==expected.body;}))throw new Error("번역 콘텐츠 저장 결과를 확인할 수 없습니다.");
@@ -117,7 +123,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
   </section>}
   {tab==="translation"&&<section className="website-panel website-panel-v2 website-translation-panel">
    <div className="website-section-intro"><div><span className="website-kicker">BILINGUAL PAGE EDITOR</span><h3>한국어·미얀마어 번역 비교</h3><p>같은 홈페이지 항목을 두 언어로 나란히 확인하고 수정합니다. 저장하면 두 언어 페이지에 각각 반영됩니다.</p></div></div>
-   {loading?<div className="website-loading">콘텐츠를 불러오는 중입니다…</div>:<div className="website-translation-list">{pageFields.map((field,index)=><article className="website-translation-item" key={field.key}>
+   {loading?<div className="website-loading">콘텐츠를 불러오는 중입니다…</div>:<div className="website-translation-list">{translationFields.map((field,index)=><article className="website-translation-item" key={field.key}>
     <div className="website-field-title"><span>{String(index+1).padStart(2,"0")}</span><div><h4>{field.label}</h4><p>{field.hint}</p></div></div>
     <div className="website-translation-columns">{locales.map(language=><section key={language.value} className="website-translation-language"><h5>{language.label}</h5>{field.key!=="address"&&<FormField label="제목"><input disabled={!canManage||saving} value={translationValues[field.key]?.[language.value]?.title||""} onChange={e=>setTranslationValues(values=>({...values,[field.key]:{...values[field.key],[language.value]:{...values[field.key]?.[language.value],title:e.target.value}}}))}/></FormField>}<FormField label={field.key==="address"?"주소":"본문 및 소개 문구"}><textarea disabled={!canManage||saving} rows={field.key==="about"?6:4} value={translationValues[field.key]?.[language.value]?.body||""} onChange={e=>setTranslationValues(values=>({...values,[field.key]:{...values[field.key],[language.value]:{...values[field.key]?.[language.value],body:e.target.value}}}))}/></FormField></section>)}</div>
    </article>)}</div>}

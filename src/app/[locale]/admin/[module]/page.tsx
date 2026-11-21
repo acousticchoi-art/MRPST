@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type {ReactNode} from "react";
 import dynamic from "next/dynamic";
 import {notFound,redirect} from "next/navigation";
 import {getServerModuleAccess} from "@/lib/auth/server-access";
@@ -6,6 +7,7 @@ import {MODULES,getModuleKey,canAccessModule} from "@/lib/auth/permissions";
 import AdminActions from "../AdminActions";
 import AdminMenuDetails from "../AdminMenuDetails";
 import InlineAdminEditor from "../InlineAdminEditor";
+import InlinePageEditor from "../../InlinePageEditor";
 const AdminMyanmarTranslator=dynamic(()=>import("../AdminMyanmarTranslator"));
 const FinanceModule=dynamic(()=>import("./FinanceModule"));
 const StudentModule=dynamic(()=>import("./StudentModule"));
@@ -48,7 +50,8 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
   const moduleGroups=[["academic",["students","academics"]],["finance",["finance"]],["operations",["facilities","library","meetings"]],["system",["administration","website"]]] as const;
   const visibleInGroup=(keys:readonly string[])=>visible.filter(([moduleKey])=>keys.includes(moduleKey));
   const moduleNames:Record<string,string>={finance:t.finance,students:t.students,academics:t.academics,facilities:t.facilities,library:t.library,meetings:t.meetings,administration:t.administration,website:t.website};
-  return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>}<InlineAdminEditor locale={locale}><div className="admin">
+  const adminShell=(content:ReactNode)=>locale==="my"?<InlineAdminEditor locale={locale}>{content}</InlineAdminEditor>:<InlinePageEditor pageKey={`admin-${module}`} locale={locale}>{content}</InlinePageEditor>;
+  return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>} {adminShell(<div className="admin">
     <aside className="sidebar">
       <Link href={`/${locale}/admin`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
       <AdminMenuDetails>
@@ -76,5 +79,5 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
         {key==="finance"?<FinanceModule/>:key==="students"?<StudentModule/>:key==="library"?<LibraryModule canManage={access.canManage}/>:key==="facilities"?<FacilitiesModule canManage={access.canManage}/>:key==="meetings"?<MeetingsModule canManage={access.canManage}/>:key==="academics"?<AcademicsModule/>:key==="administration"?<AdministrationModule/>:key==="website"?<WebsiteModule canManage={access.canManage}/>:<><h1 className="admin-heading">{moduleNames[key]??item.title}</h1><p className="admin-subtitle">{item.description}</p><div className="module-placeholder"><strong>Module foundation</strong><p>This area is reserved for the {item.title.toLowerCase()} workflow. Data entry, approval steps, reporting and department-level database policies will be added in the next implementation phase.</p><span>Not connected to live records</span></div></>}
           </div>
     </main>
-  </div></InlineAdminEditor></>;
+  </div>)}</>;
 }

@@ -2,6 +2,7 @@
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 import {AdminFormActions,FormField} from "./AdminUI";
+import GraduateBulkImport from "./GraduateBulkImport";
 
 type Student={id:string;auth_user_id:string|null;program_code:string|null;current_semester:number|null;student_number:string;full_name:string;full_name_my:string|null;full_name_en:string|null;gender:string|null;date_of_birth:string|null;admission_year:number|null;program:string|null;cohort:string|null;student_status:string;phone:string|null;email:string|null;guardian_name:string|null;guardian_phone:string|null;notes:string|null;graduation_year:number|null;graduation_term:number|null;graduation_date:string|null;graduation_number:string|null};
 type StatusHistory={id:string;student_id:string;previous_status:string|null;new_status:string;effective_date:string;reason:string|null;created_at:string};
@@ -96,6 +97,7 @@ const archiveStudent=async()=>changeStudentStatus("withdrawn");
  const input=(label:string,key:string,type="text")=><FormField label={label}><input type={type} value={profile[key]??""} disabled={!canManage||!academicMutationsEnabled||saving} onChange={e=>setP(key,e.target.value)}/></FormField>;
  return <div className="student-workspace">
   <header className="student-page-head"><div><span className="eyebrow">STUDENT INFORMATION SYSTEM</span><h2>학생 관리</h2><p>학생 정보와 학업 이력을 한곳에서 빠르게 확인하고 관리합니다.</p></div><button className="student-primary" disabled={!academicMutationsEnabled||!canManage} onClick={newProfile}>＋ 학생 등록</button></header>
+  <GraduateBulkImport canManage={canManage} enabled={academicMutationsEnabled} onDone={load}/>
   <section className="student-overview student-overview-academic" aria-label="학생 현황"><article><span>재학생</span><strong>{currentStudents.length}</strong><small>현재 재학 상태</small></article><article><span>졸업생</span><strong>{graduatedStudentCount}</strong><small>졸업 확정 기록 포함</small></article><article><span>전체 학생</span><strong>{students.length}</strong><small>재학 상태 {activeStudents}명</small></article></section>
   {error&&<div className="student-alert error">{error}</div>}{notice&&<div className="student-alert success">{notice}</div>}{!supabase&&<div className="student-alert">Supabase 환경변수를 설정하면 실제 학생 데이터를 사용할 수 있습니다.</div>}
   <div className="student-layout student-layout-roster">

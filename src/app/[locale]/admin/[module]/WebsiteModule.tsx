@@ -32,11 +32,9 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
  const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [items,setItems]=useState<Entry[]>([]);
- const [locale,setLocale]=useState("ko");
- const [tab,setTab]=useState<"pages"|"translation"|"notices"|"admin">("pages");
+ const [tab,setTab]=useState<"translation"|"notices"|"admin">("notices");
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false);
  const [error,setError]=useState(""),[notice,setNotice]=useState("");
- const [pageValues,setPageValues]=useState<Record<string,{title:string;body:string}>>({});
  const [translationValues,setTranslationValues]=useState<Record<string,Record<string,{title:string;body:string}>>>({});
  const [editingId,setEditingId]=useState("");
  const [noticeTitle,setNoticeTitle]=useState(""),[noticeBody,setNoticeBody]=useState(""),[noticeLocale,setNoticeLocale]=useState("ko"),[noticePublished,setNoticePublished]=useState(true);
@@ -50,33 +48,17 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
   const rows=(data.items?.data||[]) as Entry[];setItems(rows);
   const adminRow=rows.find(row=>row.content_type==="page"&&row.content_key==="admin-translations"&&row.locale==="my");
   try{setAdminTranslations(adminRow?.body?JSON.parse(adminRow.body):{});}catch{setAdminTranslations({});}
-  const values:Record<string,{title:string;body:string}>={};
   const translations:Record<string,Record<string,{title:string;body:string}>>={};
-  for(const field of pageFields){const row=rows.find(x=>x.content_type==="page"&&x.content_key===field.key&&x.locale===locale);values[field.key]={title:row?.title||"",body:row?.body||""};}
   const allPageKeys=Array.from(new Set([...pageFields.map(field=>field.key),...rows.filter(row=>row.content_type==="page").map(row=>row.content_key)]));
   for(const key of allPageKeys){translations[key]={};for(const language of locales){const row=rows.find(x=>x.content_type==="page"&&x.content_key===key&&x.locale===language.value);translations[key][language.value]={title:row?.title||"",body:row?.body||""};}}
-  setPageValues(values);setTranslationValues(translations);
- }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[locale]);
+  setTranslationValues(translations);
+ }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[]);
  useEffect(()=>{void load();},[load]);
  const translationFields=useMemo(()=>{
   const known=new Map<string,{key:string;label:string;hint:string}>(pageFields.map(field=>[field.key,{...field}]));
   const keys=Array.from(new Set([...pageFields.map(field=>field.key),...items.filter(item=>item.content_type==="page"&&item.content_key!=="admin-translations"&&!item.content_key.startsWith("inline-page-")).map(item=>item.content_key)]));
   return keys.map(key=>known.get(key)||{key,label:key.replace(/[-_]/g," "),hint:"홈페이지에 등록된 추가 문구"});
  },[items]);
- async function savePages(){
-  if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}
-  if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}
-  if(!db)return;setSaving(true);setError("");setNotice("");
-  try{
-   const {data:{user}}=await db.auth.getUser();
-   const rows=pageFields.map((field,index)=>({content_type:"page",content_key:field.key,locale,title:pageValues[field.key]?.title||"",body:pageValues[field.key]?.body||"",is_published:true,sort_order:index,updated_by:user?.id??null}));
-   const {data:saved,error}=await db.from("website_contents").upsert(rows,{onConflict:"content_type,content_key,locale"}).select("content_key,locale,title,body,is_published");
-   if(error)throw error;
-   if(!saved||saved.length!==rows.length||saved.some(row=>{const expected=rows.find(x=>x.content_key===row.content_key&&x.locale===row.locale);return !expected||row.title!==expected.title||row.body!==expected.body||row.is_published!==true;}))throw new Error("일부 홈페이지 콘텐츠 저장 결과를 확인할 수 없습니다.");
-   setNotice("페이지 콘텐츠 저장 및 게시 결과를 확인했습니다.");await load();
-  }catch(e:any){setError(e?.message||"저장하지 못했습니다.");}
-  finally{setSaving(false);}
- }
  async function saveTranslations(){
   if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}
   if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}
@@ -131,8 +113,8 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
  const notices=items.filter(x=>x.content_type==="announcement").sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
  return <div className="website-workspace website-workspace-v2">{!canManage&&<div className="website-alert">읽기 전용 권한입니다. 홈페이지 콘텐츠와 공지사항을 조회할 수 있습니다.</div>}
   <div className="website-heading website-heading-v2">
-   <div><span className="eyebrow">PUBLIC WEBSITE CMS</span><h2>홈페이지 관리</h2><p>홈페이지에 공개되는 학교 소개와 공지사항을 한곳에서 관리합니다.</p></div>
-   <a className="website-preview-link" href={`/${locale}`} target="_blank" rel="noreferrer">홈페이지 미리보기 ↗</a>
+   <div><span className="eyebrow">PUBLIC WEBSITE CMS</span><h2>홈페이지 관리</h2><p>공지사항을 먼저 관리하고, 필요한 경우 아래에서 두 언어의 홈페이지 문구를 함께 수정합니다.</p></div>
+   <a className="website-preview-link" href="/ko" target="_blank" rel="noreferrer">홈페이지 미리보기 ↗</a>
   </div>
   <div className="website-overview">
    <article><span>페이지 콘텐츠</span><strong>{pageFields.length}</strong><small>관리 항목</small></article>
@@ -140,28 +122,16 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
    <article><span>게시 중</span><strong>{notices.filter(x=>x.is_published).length}</strong><small>홈페이지 공개</small></article>
    <article><span>비공개</span><strong>{notices.filter(x=>!x.is_published).length}</strong><small>임시 보관</small></article>
   </div>
-  <div className="website-workflow"><article><b>1</b><div><strong>언어 선택</strong><span>수정할 홈페이지 언어를 고릅니다.</span></div></article><article><b>2</b><div><strong>내용 저장</strong><span>문구 또는 공지사항을 작성해 저장합니다.</span></div></article><article><b>3</b><div><strong>홈페이지 확인</strong><span>미리보기에서 실제 공개 화면을 확인합니다.</span></div></article></div>
+  <div className="website-workflow"><article><b>1</b><div><strong>공지 작성</strong><span>먼저 공지사항을 등록하거나 게시 상태를 바꿉니다.</span></div></article><article><b>2</b><div><strong>문구 관리</strong><span>한국어와 미얀마어 문구를 한 화면에서 수정합니다.</span></div></article><article><b>3</b><div><strong>홈페이지 확인</strong><span>미리보기에서 실제 공개 화면을 확인합니다.</span></div></article></div>
   {error&&<div className="website-alert error" role="alert">{error}</div>}
   {notice&&<div className="website-alert success" role="status">{notice}</div>}
   <nav className="website-tabs website-tabs-v2" aria-label="홈페이지 콘텐츠 종류">
-   <button className={tab==="pages"?"active":""} onClick={()=>setTab("pages")}><span>01</span> 페이지 콘텐츠</button>
-   <button className={tab==="translation"?"active":""} onClick={()=>setTab("translation")}><span>02</span> 번역 비교·수정</button>
-   <button className={tab==="notices"?"active":""} onClick={()=>setTab("notices")}><span>03</span> 공지사항 <b>{notices.length}</b></button>
-   <button className={tab==="admin"?"active":""} onClick={()=>setTab("admin")}><span>04</span> 관리자 화면 번역</button>
+   <button className={tab==="notices"?"active":""} onClick={()=>setTab("notices")}><span>01</span> 공지사항 <b>{notices.length}</b></button>
+   <button className={tab==="translation"?"active":""} onClick={()=>setTab("translation")}><span>02</span> 홈페이지 문구</button>
+   <button className={tab==="admin"?"active":""} onClick={()=>setTab("admin")}><span>03</span> 관리자 화면 번역</button>
   </nav>
-  {tab==="pages"&&<section className="website-panel website-panel-v2">
-   <div className="website-section-intro"><div><span className="website-kicker">PAGE EDITOR</span><h3>홈페이지 문구 편집</h3><p>언어를 고르고 문구를 수정한 뒤 저장하세요. 마지막으로 위 미리보기에서 공개 화면을 확인합니다.</p></div>
-    <FormField label="편집 언어" className="website-language-select"><select value={locale} onChange={e=>setLocale(e.target.value)} disabled={!canManage||saving}>{locales.map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select></FormField>
-   </div>
-   {loading?<div className="website-loading">콘텐츠를 불러오는 중입니다…</div>:<div className="website-fields website-fields-v2">{pageFields.map((field,index)=><article className="website-field website-field-v2" key={field.key}>
-    <div className="website-field-title"><span>{String(index+1).padStart(2,"0")}</span><div><h4>{field.label}</h4><p>{field.hint}</p></div></div>
-    <div className="website-field-inputs">{field.key!=="address"&&<FormField label="제목"><input disabled={!canManage||saving} value={pageValues[field.key]?.title||""} onChange={e=>setPageValues(v=>({...v,[field.key]:{...v[field.key],title:e.target.value}}))} placeholder={field.label+" 제목"}/></FormField>}
-     <FormField label={field.key==="address"?"주소":"본문 및 소개 문구"}><textarea disabled={!canManage||saving} rows={field.key==="about"?5:3} value={pageValues[field.key]?.body||""} onChange={e=>setPageValues(v=>({...v,[field.key]:{...v[field.key],body:e.target.value}}))} placeholder="홈페이지에 표시할 내용을 입력하세요."/></FormField></div>
-   </article>)}</div>}
-   <div className="website-footer-actions"><span>변경한 내용은 저장 후 홈페이지에 게시됩니다.</span><button className="website-primary" disabled={!canManage||saving||loading} onClick={()=>void savePages()}>{saving?"저장 중…":"변경 내용 저장 및 게시"}</button></div>
-  </section>}
   {tab==="translation"&&<section className="website-panel website-panel-v2 website-translation-panel">
-   <div className="website-section-intro"><div><span className="website-kicker">BILINGUAL PAGE EDITOR</span><h3>한국어·미얀마어 번역 비교</h3><p>같은 홈페이지 항목을 두 언어로 나란히 확인하고 수정합니다. 저장하면 두 언어 페이지에 각각 반영됩니다.</p></div></div>
+   <div className="website-section-intro"><div><span className="website-kicker">BILINGUAL PAGE EDITOR</span><h3>홈페이지 문구</h3><p>한국어와 미얀마어를 한 화면에서 확인하고 수정합니다. 저장하면 두 언어 페이지에 각각 반영됩니다.</p></div></div>
    {loading?<div className="website-loading">콘텐츠를 불러오는 중입니다…</div>:<div className="website-translation-list">{translationFields.map((field,index)=><article className="website-translation-item" key={field.key}>
     <div className="website-field-title"><span>{String(index+1).padStart(2,"0")}</span><div><h4>{field.label}</h4><p>{field.hint}</p></div></div>
     <div className="website-translation-columns">{locales.map(language=><section key={language.value} className="website-translation-language"><h5>{language.label}</h5>{field.key!=="address"&&<FormField label="제목"><input disabled={!canManage||saving} value={translationValues[field.key]?.[language.value]?.title||""} onChange={e=>setTranslationValues(values=>({...values,[field.key]:{...values[field.key],[language.value]:{...values[field.key]?.[language.value],title:e.target.value}}}))}/></FormField>}<FormField label={field.key==="address"?"주소":"본문 및 소개 문구"}><textarea disabled={!canManage||saving} rows={field.key==="about"?6:4} value={translationValues[field.key]?.[language.value]?.body||""} onChange={e=>setTranslationValues(values=>({...values,[field.key]:{...values[field.key],[language.value]:{...values[field.key]?.[language.value],body:e.target.value}}}))}/></FormField></section>)}</div>

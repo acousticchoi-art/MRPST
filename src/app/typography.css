@@ -123,3 +123,7 @@
   letter-spacing:0;
   line-height:1.85;
 }
+
+/* Preserve intentional paragraph breaks from inline website editing. */
+.inline-editable-text{white-space:pre-wrap!important}
+.inline-text-multiline:not(.inline-editable-text){white-space:pre-line}

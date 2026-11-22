@@ -127,3 +127,23 @@
 /* Preserve intentional paragraph breaks from inline website editing. */
 .inline-editable-text{white-space:pre-wrap!important}
 .inline-text-multiline:not(.inline-editable-text){white-space:pre-line}
+
+/* Website management: explicit high-contrast text on light CMS surfaces. */
+.admin .website-workspace{color:#263f50}
+.admin .website-workspace :is(.website-heading,.website-section-intro,.website-field-title,.website-notice-item,.website-overview article,.website-workflow article){color:#263f50}
+.admin .website-workspace :is(.website-heading h2,.website-section-intro h3,.website-field-title h4,.website-notice-item h4,.website-overview strong,.website-empty strong){color:#173e59}
+.admin .website-workspace :is(.website-heading p,.website-section-intro p,.website-field-title p,.website-notice-item p,.website-overview span,.website-overview small,.website-workflow span,.website-notice-audience,.website-loading,.website-footer-actions span){color:#526875}
+.admin .website-workspace :is(.website-form label,.website-translation-language label,.website-field-inputs label,.website-translation-language h5){color:#324c60}
+.admin .website-workspace :is(input:not([type="checkbox"]),textarea,select){
+  color:#203b4d!important;
+  background-color:#fff!important;
+  -webkit-text-fill-color:#203b4d;
+  opacity:1;
+}
+.admin .website-workspace :is(input,textarea)::placeholder{color:#71818d!important;opacity:1}
+.admin .website-workspace :is(input:disabled,textarea:disabled,select:disabled){background-color:#f5f7f9!important;color:#526875!important;-webkit-text-fill-color:#526875}
+.admin .website-workspace .website-tabs-v2 button{color:#425b6c}
+.admin .website-workspace .website-tabs-v2 button.active{color:#173e59;background:#edf3f6}
+.admin .website-workspace .website-tabs-v2 button span{color:#617784}
+.admin .website-workspace .website-preview-link{color:#173e59}
+.admin .website-workspace .website-notice-actions button:not(.danger){color:#173e59}

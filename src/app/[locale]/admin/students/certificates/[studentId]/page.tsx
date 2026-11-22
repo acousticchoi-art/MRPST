@@ -7,18 +7,20 @@ import CertificatePrintButton from "./CertificatePrintButton";
 export const dynamic="force-dynamic";
 export const revalidate=0;
 
-type Kind="enrollment"|"graduation"|"record";
+type Kind="enrollment"|"graduation"|"record"|"transcript";
+type CourseRow={courseCode:string;courseName:string;credits:number|null;score:number|null;grade:string|null;status:string};
+type TermGroup={id:string;year:number|null;name:string;code:string;courses:CourseRow[]};
 const statusKo:Record<string,string>={active:"재학",leave:"휴학",graduated:"졸업",withdrawn:"자퇴"};
 const statusMy:Record<string,string>={active:"တက်ရောက်ဆဲ",leave:"ခွင့်ယူထား",graduated:"ဘွဲ့ရ",withdrawn:"ကျောင်းထွက်"};
 const typeTitle={
-  ko:{enrollment:"재학증명서",graduation:"졸업증명서",record:"학적확인서"},
-  my:{enrollment:"ကျောင်းတက်ရောက်ကြောင်း ထောက်ခံစာ",graduation:"ဘွဲ့ရကြောင်း ထောက်ခံစာ",record:"ကျောင်းသားမှတ်တမ်း အတည်ပြုစာ"}
+  ko:{enrollment:"재학증명서",graduation:"졸업증명서",record:"학적확인서",transcript:"성적증명서"},
+  my:{enrollment:"ကျောင်းတက်ရောက်ကြောင်း ထောက်ခံစာ",graduation:"ဘွဲ့ရကြောင်း ထောက်ခံစာ",record:"ကျောင်းသားမှတ်တမ်း အတည်ပြုစာ",transcript:"အမှတ်စာရင်းထောက်ခံစာ"}
 };
 export default async function CertificatePage({params,searchParams}:{params:Promise<{locale:string;studentId:string}>;searchParams:Promise<{type?:string}>}){
  const {locale,studentId}=await params;
  const lang=locale==="my"?"my":"ko";
  const query=await searchParams;
- const kind:Kind=query.type==="graduation"?"graduation":query.type==="record"?"record":"enrollment";
+ const kind:Kind=query.type==="graduation"?"graduation":query.type==="record"?"record":query.type==="transcript"?"transcript":"enrollment";
  const access=await getServerModuleAccess("students");
  if(!access.ok){if(access.status===401)redirect(`/${locale}/login`);return <main className="student-cert-error">{access.error}</main>;}
  if(!/^[0-9a-f-]{36}$/i.test(studentId))notFound();
@@ -26,20 +28,65 @@ export default async function CertificatePage({params,searchParams}:{params:Prom
  if(error||!student)notFound();
  const {data:graduation}=await access.supabase.from("student_graduations").select("degree_name,graduation_year,graduation_date,graduation_number,approved_at").eq("student_id",studentId).not("approved_at","is",null).order("approved_at",{ascending:false}).limit(1).maybeSingle();
  const approvedGraduation=student.student_status==="graduated"&&!!graduation;
- const valid=kind==="record"||(kind==="enrollment"&&student.student_status==="active")||(kind==="graduation"&&approvedGraduation);
+ const valid=kind==="record"||kind==="transcript"||(kind==="enrollment"&&student.student_status==="active")||(kind==="graduation"&&approvedGraduation);
  const t=lang==="ko"?{
   label:"STUDENT CERTIFICATES",page:"학생 증명서 출력",back:"학생 관리로 돌아가기",print:"인쇄 / PDF 저장",
   name:"성명",number:"학번",program:"과정",cohort:"학년 / 기수",admission:"입학 연도",status:"학적 상태",
   degree:"학위",graduation:"졸업일",date:"출력일",unknown:"미등록",reason:"현재 학적 상태 또는 승인된 졸업 이력으로는 이 종류의 증명서를 출력할 수 없습니다.",
-  body:{enrollment:"위 학생이 본 신학교에 재학 중임을 등록된 학적 자료에 따라 확인합니다.",graduation:"위 학생이 본 신학교의 해당 과정을 졸업하였음을 승인된 졸업 기록에 따라 확인합니다.",record:"위 학생의 학적 정보가 본 신학교의 전산 기록에 등록되어 있음을 확인합니다."},
+  body:{enrollment:"위 학생이 본 신학교에 재학 중임을 등록된 학적 자료에 따라 확인합니다.",graduation:"위 학생이 본 신학교의 해당 과정을 졸업하였음을 승인된 졸업 기록에 따라 확인합니다.",record:"위 학생의 학적 정보가 본 신학교의 전산 기록에 등록되어 있음을 확인합니다.",transcript:"아래의 학기별 성적은 본 신학교에 등록된 학사 기록을 기준으로 작성되었습니다."},
   warning:"이 문서는 관리자 시스템에서 생성한 확인용 출력본입니다. 별도의 직인이나 서명이 필요한 공식 제출용 서류는 학교의 확인을 받아야 합니다."
  }:{
   label:"STUDENT CERTIFICATES",page:"ကျောင်းသားထောက်ခံစာ ထုတ်ယူရန်",back:"ကျောင်းသားစာရင်းသို့ ပြန်သွားရန်",print:"ပုံနှိပ်ရန် / PDF သိမ်းရန်",
   name:"အမည်",number:"ကျောင်းသားနံပါတ်",program:"ပညာရေးအစီအစဉ်",cohort:"အတန်း / အုပ်စု",admission:"ဝင်ခွင့်နှစ်",status:"ကျောင်းသားအခြေအနေ",
   degree:"ဘွဲ့",graduation:"ဘွဲ့ရသည့်နေ့",date:"ထုတ်ယူသည့်နေ့",unknown:"မှတ်တမ်းမရှိ",reason:"လက်ရှိကျောင်းသားအခြေအနေ သို့မဟုတ် အတည်ပြုထားသည့် ဘွဲ့ရမှတ်တမ်းအရ ဤထောက်ခံစာကို ထုတ်ယူ၍မရပါ။",
-  body:{enrollment:"ဤကျောင်းသားသည် ကျောင်း၏မှတ်တမ်းများအရ လက်ရှိတက်ရောက်နေကြောင်း အတည်ပြုပါသည်။",graduation:"ဤကျောင်းသားသည် အတည်ပြုထားသည့် ဘွဲ့ရမှတ်တမ်းအရ သက်ဆိုင်ရာသင်တန်းကို ပြီးမြောက်ကြောင်း အတည်ပြုပါသည်။",record:"ဤကျောင်းသား၏ အချက်အလက်များကို ကျောင်း၏မှတ်တမ်းတွင် မှတ်ပုံတင်ထားကြောင်း အတည်ပြုပါသည်။"},
+  body:{enrollment:"ဤကျောင်းသားသည် ကျောင်း၏မှတ်တမ်းများအရ လက်ရှိတက်ရောက်နေကြောင်း အတည်ပြုပါသည်။",graduation:"ဤကျောင်းသားသည် အတည်ပြုထားသည့် ဘွဲ့ရမှတ်တမ်းအရ သက်ဆိုင်ရာသင်တန်းကို ပြီးမြောက်ကြောင်း အတည်ပြုပါသည်။",record:"ဤကျောင်းသား၏ အချက်အလက်များကို ကျောင်း၏မှတ်တမ်းတွင် မှတ်ပုံတင်ထားကြောင်း အတည်ပြုပါသည်။",transcript:"အောက်ပါစာရင်းသည် ကျောင်း၏ တရားဝင်မှတ်တမ်းတွင် မှတ်တမ်းတင်ထားသော စာသင်နှစ်အလိုက် ရမှတ်များဖြစ်ပါသည်။"},
   warning:"ဤစာရွက်စာတမ်းသည် စီမံခန့်ခွဲရေးစနစ်မှ ထုတ်ယူထားသည့် စစ်ဆေးရန်မိတ္တူဖြစ်သည်။ တရားဝင်တံဆိပ်နှင့် လက်မှတ်လိုအပ်ပါက ကျောင်း၏အတည်ပြုချက်ကို ရယူပါ။"
  };
+ const transcriptText=lang==="ko"?{
+  course:"과목명",code:"과목코드",credit:"학점",score:"점수",grade:"등급",status:"수강 상태",empty:"등록된 수강·성적 내역이 없습니다.",
+  pending:"미입력",notSet:"미지정",withdrawn:"수강 취소",complete:"이수",enrolled:"수강 중",subtotal:"학기 수강 학점 합계",
+  termUnknown:"학기 미지정",note:"학점 합계는 수강 기록에 등록된 학점의 합계이며, 취득 학점이나 GPA를 의미하지 않습니다.",
+  failed:"수강 또는 성적 데이터를 불러오지 못했습니다."
+ }:{
+  course:"ဘာသာရပ်",code:"ဘာသာရပ်ကုဒ်",credit:"ခရက်ဒစ်",score:"ရမှတ်",grade:"အဆင့်",status:"တက်ရောက်မှု",empty:"ဘာသာရပ်နှင့် အမှတ်မှတ်တမ်းများ မရှိသေးပါ။",
+  pending:"မဖြည့်ရသေး",notSet:"မသတ်မှတ်ရသေး",withdrawn:"ရပ်ဆိုင်း",complete:"ပြီးဆုံး",enrolled:"တက်ရောက်ဆဲ",subtotal:"ဤစာသင်ကာလ၏ စာရင်းသွင်းခရက်ဒစ်",
+  termUnknown:"စာသင်ကာလ မသတ်မှတ်ရသေး",note:"ခရက်ဒစ်စုစုပေါင်းသည် စာရင်းသွင်းထားသော ခရက်ဒစ်များဖြစ်ပြီး GPA သို့မဟုတ် အောင်မြင်ရရှိသော ခရက်ဒစ်များကို မဆိုလိုပါ။",
+  failed:"ဘာသာရပ် သို့မဟုတ် အမှတ်မှတ်တမ်းကို ရယူ၍မရပါ။"
+ };
+ let termGroups:TermGroup[]=[];
+ let transcriptError="";
+ if(kind==="transcript"){
+   const [enrollments,grades]=await Promise.all([
+     access.supabase.from("academic_enrollments")
+       .select("id,course_id,term_id,enrollment_status,academic_courses(course_code,title,title_my,credits),academic_terms(academic_year,name,term_code)")
+       .eq("student_id",studentId).order("created_at",{ascending:true}),
+     access.supabase.from("academic_grades").select("course_id,term_id,score,grade,updated_at").eq("student_id",studentId).order("updated_at",{ascending:false})
+   ]);
+   if(enrollments.error||grades.error){
+     transcriptError=transcriptText.failed;
+   }else{
+     const gradeMap=new Map<string,{score:number|null;grade:string|null}>();
+     for(const row of grades.data??[]){
+       const key=`${row.term_id}|${row.course_id}`;
+       if(!gradeMap.has(key))gradeMap.set(key,{score:row.score===null?null:Number(row.score),grade:row.grade??null});
+     }
+     const termMap=new Map<string,TermGroup>();
+     for(const enrollment of enrollments.data??[]){
+       const course=Array.isArray(enrollment.academic_courses)?enrollment.academic_courses[0]:enrollment.academic_courses;
+       const term=Array.isArray(enrollment.academic_terms)?enrollment.academic_terms[0]:enrollment.academic_terms;
+       const termId=enrollment.term_id||"unknown";
+       if(!termMap.has(termId))termMap.set(termId,{id:termId,year:term?.academic_year??null,name:term?.name||transcriptText.termUnknown,code:term?.term_code||"",courses:[]});
+       const result=gradeMap.get(`${enrollment.term_id}|${enrollment.course_id}`);
+       termMap.get(termId)!.courses.push({
+         courseCode:course?.course_code??transcriptText.notSet,
+         courseName:(lang==="my"?(course?.title_my||course?.title):course?.title)||transcriptText.notSet,
+         credits:course?.credits===null||course?.credits===undefined?null:Number(course.credits),
+         score:result?.score??null,grade:result?.grade??null,status:enrollment.enrollment_status??""
+       });
+     }
+     termGroups=[...termMap.values()].sort((a,b)=>(a.year??0)-(b.year??0)||a.code.localeCompare(b.code)||a.name.localeCompare(b.name));
+   }
+ }
  const title=typeTitle[lang][kind];
  const date=new Intl.DateTimeFormat(lang==="my"?"en-GB":"ko-KR",{timeZone:"Asia/Yangon",year:"numeric",month:"long",day:"numeric"}).format(new Date());
  const graduateDate=graduation?.graduation_date??student.graduation_date;
@@ -51,12 +98,23 @@ export default async function CertificatePage({params,searchParams}:{params:Prom
   ...(kind==="graduation"?[[t.degree,graduation?.degree_name||student.program||t.unknown],[t.graduation,graduateDate||t.unknown]]:[])
  ];
  return <main className="student-cert-page">
-   <div className="student-cert-toolbar"><Link href={`/${locale}/admin/students`}>{t.back}</Link><strong>{t.page}</strong><div className="student-cert-links">{(["enrollment","graduation","record"] as Kind[]).map(type=><Link key={type} className={type===kind?"active":""} href={`/${locale}/admin/students/certificates/${studentId}?type=${type}`}>{typeTitle[lang][type]}</Link>)}</div>{valid&&<CertificatePrintButton label={t.print}/>}</div>
+   <div className="student-cert-toolbar"><Link href={`/${locale}/admin/students`}>{t.back}</Link><strong>{t.page}</strong><div className="student-cert-links">{(["enrollment","graduation","record","transcript"] as Kind[]).map(type=><Link key={type} className={type===kind?"active":""} href={`/${locale}/admin/students/certificates/${studentId}?type=${type}`}>{typeTitle[lang][type]}</Link>)}</div>{valid&&<CertificatePrintButton label={t.print}/>}</div>
    {valid?<article className="student-cert-sheet">
     <header><img src="/mrpst-logo.png" alt="" width="72" height="72"/><div><span>MRPST</span><strong>Myanmar Reformed Presbyterian School of Theology</strong></div></header>
     <p className="student-cert-kicker">STUDENT CERTIFICATE</p><h1>{title}</h1>
     <dl>{fields.map(([label,value],index)=><div key={index}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
-    <p className="student-cert-statement">{t.body[kind]}</p>
+    {kind==="transcript"?<div className="student-transcript">
+       {transcriptError?<p className="student-transcript-error" role="alert">{transcriptError}</p>:
+        termGroups.length===0?<p className="student-transcript-empty">{transcriptText.empty}</p>:
+        termGroups.map(group=><section className="student-transcript-term" key={group.id}>
+          <h2>{group.year??"—"} · {group.name}</h2>
+          <table><thead><tr><th>{transcriptText.code}</th><th>{transcriptText.course}</th><th>{transcriptText.credit}</th><th>{transcriptText.score}</th><th>{transcriptText.grade}</th><th>{transcriptText.status}</th></tr></thead>
+          <tbody>{group.courses.map((course,i)=><tr key={i}><td>{course.courseCode}</td><td>{course.courseName}</td><td>{course.credits??"—"}</td><td>{course.score??transcriptText.pending}</td><td>{course.grade??transcriptText.pending}</td><td>{course.status==="withdrawn"?transcriptText.withdrawn:course.status==="completed"?transcriptText.complete:course.status==="enrolled"?transcriptText.enrolled:(course.status||transcriptText.notSet)}</td></tr>)}</tbody>
+          </table>
+          <p className="student-transcript-total">{transcriptText.subtotal}: {group.courses.filter(c=>c.status!=="withdrawn"&&c.credits!==null).reduce((sum,c)=>sum+(c.credits??0),0).toLocaleString("en-US",{maximumFractionDigits:2})}</p>
+        </section>)}
+       <p className="student-transcript-note">{transcriptText.note}</p>
+     </div>:<p className="student-cert-statement">{t.body[kind]}</p>}
     <p className="student-cert-date">{t.date}: {date}</p>
     <footer><strong>Myanmar Reformed Presbyterian School of Theology</strong><p>{t.warning}</p></footer>
    </article>:<section className="student-cert-unavailable">{t.reason}</section>}

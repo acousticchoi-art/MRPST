@@ -5,6 +5,8 @@ import {useCallback,useEffect,useMemo,useState} from "react";
 import {AdminFormActions,FormField,SearchSelect} from "./AdminUI";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 import GradeManagementModule from "./GradeManagementModule";
+import dynamic from "next/dynamic";
+const SemesterProgressionPanel=dynamic(()=>import("./SemesterProgressionPanel"));
 import TimetableBuilder from "./TimetableBuilder";
 import ScheduleCalendar from "./ScheduleCalendar";
 type Row={id:string;[key:string]:any};
@@ -64,7 +66,7 @@ export default function AcademicsModule(){
   {key:"overview",label:"시작하기",tabs:[["overview","업무 순서"]]},
   {key:"foundation",label:"1. 학기·과목",tabs:[["terms","학기 관리"],["courses","과목 관리"]]},
   {key:"teaching",label:"2. 수업 준비",tabs:[["instructors","교수 등록"],["assignments","수업 담당"],["schedule","수업 시간표"],["syllabi","강의계획서"]]},
- {key:"students",label:"3. 수업 반영·성적",tabs:[["enrolments","고정 수업 반영"],["grades","성적 관리"]]},
+ {key:"students",label:"3. 수업 반영·성적",tabs:[["enrolments","고정 수업 반영"],["grades","성적 관리"],["progression","학기 이수·진급"]]},
   {key:"calendar",label:"4. 일정",tabs:[["calendar","학사 일정"]]}
  ];
  const activeSection=sections.find(section=>section.tabs.some(([key])=>key===tab))||sections[0];
@@ -73,7 +75,7 @@ export default function AcademicsModule(){
  {error&&<div className="academics-alert error">{error}</div>}{notice&&<div className="academics-alert">{notice}</div>}{!db&&<div className="academics-alert">Supabase를 연결하면 실제 학사 데이터를 관리할 수 있습니다.</div>}
  <div className="academics-tabs" aria-label="학사 업무 단계">{sections.map(section=><button key={section.key} className={activeSection.key===section.key?"active":""} onClick={()=>{setTab(section.tabs[0][0]);setSearch("");}}>{section.label}</button>)}</div>
  {activeSection.tabs.length>1&&<div className="academics-tabs academics-subtabs" aria-label={activeSection.label+" 하위 메뉴"}>{activeSection.tabs.map(([key,label])=><button key={key} className={tab===key?"active":""} onClick={()=>{setTab(key);setSearch("");}}>{label}</button>)}</div>}
- {tab==="calendar"&&<ScheduleCalendar canManage={canManage}/>}
+ {tab==="calendar"&&<ScheduleCalendar canManage={canManage}/>}\n {tab==="progression"&&<SemesterProgressionPanel canManage={canManage}/>}
  {!mutationsEnabled&&<div className="academics-alert">학사 데이터 변경 기능은 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다. 현재는 조회만 가능합니다.</div>}
  {tab==="overview"&&<div className="academics-overview"><section className="academics-panel academics-workflow"><div><h3>학사 업무 순서</h3><p>아래 순서대로 진행하면 수업 개설부터 성적 확정까지 관리할 수 있습니다.</p></div><div className="academics-workflow-steps">{workflowSteps.map(item=><button key={item.tab} onClick={()=>{setTab(item.tab);setSearch("");}}><b>{item.step}</b><span><strong>{item.title}</strong><small>{item.description}</small></span><i>→</i></button>)}</div></section><section className="academics-panel"><h3>현재 준비 상태</h3><div className="academics-row"><div><strong>선택 학기 수강 등록</strong><small>{termName(selectedTerm)} · 등록 기준</small></div><span>{termEnrol.length}명/건</span></div><div className="academics-row"><div><strong>교수 배정 미완료 과목</strong><small>활성 과목 중 선택 학기 배정 여부</small></div><span>{courses.filter(x=>x.is_active&&!teachingAssignments.some(a=>a.term_id===selectedTerm&&a.course_id===x.id)).length}개</span></div><div className="academics-row"><div><strong>강의계획서 미등록</strong><small>선택 학기 배정 과목 기준</small></div><span>{missingSyllabusCourseCount}개</span></div><div className="academics-row"><div><strong>성적 미입력 수강 건</strong><small>실제 수강 등록과 성적 기록 비교</small></div><span>{termEnrol.filter(e=>["enrolled","completed"].includes(e.enrollment_status)&&!grades.some(g=>g.term_id===selectedTerm&&g.student_id===e.student_id&&g.course_id===e.course_id&&g.score!==null&&g.score!==undefined)).length}건</span></div></section><section className="academics-panel"><h3>최근 학기</h3>{terms.slice(0,6).map(x=><div className="academics-row" key={x.id}><div><strong>{x.name}</strong><small>{x.academic_year} · {x.start_date||"시작일 미정"} ~ {x.end_date||"종료일 미정"}</small></div><span>{({planned:"예정",active:"진행 중",completed:"종료"} as any)[x.status]||x.status}</span></div>)}{!loading&&!terms.length&&<Empty>등록된 학기가 없습니다.</Empty>}</section></div>}
  {tab==="terms"&&<section className="academics-panel"><div className="academics-panel-head"><h3>학기 관리</h3>{canManage&&mutationsEnabled&&<button className="academics-primary small" onClick={()=>open("term")}>＋ 학기 등록</button>}</div><Search value={search} onChange={setSearch}/><Table headers={["학기 코드","학기명","학년도","시작일","종료일","상태","관리"]} rows={filtered(terms,["term_code","name"]).map(x=><tr key={x.id}><td>{x.term_code}</td><td>{x.name}</td><td>{x.academic_year}</td><td>{x.start_date||"—"}</td><td>{x.end_date||"—"}</td><td>{({planned:"예정",active:"진행 중",completed:"종료"} as any)[x.status]}</td><td>{canManage&&mutationsEnabled&&<><button onClick={()=>{setEditingEntityId(x.id);setTerm({term_code:x.term_code,name:x.name,academic_year:String(x.academic_year),start_date:x.start_date||"",end_date:x.end_date||"",status:x.status});setModal("term");}}>수정</button> <button onClick={()=>void removeEntity("academic_terms",x.id)}>삭제</button></>}</td></tr>)} empty="등록된 학기가 없습니다."/></section>}

@@ -69,7 +69,7 @@ export default function AcademicsModule(){
   {key:"calendar",label:"4. 일정",tabs:[["calendar","학사 일정"]]}
  ];
  const activeSection=sections.find(section=>section.tabs.some(([key])=>key===tab))||sections[0];
- return <div className="academics-workspace"><div className="academics-heading"><div><AdminModuleHeading moduleKey="academics"/></div>{canManage&&mutationsEnabled&&tab==="overview"&&<button className="academics-primary" onClick={()=>open("grade")}>＋ 성적 입력</button>}{!loading&&!canManage&&mutationsEnabled&&<span className="academics-readonly-note">조회 전용 권한</span>}</div>
+ return <div className="academics-workspace"><div className="academics-heading"><div><AdminModuleHeading moduleKey="academics"/></div>{canManage&&mutationsEnabled&&tab==="overview"&&<button className="academics-primary" onClick={()=>setTab("grades")}>점수 입력하기</button>}{!loading&&!canManage&&mutationsEnabled&&<span className="academics-readonly-note">조회 전용 권한</span>}</div>
  <div className="academics-stats"><article><span>운영 학기</span><strong>{terms.length}</strong></article><article><span>등록 과목</span><strong>{courses.length}</strong></article><article><span>수강 등록</span><strong>{enrol.length}</strong></article><article><span>시간표 항목</span><strong>{timetableEntries.length+timetableEvents.length}</strong></article></div>
  {error&&<div className="academics-alert error">{error}</div>}{notice&&<div className="academics-alert">{notice}</div>}{!db&&<div className="academics-alert">Supabase를 연결하면 실제 학사 데이터를 관리할 수 있습니다.</div>}
  <div className="academics-tabs" aria-label="학사 업무 단계">{sections.map(section=><button key={section.key} className={activeSection.key===section.key?"active":""} onClick={()=>{setTab(section.tabs[0][0]);setSearch("");}}>{section.label}</button>)}</div>

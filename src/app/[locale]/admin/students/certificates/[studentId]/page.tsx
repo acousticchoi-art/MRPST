@@ -1,3 +1,4 @@
+import "./certificate.css";
 import Link from "next/link";
 import {notFound,redirect} from "next/navigation";
 import {getServerModuleAccess} from "@/lib/auth/server-access";

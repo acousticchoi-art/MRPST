@@ -28,6 +28,8 @@ function elementKey(root:HTMLElement,element:HTMLElement){
 export default function InlinePageEditor({pageKey,locale,initialValues,children}:{pageKey:string;locale:string;initialValues?:InlineValues;children:ReactNode}){
   const rootRef=useRef<HTMLDivElement>(null);
   const original=useRef<InlineValues>({});
+  const savedValues=useRef<InlineValues>(initialValues??{});
+  const editingRef=useRef(false);
   const [canManage,setCanManage]=useState(false);
   const [editing,setEditing]=useState(false);
   const [saving,setSaving]=useState(false);
@@ -38,13 +40,29 @@ export default function InlinePageEditor({pageKey,locale,initialValues,children}
 
   const applyValues=useCallback((values:InlineValues)=>{
     const root=rootRef.current;if(!root)return;
-    textElements(root).forEach(element=>{const value=values[elementKey(root,element)];if(value!==undefined){element.textContent=value;element.classList.toggle("inline-text-multiline",value.includes("\n"));}});
+    textElements(root).forEach(element=>{const value=values[elementKey(root,element)];if(value!==undefined){if(element.textContent!==value)element.textContent=value;element.classList.toggle("inline-text-multiline",value.includes("\n"));}});
   },[]);
 
   useLayoutEffect(()=>{
     if(initialValues===undefined)return;
-    applyValues(initialValues);
+    savedValues.current=initialValues;
+    if(!editingRef.current)applyValues(initialValues);
   },[applyValues,initialValues]);
+
+  // Dynamic admin modules render after the page shell has mounted. React may
+  // replace the text nodes later, so keep published edits attached to the DOM.
+  // Observe only while not editing, and discard our own mutation records.
+  useEffect(()=>{
+    const root=rootRef.current;if(!root)return;
+    const observer=new MutationObserver(records=>{
+      if(editingRef.current||!Object.keys(savedValues.current).length)return;
+      if(!records.some(record=>record.type==="childList"||record.type==="characterData"))return;
+      applyValues(savedValues.current);
+      observer.takeRecords();
+    });
+    observer.observe(root,{subtree:true,childList:true,characterData:true});
+    return ()=>observer.disconnect();
+  },[applyValues]);
 
   useEffect(()=>{
     if(!document.cookie.includes("sb-"))return;
@@ -58,7 +76,7 @@ export default function InlinePageEditor({pageKey,locale,initialValues,children}
           .catch(()=>setCanManage(false));
         if(hasInitialValues)return;
         return db.from("website_contents").select("body").eq("content_type","page").eq("content_key",storageKey).eq("locale",locale).eq("is_published",true).maybeSingle()
-          .then(({data})=>{try{if(data?.body)applyValues(JSON.parse(data.body));}catch{}});
+          .then(({data})=>{try{const values=data?.body?JSON.parse(data.body):{};if(values&&typeof values==="object"&&!Array.isArray(values)){savedValues.current=values;if(!editingRef.current)applyValues(values);}}catch{}});
       });
     });
   },[applyValues,hasInitialValues,locale,storageKey]);
@@ -84,6 +102,7 @@ export default function InlinePageEditor({pageKey,locale,initialValues,children}
       element.contentEditable="false";
       element.classList.remove("inline-editable-text");
     });
+    editingRef.current=false;
     setEditing(false);
   },[]);
 
@@ -91,7 +110,7 @@ export default function InlinePageEditor({pageKey,locale,initialValues,children}
     const root=rootRef.current;if(!root)return;
     const values:InlineValues={};
     textElements(root).forEach(element=>{values[elementKey(root,element)]=element.textContent??"";element.contentEditable="true";element.classList.add("inline-editable-text");});
-    original.current=values;setMessage("");setEditing(true);
+    original.current=values;editingRef.current=true;setMessage("");setEditing(true);
   };
 
   const insertLineBreak=(event:React.KeyboardEvent<HTMLDivElement>)=>{
@@ -122,7 +141,7 @@ export default function InlinePageEditor({pageKey,locale,initialValues,children}
       const row={content_type:"page",content_key:storageKey,locale,title:`Inline text: ${pageKey}`,body:JSON.stringify(values),is_published:true,sort_order:998,updated_by:user?.id??null};
       const {error}=await db.from("website_contents").upsert(row,{onConflict:"content_type,content_key,locale"});
       if(error)throw error;
-      original.current=values;stopEditing(false);setMessage("저장되었습니다.");
+      savedValues.current=values;original.current=values;stopEditing(false);setMessage("저장되었습니다.");
     }catch{setMessage("저장하지 못했습니다. 권한과 연결 상태를 확인해 주세요.");}
     finally{setSaving(false);}
   };

@@ -1,0 +1,50 @@
+/* Standalone academic timetable preview, optimized for A4 landscape printing. */
+.lecture-print-page{min-height:100vh;background:#f0f4f6;color:#203647;padding:22px;font-family:"Noto Sans KR","Noto Sans Myanmar",Arial,sans-serif}
+.lecture-print-toolbar{max-width:1300px;margin:0 auto 18px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.lecture-print-toolbar>a{font-size:13px;color:#173e59;text-decoration:underline}
+.lecture-print-toolbar>strong{font-size:17px;margin-right:auto}
+.lecture-print-action{border:0;background:#173e59;color:white;border-radius:7px;padding:11px 18px;cursor:pointer;font-weight:700}
+.lecture-print-sheet{box-sizing:border-box;max-width:1300px;margin:0 auto;padding:30px 28px;background:#fff;border:1px solid #d6e1e8;box-shadow:0 8px 30px #163b5217}
+.lecture-print-sheet>header{text-align:center;border-bottom:2px solid #173e59;padding-bottom:16px;margin-bottom:20px}
+.lecture-print-sheet>header>span{display:block;font-size:11px;letter-spacing:.14em;color:#668195;font-weight:700}
+.lecture-print-sheet h1{font-size:24px;line-height:1.6;color:#173e59;margin:6px 0 12px}
+.lecture-print-sheet>header>div{display:flex;justify-content:center;gap:30px;flex-wrap:wrap;font-size:13px}
+.lecture-print-grid{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px}
+.lecture-print-grid th,.lecture-print-grid td{box-sizing:border-box;border:1px solid #c7d3dc;vertical-align:top;padding:7px 5px;overflow-wrap:anywhere}
+.lecture-print-grid thead th{background:#eaf1f5;color:#173e59;font-weight:750;text-align:center}
+.lecture-print-grid th:first-child{width:92px}
+.lecture-print-grid tbody th{text-align:center;background:#f6f8fa;font-size:11px;white-space:nowrap}
+.lecture-print-grid tbody th span{display:block}
+.lecture-print-course,.lecture-print-event{border-radius:4px;padding:7px;margin:0 0 5px;display:flex;flex-direction:column;gap:4px;break-inside:avoid}
+.lecture-print-course{background:#e7f0f6}
+.lecture-print-event{background:#fff0d9}
+.lecture-print-course b,.lecture-print-event b{font-size:11px;line-height:1.5}
+.lecture-print-course :is(span,small),.lecture-print-event small{font-size:10px;line-height:1.5;color:#42586a}
+.lecture-print-sheet footer{font-size:10px;color:#667b8a;text-align:right;margin-top:15px}
+.lecture-print-empty,.lecture-print-error{padding:30px;text-align:center;max-width:1000px;margin:0 auto;background:#fff;border-radius:7px}
+@media(max-width:750px){
+ .lecture-print-page{padding:10px}
+ .lecture-print-sheet{padding:14px 10px;overflow-x:auto}
+ .lecture-print-grid{min-width:680px;font-size:10px}
+ .lecture-print-sheet h1{font-size:20px}
+}
+@page{size:A4 landscape;margin:9mm}
+@media print{
+ html,body{margin:0!important;padding:0!important;background:white!important}
+ .lecture-print-page{background:#fff;padding:0;min-height:0}
+ .lecture-print-toolbar{display:none!important}
+ .lecture-print-sheet{max-width:none;width:100%;padding:0;border:0;box-shadow:none;overflow:visible}
+ .lecture-print-sheet>header{padding-bottom:9px;margin-bottom:12px}
+ .lecture-print-sheet h1{font-size:17pt;margin:4px 0 7px}
+ .lecture-print-sheet>header>div{font-size:9pt}
+ .lecture-print-grid{min-width:0;width:100%;font-size:8pt}
+ .lecture-print-grid th,.lecture-print-grid td{padding:5px 4px}
+ .lecture-print-grid thead{display:table-header-group}
+ .lecture-print-grid tr{break-inside:avoid;page-break-inside:avoid}
+ .lecture-print-grid th:first-child{width:18mm}
+ .lecture-print-grid tbody th{font-size:8pt}
+ .lecture-print-course,.lecture-print-event{padding:4px;margin-bottom:3px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .lecture-print-course b,.lecture-print-event b{font-size:8pt}
+ .lecture-print-course :is(span,small),.lecture-print-event small{font-size:7pt}
+ .lecture-print-sheet footer{font-size:7pt}
+}

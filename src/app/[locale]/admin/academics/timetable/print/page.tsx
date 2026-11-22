@@ -57,7 +57,7 @@ export default async function TimetablePrintPage({params,searchParams}:{params:P
  return <main className="lecture-print-page">
   <nav className="lecture-print-toolbar"><Link href={back}>{copy.back}</Link><strong>{copy.title}</strong>{!error&&term.data&&department.data&&<PrintActions label={copy.print}/>}</nav>
   {error||!term.data||!department.data?<section className="lecture-print-error">{copy.fail}</section>:
-  <article className="lecture-print-sheet">
+  <article className="lecture-print-sheet" data-print-lang={lang}>
    <header><span>MRPST · ACADEMIC TIMETABLE</span><h1>{copy.title}</h1><div><strong>{copy.term}: {term.data.name}</strong><strong>{copy.dept}: {departmentName}</strong></div></header>
    {slots.length===0?<p className="lecture-print-empty">{copy.empty}</p>:
    <table className="lecture-print-grid"><thead><tr><th scope="col">{copy.time}</th>{weekdays.map(day=><th key={day.day} scope="col">{day.label}</th>)}</tr></thead>

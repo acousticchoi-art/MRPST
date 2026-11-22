@@ -45,8 +45,8 @@ export default function AdminModuleHeading({moduleKey}:{moduleKey:ModuleKey}){
   const locale=pathname.startsWith("/my/")?"my":"ko";
   const copy=labels[moduleKey][locale];
   return <>
-    <span className="eyebrow admin-module-eyebrow" data-no-inline-edit="">{copy.eyebrow}</span>
-    <h2 className="admin-module-title" data-no-inline-edit="">{copy.title}</h2>
-    <p className="admin-module-description" data-no-inline-edit="">{copy.description}</p>
+    <span className="eyebrow admin-module-eyebrow" data-no-inline-edit="" data-no-translate="">{copy.eyebrow}</span>
+    <h2 className="admin-module-title" data-no-inline-edit="" data-no-translate="">{copy.title}</h2>
+    <p className="admin-module-description" data-no-inline-edit="" data-no-translate="">{copy.description}</p>
   </>;
 }

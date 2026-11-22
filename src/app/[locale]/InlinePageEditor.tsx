@@ -38,7 +38,7 @@ export default function InlinePageEditor({pageKey,locale,initialValues,children}
 
   const applyValues=useCallback((values:InlineValues)=>{
     const root=rootRef.current;if(!root)return;
-    textElements(root).forEach(element=>{const value=values[elementKey(root,element)];if(value!==undefined)element.textContent=value;});
+    textElements(root).forEach(element=>{const value=values[elementKey(root,element)];if(value!==undefined){element.textContent=value;element.classList.toggle("inline-text-multiline",value.includes("\n"));}});
   },[]);
 
   useLayoutEffect(()=>{
@@ -80,7 +80,7 @@ export default function InlinePageEditor({pageKey,locale,initialValues,children}
     const root=rootRef.current;if(!root)return;
     textElements(root).forEach(element=>{
       const key=elementKey(root,element);
-      if(restore&&original.current[key]!==undefined)element.textContent=original.current[key];
+      if(restore&&original.current[key]!==undefined){element.textContent=original.current[key];element.classList.toggle("inline-text-multiline",original.current[key].includes("\n"));}
       element.contentEditable="false";
       element.classList.remove("inline-editable-text");
     });
@@ -94,9 +94,27 @@ export default function InlinePageEditor({pageKey,locale,initialValues,children}
     original.current=values;setMessage("");setEditing(true);
   };
 
+  const insertLineBreak=(event:React.KeyboardEvent<HTMLDivElement>)=>{
+    if(event.key!=="Enter"||event.nativeEvent.isComposing)return;
+    const target=event.target;
+    if(!(target instanceof HTMLElement)||!target.classList.contains("inline-editable-text"))return;
+    const selection=window.getSelection();
+    if(!selection||selection.rangeCount===0)return;
+    const range=selection.getRangeAt(0);
+    if(!target.contains(range.commonAncestorContainer))return;
+    event.preventDefault();
+    range.deleteContents();
+    const newline=document.createTextNode("\n");
+    range.insertNode(newline);
+    range.setStartAfter(newline);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  };
+
   const save=async()=>{
     const root=rootRef.current;if(!root)return;
-    const values:InlineValues={};textElements(root).forEach(element=>{values[elementKey(root,element)]=element.textContent??"";});
+    const values:InlineValues={};textElements(root).forEach(element=>{const value=element.textContent??"";values[elementKey(root,element)]=value;element.classList.toggle("inline-text-multiline",value.includes("\n"));});
     setSaving(true);setMessage("");
     try{
       const {createSupabaseBrowserClient}=await import("@/lib/supabase/client");const db=createSupabaseBrowserClient();if(!db)throw new Error();
@@ -109,6 +127,6 @@ export default function InlinePageEditor({pageKey,locale,initialValues,children}
     finally{setSaving(false);}
   };
 
-  const bootstrap=hasInitialValues?`(()=>{const root=document.currentScript&&document.currentScript.parentElement;if(!root)return;const values=${JSON.stringify(initialValues).replace(/</g,"\\u003c")};const selector=${JSON.stringify(editableSelector)};const elements=Array.from(root.querySelectorAll(selector)).filter(element=>element.textContent&&element.textContent.trim()&&!element.closest('[data-inline-editor-controls],[data-no-inline-edit]')&&!Array.from(element.querySelectorAll(selector)).some(child=>child!==element&&child.textContent&&child.textContent.trim()));const key=element=>{const parts=[];let current=element;while(current&&current!==root){const parent=current.parentElement;if(!parent)break;parts.unshift(String(Array.from(parent.children).indexOf(current)));current=parent;}return parts.join('.');};elements.forEach(element=>{const value=values[key(element)];if(value!==undefined)element.textContent=value;});})();`:"";
-  return <div ref={rootRef} data-inline-page={pageKey}>{children}{hasInitialValues&&<script dangerouslySetInnerHTML={{__html:bootstrap}}/>}{canManage&&<div className="inline-editor-controls" data-inline-editor-controls style={position?{left:position.x,top:position.y,right:"auto"}:undefined}><span className="inline-editor-drag" onPointerDown={startDrag} title="끌어서 이동">⋮⋮</span><span>{message}</span>{editing?<><button type="button" onClick={()=>stopEditing(true)} disabled={saving}>취소</button><button type="button" onClick={()=>void save()} disabled={saving}>{saving?"저장 중…":"저장"}</button></>:<button type="button" onClick={startEditing}>편집 모드</button>}</div>}</div>;
+  const bootstrap=hasInitialValues?`(()=>{const root=document.currentScript&&document.currentScript.parentElement;if(!root)return;const values=${JSON.stringify(initialValues).replace(/</g,"\\u003c")};const selector=${JSON.stringify(editableSelector)};const elements=Array.from(root.querySelectorAll(selector)).filter(element=>element.textContent&&element.textContent.trim()&&!element.closest('[data-inline-editor-controls],[data-no-inline-edit]')&&!Array.from(element.querySelectorAll(selector)).some(child=>child!==element&&child.textContent&&child.textContent.trim()));const key=element=>{const parts=[];let current=element;while(current&&current!==root){const parent=current.parentElement;if(!parent)break;parts.unshift(String(Array.from(parent.children).indexOf(current)));current=parent;}return parts.join('.');};elements.forEach(element=>{const value=values[key(element)];if(value!==undefined){element.textContent=value;element.classList.toggle("inline-text-multiline",value.includes("\\n"));}});})();`:"";
+  return <div ref={rootRef} data-inline-page={pageKey} onKeyDownCapture={insertLineBreak}>{children}{hasInitialValues&&<script dangerouslySetInnerHTML={{__html:bootstrap}}/>}{canManage&&<div className="inline-editor-controls" data-inline-editor-controls style={position?{left:position.x,top:position.y,right:"auto"}:undefined}><span className="inline-editor-drag" onPointerDown={startDrag} title="끌어서 이동">⋮⋮</span><span>{message}</span>{editing?<><button type="button" onClick={()=>stopEditing(true)} disabled={saving}>취소</button><button type="button" onClick={()=>void save()} disabled={saving}>{saving?"저장 중…":"저장"}</button></>:<button type="button" onClick={startEditing}>편집 모드</button>}</div>}</div>;
 }

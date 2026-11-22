@@ -1,4 +1,6 @@
 "use client";
+import AdminModuleHeading from "./AdminModuleHeading";
+
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 import {AdminFormActions,FormField} from "./AdminUI";
@@ -96,7 +98,7 @@ const archiveStudent=async()=>changeStudentStatus("withdrawn");
  const issueStudentAccount=async()=>{if(!canManage){setError("학생 계정 발급 권한이 없습니다.");return;}if(!selected)return;setAccountBusy(true);setError("");try{const response=await fetch("/api/admin/manage-user",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({action:"create_student",student_id:selected.id,email:accountEmail.trim(),password:accountPassword})});const data=await response.json().catch(()=>({error:"계정 관리 서버의 응답을 읽을 수 없습니다."}));if(!response.ok||data?.error)throw new Error(data?.error||"학생 계정 발급에 실패했습니다.");setNotice(data?.audit_warning||"학생 로그인 계정과 도서관 회원 계정을 함께 연결했습니다.");setAccountOpen(false);setAccountPassword("");setAccountEmail("");await load();}catch(e:any){setError(e.message??"학생 계정 발급에 실패했습니다.");}finally{setAccountBusy(false);}};
  const input=(label:string,key:string,type="text")=><FormField label={label}><input type={type} value={profile[key]??""} disabled={!canManage||!academicMutationsEnabled||saving} onChange={e=>setP(key,e.target.value)}/></FormField>;
  return <div className="student-workspace">
-  <header className="student-page-head"><div><span className="eyebrow">STUDENT INFORMATION SYSTEM</span><h2>학생 관리</h2><p>학생 정보와 학업 이력을 한곳에서 빠르게 확인하고 관리합니다.</p></div><button className="student-primary" disabled={!academicMutationsEnabled||!canManage} onClick={newProfile}>＋ 학생 등록</button></header>
+  <header className="student-page-head"><div><AdminModuleHeading moduleKey="students"/></div><button className="student-primary" disabled={!academicMutationsEnabled||!canManage} onClick={newProfile}>＋ 학생 등록</button></header>
   <GraduateBulkImport canManage={canManage} enabled={academicMutationsEnabled} onDone={load}/>
   <section className="student-overview student-overview-academic" aria-label="학생 현황"><article><span>재학생</span><strong>{currentStudents.length}</strong><small>현재 재학 상태</small></article><article><span>졸업생</span><strong>{graduatedStudentCount}</strong><small>졸업 확정 기록 포함</small></article><article><span>전체 학생</span><strong>{students.length}</strong><small>재학 상태 {activeStudents}명</small></article></section>
   {error&&<div className="student-alert error">{error}</div>}{notice&&<div className="student-alert success">{notice}</div>}{!supabase&&<div className="student-alert">Supabase 환경변수를 설정하면 실제 학생 데이터를 사용할 수 있습니다.</div>}

@@ -44,7 +44,7 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
       const keys=["funds","accounts","entries","donors","budgets","actuals","donations","students","awards","disbursements"] as const;
       const queries=[
         supabase.from("finance_funds").select("id,code,name_ko,name_en").eq("is_active",true).order("code"),
-        supabase.from("finance_accounts").select("id,code,name_ko,name_en,account_type").eq("is_active",true).order("code"),
+        supabase.from("finance_accounts").select("id,code,name_ko,name_en,account_type,expense_nature").eq("is_active",true).order("code"),
         supabase.from("journal_entries").select("id,entry_no,entry_date,description,status,fund_id,reference_no,journal_lines(account_id,description,debit,credit)").order("entry_date",{ascending:false}).limit(300),
         supabase.from("finance_donors").select("id,donor_code,display_name,donor_type,phone,email,country").eq("is_active",true).order("display_name"),
         supabase.from("finance_budgets").select("id,fiscal_year,title,fund_id,status,finance_budget_lines(id,account_id,planned_amount,notes,finance_accounts(code,name_ko,name_en))").order("fiscal_year",{ascending:false}),

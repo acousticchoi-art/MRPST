@@ -13,7 +13,7 @@ type Grade={id:string;student_id:string;course_id:string;term_id:string;score:nu
 
 const csvCell=(value:unknown)=>'"'+String(value??"").replace(/"/g,'""')+'"';
 
-export default function GradeManagementModule({canManage,onNext,initialTermId,onTermChange}:{canManage:boolean;onNext?:()=>void;initialTermId?:string;onTermChange?:(id:string)=>void}){
+export default function GradeManagementModule({canManage,initialTermId,onTermChange}:{canManage:boolean;initialTermId?:string;onTermChange?:(id:string)=>void}){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]); const academicMutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const [departments,setDepartments]=useState<Department[]>([]);
  const [terms,setTerms]=useState<Term[]>([]);
@@ -25,7 +25,7 @@ export default function GradeManagementModule({canManage,onNext,initialTermId,on
  const [departmentId,setDepartmentId]=useState("");
  const [level,setLevel]=useState("");
  const [courseId,setCourseId]=useState("");
- const [tab,setTab]=useState<"lookup"|"entry">(canManage&&academicMutationsEnabled?"entry":"lookup");
+ const [tab,setTab]=useState<"lookup"|"entry">("entry");
  const [search,setSearch]=useState("");
  const [selectedStudentId,setSelectedStudentId]=useState("");
  const [inputValues,setInputValues]=useState<Record<string,string>>({});
@@ -70,7 +70,7 @@ export default function GradeManagementModule({canManage,onNext,initialTermId,on
   ...students.filter(x=>!programCode||x.program_code===programCode).map(x=>x.cohort)
  ].filter((x):x is string=>Boolean(x)))).sort((a,b)=>a.localeCompare(b)),[courses,students,departmentId,programCode]);
  useEffect(()=>{if(level&&!levels.includes(level))setLevel("");},[levels,level]);
- const visibleCourses=useMemo(()=>courses.filter(x=>(!departmentId||x.department_id===departmentId)&&(!level||x.level===level)),[courses,departmentId,level]);
+ const visibleCourses=useMemo(()=>courses.filter(x=>(!departmentId||x.department_id===departmentId)&&(!level||x.level===level||x.level==="All Levels")),[courses,departmentId,level]);
  const entryCourses=useMemo(()=>visibleCourses.filter(x=>x.is_active),[visibleCourses]);
  useEffect(()=>{if(!entryCourses.some(x=>x.id===courseId))setCourseId(entryCourses[0]?.id??"");},[entryCourses,courseId]);
  const visibleStudents=useMemo(()=>students.filter(x=>(!programCode||x.program_code===programCode)&&(!level||x.cohort===level)&&(!search.trim()||x.full_name.toLowerCase().includes(search.toLowerCase())||x.student_number.toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>Number.isFinite(Number(a.student_number))&&Number.isFinite(Number(b.student_number))?Number(a.student_number)-Number(b.student_number):a.student_number.localeCompare(b.student_number)),[students,programCode,level,search]);
@@ -79,7 +79,19 @@ export default function GradeManagementModule({canManage,onNext,initialTermId,on
  const selectedStudent=students.find(x=>x.id===selectedStudentId);
  const studentCourses=visibleCourses.filter(course=>enrollments.some(e=>e.student_id===selectedStudentId&&e.course_id===course.id&&e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status))).map(course=>({course,grade:gradeByKey.get(selectedStudentId+"|"+course.id)}));
  const entryStudents=useMemo(()=>visibleStudents.filter(student=>student.student_status==="active"),[visibleStudents]);
- const inputStudents=useMemo(()=>courseId&&termId?entryStudents.filter(student=>enrollments.some(e=>e.student_id===student.id&&e.course_id===courseId&&e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status))):[],[courseId,termId,entryStudents,enrollments]);
+ const inputStudents=useMemo(()=>{
+  if(!courseId||!termId)return [];
+  const selectedCourse=entryCourses.find(course=>course.id===courseId);
+  if(!selectedCourse)return [];
+  const courseDepartment=departments.find(department=>department.id===selectedCourse.department_id);
+  const expectedProgram=courseDepartment?.code?.toLowerCase()==="ece"?"ece":courseDepartment?.code?.toLowerCase()==="theology"?"theology":null;
+  return entryStudents.filter(student=>{
+    if(expectedProgram&&student.program_code!==expectedProgram)return false;
+    if(selectedCourse.level&&selectedCourse.level!=="All Levels"&&student.cohort!==selectedCourse.level)return false;
+    const registration=enrollments.find(e=>e.student_id===student.id&&e.course_id===courseId&&e.term_id===termId);
+    return registration?.enrollment_status!=="withdrawn";
+  });
+ },[courseId,termId,entryStudents,entryCourses,departments,enrollments]);
  const currentCourse=entryCourses.find(x=>x.id===courseId);
  useEffect(()=>{
   const next:Record<string,string>={};
@@ -108,7 +120,19 @@ export default function GradeManagementModule({canManage,onNext,initialTermId,on
   const changed=rows.filter(row=>{const old=gradeByKey.get(row.student_id+"|"+courseId);return !old||Number(old.score)!==row.score;});
   if(!changed.length){setNotice("변경된 점수가 없습니다.");return;}
   setSaving(true);setError("");setNotice("");
-  try{const {data:saved,error}=await db.from("academic_grades").upsert(changed,{onConflict:"student_id,course_id,term_id"}).select("student_id,course_id,term_id,score");if(error)throw error;if(!saved||saved.length!==changed.length||saved.some(row=>!changed.some(expected=>expected.student_id===row.student_id&&expected.course_id===row.course_id&&expected.term_id===row.term_id&&expected.score===row.score)))throw new Error("일부 성적 저장 결과를 확인할 수 없습니다.");setNotice(changed.length+"명의 성적을 저장했습니다.");await load();}
+  try{
+    if(!currentUserId)throw new Error("로그인 상태를 다시 확인해 주세요.");
+    // The grade form is independent of semester enrollment/completion. Create
+    // only the course registration rows needed for actually saved scores.
+    const missingRegistrations=changed.filter(row=>!enrollments.some(e=>e.student_id===row.student_id&&e.course_id===row.course_id&&e.term_id===row.term_id));
+    if(missingRegistrations.length){
+      const {data:registered,error:registrationError}=await db.from("academic_enrollments")
+        .insert(missingRegistrations.map(row=>({student_id:row.student_id,course_id:row.course_id,term_id:row.term_id,enrollment_status:"enrolled",created_by:currentUserId})))
+        .select("student_id,course_id,term_id");
+      if(registrationError)throw registrationError;
+      if(!registered||registered.length!==missingRegistrations.length)throw new Error("성적에 필요한 수강 기록을 확인할 수 없습니다.");
+    }
+    const {data:saved,error}=await db.from("academic_grades").upsert(changed,{onConflict:"student_id,course_id,term_id"}).select("student_id,course_id,term_id,score");if(error)throw error;if(!saved||saved.length!==changed.length||saved.some(row=>!changed.some(expected=>expected.student_id===row.student_id&&expected.course_id===row.course_id&&expected.term_id===row.term_id&&expected.score===row.score)))throw new Error("일부 성적 저장 결과를 확인할 수 없습니다.");setNotice(changed.length+"명의 성적을 저장했습니다.");await load();}
   catch(err:any){setError(err?.message||"성적 저장에 실패했습니다.");}
   finally{setSaving(false);}
  };
@@ -134,7 +158,7 @@ export default function GradeManagementModule({canManage,onNext,initialTermId,on
 
  return <div className={styles.workspace}>
   <div className={styles.heading}>
-   <div><span className={styles.eyebrow}>GRADE MANAGEMENT</span><h2>점수 입력·확인</h2><p>학기와 학과를 고른 뒤, 과목별로 점수를 입력하고 저장하세요. 학생별 입력 현황도 확인할 수 있습니다.</p></div>
+   <div><span className={styles.eyebrow}>GRADE MANAGEMENT</span><h2>점수 입력·확인</h2><p>학기와 과목을 선택하고 점수를 적어 저장하세요. 학기 등록·이수 확정 없이 성적을 관리합니다.</p></div>
    <span className={styles.permission}>{canManage&&academicMutationsEnabled?"점수 입력 가능":"조회 전용"}</span>
   </div>
   <div className={styles.filters}>
@@ -168,19 +192,18 @@ export default function GradeManagementModule({canManage,onNext,initialTermId,on
    </div></div>}
   </section>}
   {tab==="entry"&&<section className={styles.panel}>
-   <div className={styles.panelHead}><div><h3>과목을 선택하고 점수를 저장하세요</h3><p>과목을 고르고 학생의 점수(0~100점)를 입력한 뒤 아래의 ‘점수 저장’을 누르면 됩니다. 빈칸은 저장하지 않습니다.</p></div></div>
+   <div className={styles.panelHead}><div><h3>과목별 점수 입력</h3><p>과목을 고르면 해당 학과·학년 학생이 표시됩니다. 0~100점을 적고 저장하세요. 아직 수강 기록이 없는 학생은 점수 저장 시 자동으로 연결됩니다.</p></div></div>
    <div className={styles.entryFilters}>
     <label>점수를 입력할 과목<SearchSelect value={courseId} placeholder="과목 검색" searchPlaceholder="과목 코드, 과목명 검색" options={entryCourses.map(x=>({value:x.id,label:`${x.course_code} · ${x.title}`,keywords:`${x.course_code} ${x.title}`}))} onChange={setCourseId}/></label>
    </div>
    {currentCourse&&<div className={styles.entryTitle}><strong>{currentCourse.title}</strong><span>{currentCourse.course_code} · {terms.find(x=>x.id===termId)?.name||"학기 미선택"}</span></div>}
    <div className={styles.tableWrap}><table><thead><tr><th>순번</th><th>학생 이름</th><th>점수</th><th>기존 점수</th><th>작업</th></tr></thead><tbody>
     {inputStudents.map(student=>{const old=gradeByKey.get(student.id+"|"+courseId);return <tr key={student.id}><td>{student.student_number}</td><td>{student.full_name}</td><td><input className={styles.scoreInput} type="number" min="0" max="100" step="0.01" disabled={!canManage||!academicMutationsEnabled||saving} value={inputValues[student.id]??""} onChange={e=>setInputValues(v=>({...v,[student.id]:e.target.value}))} aria-label={student.full_name+" 점수"}/></td><td>{old?.score??"—"}</td><td>{old&&<button className={styles.deleteButton} disabled={!academicMutationsEnabled||saving} onClick={()=>void deleteScore(student)}>삭제</button>}</td></tr>;})}
-    {!inputStudents.length&&<tr><td colSpan={5} className={styles.empty}>{!termId?"먼저 학기를 선택하세요.":!courseId?"과목을 선택하세요.":"선택한 학과·학년에 등록된 학생이 없습니다."}</td></tr>}
+    {!inputStudents.length&&<tr><td colSpan={5} className={styles.empty}>{!termId?"먼저 학기를 선택하세요.":!courseId?"과목을 선택하세요.":"해당 과목·학년에 재학 중인 학생이 없습니다."}</td></tr>}
    </tbody></table></div>
    <div className={styles.saveRow}><span>{inputStudents.length}명 · 빈 칸은 저장하지 않습니다.</span><button className={styles.primary} disabled={!academicMutationsEnabled||!canManage||saving||!inputStudents.length||!courseId||!termId} onClick={()=>void saveScores()}>{saving?"저장 중…":"점수 저장"}</button></div>
   </section>}
   {loading&&<p className={styles.loading}>성적 데이터를 불러오는 중입니다.</p>}
-  {onNext&&<div className={styles.nextStep}><span>점수 입력을 마쳤다면 다음 단계로 이동하세요.</span><button type="button" onClick={onNext}>다음: 학기 이수·진급</button></div>}
-  <p className={styles.footnote}>입력하지 않은 점수는 0점으로 계산하지 않습니다. 현재는 점수만 관리하며 학점·등급 및 GPA는 자동 계산하지 않습니다.</p>
+  <p className={styles.footnote}>학년 변경은 학생 관리 → 정보 수정에서 직접 합니다. 성적과 수강 기록은 유지되며, 미입력 점수는 0점으로 계산하지 않습니다. 학점·등급·GPA는 자동 계산하지 않습니다.</p>
  </div>;
 }

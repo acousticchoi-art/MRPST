@@ -1,6 +1,6 @@
 "use client";
 
-import {useCallback,useEffect} from "react";
+import {useEffect} from "react";
 
 function fitTimetableToOnePage(){
  const sheet=document.querySelector<HTMLElement>(".lecture-print-sheet");

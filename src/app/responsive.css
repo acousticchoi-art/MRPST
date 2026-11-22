@@ -80,6 +80,27 @@
     display:block!important;flex:0 0 42px!important;position:relative!important;
     margin-left:auto!important;z-index:1002!important;
   }
+  html body .header>.mobile-menu>summary{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    flex-direction:column!important;gap:5px!important;
+    width:42px!important;height:42px!important;list-style:none!important;
+    cursor:pointer!important;border:1px solid #d5e0e6!important;
+    border-radius:10px!important;background:#fff!important;
+  }
+  html body .header>.mobile-menu>summary::-webkit-details-marker{display:none!important}
+  html body .header>.mobile-menu>summary span{
+    display:block!important;width:18px!important;height:2px!important;
+    border-radius:2px!important;background:#173c55!important;
+  }
+  html body .header>.mobile-menu>.mobile-nav>a{
+    padding:11px 13px!important;border-radius:7px!important;
+    color:#40535f!important;font-size:14px!important;
+    text-decoration:none!important;
+  }
+  html body .header>.mobile-menu>.mobile-nav :is(.mobile-langs,.langs){
+    display:flex!important;flex-wrap:wrap!important;gap:8px!important;
+    padding:9px 10px!important;
+  }
   html body .header>.mobile-menu[open]>.mobile-nav{
     display:grid!important;visibility:visible!important;pointer-events:auto!important;
     position:absolute!important;right:0!important;top:calc(100% + 9px)!important;
@@ -160,6 +181,11 @@
     list-style:none!important;cursor:pointer!important;
   }
   html body .admin>.sidebar>.admin-menu-details>summary::-webkit-details-marker{display:none!important}
+  html body .admin>.sidebar>.admin-menu-details>summary::after{
+    content:"메뉴 ▾";font-size:11px;white-space:nowrap;margin-left:12px;
+  }
+  html body .admin>.sidebar>.admin-menu-details[open]>summary::after{content:"닫기 ▴";}
+
   html body .admin>.sidebar>.admin-menu-details:not([open])>.sidebar-nav{display:none!important}
   html body .admin>.sidebar>.admin-menu-details[open]>.sidebar-nav{
     display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(145px,100%),1fr))!important;

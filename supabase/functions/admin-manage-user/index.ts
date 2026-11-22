@@ -69,7 +69,7 @@ Deno.serve(async (req: Request) => {
       const studentId = String(body.student_id || "");
       const email = String(body.email || "").trim().toLowerCase();
       const password = String(body.password || "");
-      if (!studentId || !email || password.length < 8) return json({ error: "학생, 이메일과 8자 이상의 초기 비밀번호가 필요합니다." }, 400);
+      if (!studentId || !email || password.length < 6) return json({ error: "학생, 이메일과 6자 이상의 초기 비밀번호가 필요합니다." }, 400);
       const { data: student, error: studentError } = await admin.from("students")
         .select("id,student_number,full_name,auth_user_id,email").eq("id", studentId).maybeSingle();
       if (studentError || !student) return json({ error: "학생 정보를 찾을 수 없습니다." }, 404);
@@ -143,7 +143,7 @@ Deno.serve(async (req: Request) => {
       const requestedRole = String(body.role || "staff");
       const departmentId = body.department_id ? String(body.department_id) : null;
       const allowedRoles = ["administrator", "finance_officer", "academic_officer", "student_officer", "librarian", "facility_manager", "faculty", "staff"];
-      if (!email || !fullName || password.length < 8 || !allowedRoles.includes(requestedRole)) return json({ error: "이름, 이메일, 8자 이상의 비밀번호와 유효한 역할을 입력해 주세요." }, 400);
+      if (!email || !fullName || password.length < 6 || !allowedRoles.includes(requestedRole)) return json({ error: "이름, 이메일, 6자 이상의 비밀번호와 유효한 역할을 입력해 주세요." }, 400);
       if (departmentId) {
         const { data: department } = await admin.from("departments").select("id").eq("id", departmentId).eq("is_active", true).maybeSingle();
         if (!department) return json({ error: "선택한 부서가 없거나 비활성 상태입니다." }, 400);
@@ -168,7 +168,7 @@ Deno.serve(async (req: Request) => {
     if (body.action === "update_password") {
       const userId = String(body.user_id || "");
       const password = String(body.password || "");
-      if (!userId || password.length < 8) return json({ error: "8자 이상의 새 비밀번호를 입력해 주세요." }, 400);
+      if (!userId || password.length < 6) return json({ error: "6자 이상의 새 비밀번호를 입력해 주세요." }, 400);
       const { data: target } = await admin.from("user_profiles").select("user_id,full_name,email").eq("user_id", userId).maybeSingle();
       if (!target) return json({ error: "대상 계정을 찾을 수 없습니다." }, 404);
       const { error: updateError } = await admin.auth.admin.updateUserById(userId, { password });

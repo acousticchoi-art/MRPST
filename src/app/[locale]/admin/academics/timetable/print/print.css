@@ -74,3 +74,27 @@
 .lecture-print-measure .lecture-print-course :is(span,small),
 .lecture-print-measure .lecture-print-event small{font-size:7pt}
 .lecture-print-measure footer{font-size:7pt}
+
+/* Myanmar glyphs wrap into taller lines than Latin/Korean. Apply the same
+   compact metrics to the screen measurement clone and the printed sheet. */
+.lecture-print-sheet[data-print-lang="my"]{
+ font-family:"Noto Sans Myanmar","Myanmar Text",Arial,sans-serif;
+}
+.lecture-print-sheet[data-print-lang="my"]>header{padding-bottom:5px;margin-bottom:7px}
+.lecture-print-sheet[data-print-lang="my"]>header>span{font-size:9px;line-height:1.3}
+.lecture-print-sheet[data-print-lang="my"] h1{font-size:16px;line-height:1.35;margin:4px 0 5px}
+.lecture-print-sheet[data-print-lang="my"]>header>div{font-size:10px;line-height:1.35;gap:12px}
+.lecture-print-sheet[data-print-lang="my"] .lecture-print-grid{font-size:9px;line-height:1.35}
+.lecture-print-sheet[data-print-lang="my"] .lecture-print-grid :is(th,td){padding:3px 3px}
+.lecture-print-sheet[data-print-lang="my"] .lecture-print-grid tbody th{font-size:9px;line-height:1.35}
+.lecture-print-sheet[data-print-lang="my"] .lecture-print-course,
+.lecture-print-sheet[data-print-lang="my"] .lecture-print-event{padding:3px;margin:0 0 2px;gap:1px}
+.lecture-print-sheet[data-print-lang="my"] .lecture-print-course b,
+.lecture-print-sheet[data-print-lang="my"] .lecture-print-event b{font-size:9px;line-height:1.4}
+.lecture-print-sheet[data-print-lang="my"] .lecture-print-course :is(span,small),
+.lecture-print-sheet[data-print-lang="my"] .lecture-print-event small{font-size:8px;line-height:1.4}
+.lecture-print-sheet[data-print-lang="my"] footer{font-size:8px;margin-top:7px}
+@media print{
+ .lecture-print-sheet[data-print-lang="my"]{max-height:none;break-inside:avoid-page;page-break-inside:avoid}
+ .lecture-print-sheet[data-print-lang="my"] .lecture-print-grid tr{break-inside:avoid-page;page-break-inside:avoid}
+}

@@ -245,3 +245,23 @@
  .academics-workspace .academics-semester-help{grid-template-columns:1fr}
  .academics-workspace .academics-semester-help span{padding:9px 12px}
 }
+
+/* Direct grading and manual student year changes. */
+.academics-workspace .academics-grade-simple-guide{
+ display:flex;align-items:center;justify-content:space-between;gap:14px;
+ border:1px solid #d7e2e8;border-radius:8px;background:#f4f8fa;
+ padding:15px 18px;margin:7px 0 17px
+}
+.academics-workspace .academics-grade-simple-guide strong{display:block;color:#24495f;font-size:14px;line-height:1.5}
+.academics-workspace .academics-grade-simple-guide p{margin:5px 0 0;font-size:12px;line-height:1.6;color:#586e7b}
+.academics-workspace .academics-grade-simple-guide a{
+ display:inline-flex;align-items:center;justify-content:center;
+ background:#fff;border:1px solid #bbcdd8;border-radius:6px;color:#234a64;
+ text-decoration:none;font-weight:700;font-size:12px;min-height:38px;
+ padding:8px 12px;white-space:nowrap
+}
+.student-manual-year-hint{display:block;font-size:11px;line-height:1.6;color:#607888;margin-top:6px}
+@media(max-width:650px){
+ .academics-workspace .academics-grade-simple-guide{flex-direction:column;align-items:stretch;padding:12px}
+ .academics-workspace .academics-grade-simple-guide a{min-height:42px}
+}

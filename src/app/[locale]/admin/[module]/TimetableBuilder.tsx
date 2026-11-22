@@ -2,6 +2,7 @@
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 import {SearchSelect} from "./AdminUI";
+import {usePathname} from "next/navigation";
 
 type Row={id:string;[key:string]:any};
 const days=[{value:1,label:"MON"},{value:2,label:"TUE"},{value:3,label:"WED"},{value:4,label:"THU"},{value:5,label:"FRI"},{value:6,label:"SAT"}];
@@ -15,6 +16,7 @@ const escapeHtml=(v:any)=>String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<"
 
 export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage:boolean;mutationsEnabled:boolean}){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
+ const locale=usePathname().startsWith("/my/")?"my":"ko";
  const [terms,setTerms]=useState<Row[]>([]),[departments,setDepartments]=useState<Row[]>([]),[courses,setCourses]=useState<Row[]>([]),[instructors,setInstructors]=useState<Row[]>([]);
  const [entries,setEntries]=useState<Row[]>([]),[events,setEvents]=useState<Row[]>([]);
  const [termId,setTermId]=useState(""),[departmentId,setDepartmentId]=useState("");
@@ -172,7 +174,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
   }catch(e:any){setError(e.message||"시간표 복사에 실패했습니다.");}finally{setSaving(false);}
  };
  return <div className="timetable-workspace">
-  <div className="timetable-heading"><div><span className="eyebrow">ACADEMIC TIMETABLE</span><h2>강의 시간표 편성</h2><p>칸을 눌러 새 수업을 넣고, 등록된 수업을 다른 칸으로 끌어 옮길 수 있습니다.</p></div><div className="timetable-actions"><a className="timetable-secondary timetable-print-link" href={`/ko/admin/academics/timetable/print?term=${encodeURIComponent(termId)}&department=${encodeURIComponent(departmentId)}`} target="_blank" rel="noopener noreferrer" aria-disabled={!termId||!departmentId||loading} onClick={event=>{if(!termId||!departmentId||loading)event.preventDefault();}}>PDF / 인쇄</a>{canManage&&mutationsEnabled&&<><button className="timetable-secondary" disabled={!undoAction||saving} onClick={()=>void undoLastAction()}>작업 취소</button><button className="timetable-secondary" onClick={()=>startEdit(undefined,"event")}>＋ 공통 일정</button><button className="timetable-primary" onClick={()=>startEdit()}>＋ 강의 배치</button></>}</div></div>
+  <div className="timetable-heading"><div><span className="eyebrow">ACADEMIC TIMETABLE</span><h2>강의 시간표 편성</h2><p>칸을 눌러 새 수업을 넣고, 등록된 수업을 다른 칸으로 끌어 옮길 수 있습니다.</p></div><div className="timetable-actions"><a className="timetable-secondary timetable-print-link" href={`/${locale}/admin/academics/timetable/print?term=${encodeURIComponent(termId)}&department=${encodeURIComponent(departmentId)}`} target="_blank" rel="noopener noreferrer" aria-disabled={!termId||!departmentId||loading} onClick={event=>{if(!termId||!departmentId||loading)event.preventDefault();}}>PDF / 인쇄</a>{canManage&&mutationsEnabled&&<><button className="timetable-secondary" disabled={!undoAction||saving} onClick={()=>void undoLastAction()}>작업 취소</button><button className="timetable-secondary" onClick={()=>startEdit(undefined,"event")}>＋ 공통 일정</button><button className="timetable-primary" onClick={()=>startEdit()}>＋ 강의 배치</button></>}</div></div>
   <div className="timetable-filters"><label>학기<select value={termId} onChange={e=>setTermId(e.target.value)}>{terms.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><label>학과<SearchSelect value={departmentId} placeholder="학과 검색" searchPlaceholder="학과명 또는 코드 검색" options={departments.map(x=>({value:x.id,label:x.name_ko||x.name_en||x.code,keywords:`${x.code} ${x.name_ko||""} ${x.name_en||""} ${x.name_my||""}`}))} onChange={setDepartmentId}/></label></div>
   {canManage&&mutationsEnabled&&<div className="timetable-copy-row"><label>복사할 이전 학기<select value={copyFrom} onChange={e=>setCopyFrom(e.target.value)}><option value="">학기 선택</option>{terms.filter(x=>x.id!==termId).map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><button className="timetable-secondary" disabled={!copyFrom||saving} onClick={()=>void copySchedule()}>선택 학기 시간표 복사</button></div>}
   {!mutationsEnabled&&<div className="academics-alert">학사 데이터 변경 기능은 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다. 현재는 조회만 가능합니다.</div>}

@@ -120,7 +120,17 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   const recentAnnouncements=announcementResult.data??[];
   const moduleGroups=[["academic",["students","academics"]],["finance",["finance"]],["operations",["facilities","library","meetings"]],["system",["administration","website"]]] as const;
   const visibleInGroup=(keys:readonly string[])=>visible.filter(([key])=>keys.includes(key));
-  const adminShell=(content:ReactNode)=>locale==="my"?<InlineAdminEditor locale={locale}>{content}</InlineAdminEditor>:<InlinePageEditor pageKey="admin-dashboard" locale={locale}>{content}</InlinePageEditor>;
+  let dashboardInlineValues:Record<string,string>={};
+  if(locale!=="my"){
+    const {data}=await supabase.from("website_contents").select("body")
+      .eq("content_type","page").eq("content_key","inline-page-admin-dashboard")
+      .eq("locale",locale).eq("is_published",true).maybeSingle();
+    try{
+      const saved=data?.body?JSON.parse(data.body):{};
+      if(saved&&typeof saved==="object"&&!Array.isArray(saved))dashboardInlineValues=saved;
+    }catch{}
+  }
+  const adminShell=(content:ReactNode)=>locale==="my"?<InlineAdminEditor locale={locale}>{content}</InlineAdminEditor>:<InlinePageEditor pageKey="admin-dashboard" locale={locale} initialValues={dashboardInlineValues}>{content}</InlinePageEditor>;
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>} {adminShell(<div className="admin">
     <aside className="sidebar">
       <Link href={`/${locale}/admin`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>

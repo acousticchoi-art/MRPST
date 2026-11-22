@@ -71,7 +71,7 @@ export default function StudentModule(){
   if(duplicateQuery.error)throw duplicateQuery.error;
   const duplicate=duplicateQuery.data?.find((row:any)=>row.id!==editingStudent);
   if(duplicate){throw new Error("이미 등록된 학번입니다. 기존 학생 정보를 확인해 주세요.");}
-  const programCode=/early childhood|ece/i.test(profile.program)?"ece":/m\\.?div|master of divinity/i.test(profile.program)?"mdiv":/theology|신학|diploma/i.test(profile.program)?"theology":null;
+  const programCode=/early childhood|ece/i.test(profile.program)?"ece":/m\.?div|master of divinity/i.test(profile.program)?"mdiv":/theology|신학|diploma/i.test(profile.program)?"theology":null;
   const nextCohort=profile.cohort.trim();
   const nextSemester=yearFirstSemester[nextCohort]??null;
   const programMaxSemester=programCode==="ece"||/diploma/i.test(profile.program)?4:programCode==="mdiv"?6:programCode==="theology"?8:null;
@@ -127,7 +127,7 @@ const archiveStudent=async()=>changeStudentStatus("withdrawn");
    <FormField label="학년 (수동 변경)"><select value={profile.cohort} disabled={!canManage||!academicMutationsEnabled||saving} onChange={e=>setP("cohort",e.target.value)}>
       <option value="">학년 선택</option>
       {yearOptions.filter(([year])=>{
-        const program=/early childhood|ece/i.test(profile.program)?"ece":/m\\.?div|master of divinity/i.test(profile.program)?"mdiv":/theology|신학|diploma/i.test(profile.program)?"theology":null;
+        const program=/early childhood|ece/i.test(profile.program)?"ece":/m\.?div|master of divinity/i.test(profile.program)?"mdiv":/theology|신학|diploma/i.test(profile.program)?"theology":null;
         const max=program==="ece"||/diploma/i.test(profile.program)?4:program==="mdiv"?6:8;
         return yearFirstSemester[year]<=max;
       }).map(([year,label])=><option key={year} value={year}>{label}</option>)}

@@ -42,3 +42,31 @@
  .student-cert-sheet{max-width:none;width:210mm;min-height:297mm;margin:0;border:0;box-shadow:none;padding:22mm 20mm;page-break-inside:avoid}
  .student-cert-sheet header strong{font-size:18px}
 }
+
+/* Semester-grouped transcript: readable on screen and paginated when printed. */
+.student-transcript{margin:0 0 30px}
+.student-transcript-term{margin:0 0 26px;break-inside:avoid-page;page-break-inside:avoid}
+.student-transcript-term h2{font-size:16px;color:#173e59;margin:0 0 10px;line-height:1.6;padding:8px 11px;background:#eff5f8;border-left:3px solid #173e59}
+.student-transcript-term table{width:100%;border-collapse:collapse;font-size:11px;table-layout:auto}
+.student-transcript-term th{background:#f3f6f8;text-align:left;color:#39556a;font-weight:700}
+.student-transcript-term :is(th,td){padding:8px 6px;border-bottom:1px solid #dce4e9;vertical-align:top;overflow-wrap:anywhere}
+.student-transcript-term :is(th,td):nth-child(3),.student-transcript-term :is(th,td):nth-child(4),.student-transcript-term :is(th,td):nth-child(5){text-align:center}
+.student-transcript-total{font-size:12px;font-weight:700;text-align:right;margin:10px 0}
+.student-transcript-note{font-size:11px;color:#607484;line-height:1.7;margin-top:20px}
+.student-transcript-empty,.student-transcript-error{padding:24px 12px;text-align:center;background:#f6f8fa;border:1px solid #e1e8ec}
+.student-transcript-error{color:#9b3434}
+.student-cert-sheet:has(.student-transcript) .student-cert-kicker{margin-top:38px}
+.student-cert-sheet:has(.student-transcript) h1{margin-bottom:25px}
+.student-cert-sheet:has(.student-transcript) dl{margin-bottom:27px}
+@media(max-width:650px){
+ .student-transcript-term table{font-size:10px}
+ .student-transcript-term :is(th,td){padding:6px 3px}
+}
+@media print{
+ .student-cert-sheet:has(.student-transcript){min-height:0;page-break-inside:auto;break-inside:auto}
+ .student-transcript-term{break-inside:avoid-page;page-break-inside:avoid}
+ .student-transcript-term h2{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .student-transcript-term table{font-size:10px}
+ .student-transcript-term :is(th,td){padding:7px 4px}
+ .student-cert-sheet:has(.student-transcript) footer{break-inside:avoid-page}
+}

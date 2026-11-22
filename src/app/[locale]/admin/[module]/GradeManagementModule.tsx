@@ -13,7 +13,7 @@ type Grade={id:string;student_id:string;course_id:string;term_id:string;score:nu
 
 const csvCell=(value:unknown)=>'"'+String(value??"").replace(/"/g,'""')+'"';
 
-export default function GradeManagementModule({canManage}:{canManage:boolean}){
+export default function GradeManagementModule({canManage,onNext,initialTermId,onTermChange}:{canManage:boolean;onNext?:()=>void;initialTermId?:string;onTermChange?:(id:string)=>void}){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]); const academicMutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const [departments,setDepartments]=useState<Department[]>([]);
  const [terms,setTerms]=useState<Term[]>([]);
@@ -21,11 +21,11 @@ export default function GradeManagementModule({canManage}:{canManage:boolean}){
  const [courses,setCourses]=useState<Course[]>([]);
  const [grades,setGrades]=useState<Grade[]>([]);
  const [enrollments,setEnrollments]=useState<Enrollment[]>([]);
- const [termId,setTermId]=useState("");
+ const [termId,setTermId]=useState(initialTermId??"");
  const [departmentId,setDepartmentId]=useState("");
  const [level,setLevel]=useState("");
  const [courseId,setCourseId]=useState("");
- const [tab,setTab]=useState<"lookup"|"entry">("lookup");
+ const [tab,setTab]=useState<"lookup"|"entry">(canManage&&academicMutationsEnabled?"entry":"lookup");
  const [search,setSearch]=useState("");
  const [selectedStudentId,setSelectedStudentId]=useState("");
  const [inputValues,setInputValues]=useState<Record<string,string>>({});
@@ -55,11 +55,11 @@ export default function GradeManagementModule({canManage}:{canManage:boolean}){
    const nextTerms=(t.data??[]) as Term[];
    const nextDepartments=(d.data??[]) as Department[];
    setDepartments(nextDepartments);setTerms(nextTerms);setStudents((s.data??[]) as Student[]);setCourses((c.data??[]) as Course[]);setGrades((g.data??[]) as Grade[]);setEnrollments((e.data??[]) as Enrollment[]);
-   if(!termId&&nextTerms.length){setTermId((nextTerms.find(x=>x.status==="active")??nextTerms[0]).id);}
+   if(!termId&&nextTerms.length){const nextId=(nextTerms.find(x=>x.status==="active")??nextTerms[0]).id;setTermId(nextId);onTermChange?.(nextId);}
    
   }catch(err:any){setError(err?.message||"성적 데이터를 불러오지 못했습니다.");}
   finally{setLoading(false);}
- },[db,termId,departmentId]);
+ },[db,termId,departmentId,onTermChange]);
 
  useEffect(()=>{void load();},[load]);
 
@@ -134,27 +134,26 @@ export default function GradeManagementModule({canManage}:{canManage:boolean}){
 
  return <div className={styles.workspace}>
   <div className={styles.heading}>
-   <div><span className={styles.eyebrow}>학업 성적 관리</span><h2>성적관리</h2><p>학기를 고르고, 학생별 성적을 확인한 뒤, 과목별로 점수를 입력합니다. 성적 입력은 해당 학기에 수강 중인 학생에게만 적용됩니다.</p></div>
-   <span className={styles.permission}>행정 담당자 전용 입력</span>
+   <div><span className={styles.eyebrow}>GRADE MANAGEMENT</span><h2>점수 입력·확인</h2><p>학기와 학과를 고른 뒤, 과목별로 점수를 입력하고 저장하세요. 학생별 입력 현황도 확인할 수 있습니다.</p></div>
+   <span className={styles.permission}>{canManage&&academicMutationsEnabled?"점수 입력 가능":"조회 전용"}</span>
   </div>
   <div className={styles.filters}>
-   <label>학년도 / 학기<select value={termId} onChange={e=>setTermId(e.target.value)}><option value="">학기 선택</option>{terms.map(x=><option key={x.id} value={x.id}>{x.name} ({x.academic_year})</option>)}</select></label>
-   <label>조회할 학과<select value={departmentId} onChange={e=>{setDepartmentId(e.target.value);setSelectedStudentId("");}}><option value="">전체 학과</option>{departments.map(x=><option key={x.id} value={x.id}>{x.name_ko||x.name_en||x.code}</option>)}</select></label>
-   <label>학년<select value={level} onChange={e=>{setLevel(e.target.value);setSelectedStudentId("");}}><option value="">전체 학년</option>{levels.map(x=><option key={x} value={x}>{x}</option>)}</select></label>
+   <label>1. 학기 선택<select value={termId} onChange={e=>{setTermId(e.target.value);onTermChange?.(e.target.value);}}><option value="">학기 선택</option>{terms.map(x=><option key={x.id} value={x.id}>{x.name} ({x.academic_year})</option>)}</select></label>
+   <label>2. 학과 선택<select value={departmentId} onChange={e=>{setDepartmentId(e.target.value);setSelectedStudentId("");}}><option value="">전체 학과</option>{departments.map(x=><option key={x.id} value={x.id}>{x.name_ko||x.name_en||x.code}</option>)}</select></label>
+   <label>3. 학년 선택<select value={level} onChange={e=>{setLevel(e.target.value);setSelectedStudentId("");}}><option value="">전체 학년</option>{levels.map(x=><option key={x} value={x}>{x}</option>)}</select></label>
   </div>
-  <div className={styles.workflow}><article className={tab==="lookup"?styles.currentStep:""}><b>1</b><div><strong>성적 확인</strong><span>학과·학년별 학생 성적과 미입력 과목을 확인합니다.</span></div></article><article className={tab==="entry"?styles.currentStep:""}><b>2</b><div><strong>점수 입력</strong><span>과목을 고르고 수강생 점수를 한 번에 저장합니다.</span></div></article><article><b>3</b><div><strong>이수 처리</strong><span>성적 입력 뒤 학사관리에서 수강 완료를 확정합니다.</span></div></article></div>
   <div className={styles.stats}>
    <article><span>학생</span><strong>{stats.students}</strong></article>
    <article><span>과목</span><strong>{stats.courses}</strong></article>
-   <article><span>입력 점수</span><strong>{stats.entered}</strong></article>
-   <article><span>미입력</span><strong>{stats.missing}</strong></article>
+   <article><span>점수 입력 완료</span><strong>{stats.entered}</strong></article>
+   <article><span>점수 미입력</span><strong>{stats.missing}</strong></article>
   </div>
   {error&&<div className={styles.alertError}>{error}</div>}{notice&&<div className={styles.alertSuccess}>{notice}</div>}{!academicMutationsEnabled&&<div className={styles.alert}>성적 변경 기능이 안전 모드로 잠겨 있습니다. 조회와 출력은 사용할 수 있습니다.</div>}
   {!db&&<div className={styles.alert}>Supabase 연결 설정이 필요합니다.</div>}
   {!canManage&&db&&<div className={styles.alert}>성적관리 권한이 확인되지 않았습니다. Super Admin 또는 행정 담당자 계정으로 로그인해 주세요.</div>}
-  <div className={styles.tabs}><button className={tab==="lookup"?styles.activeTab:""} onClick={()=>setTab("lookup")}>1. 학생 성적 확인</button><button className={tab==="entry"?styles.activeTab:""} onClick={()=>setTab("entry")}>2. 과목별 점수 입력</button></div>
+  <div className={styles.tabs} aria-label="성적 업무 선택"><button type="button" className={tab==="entry"?styles.activeTab:""} onClick={()=>setTab("entry")}>과목별 점수 입력</button><button type="button" className={tab==="lookup"?styles.activeTab:""} onClick={()=>setTab("lookup")}>학생별 성적 확인</button></div>
   {tab==="lookup"&&<section className={styles.panel}>
-   <div className={styles.panelHead}><div><h3>학생별 성적 조회</h3><p>조회할 학과를 고른 뒤 학생 이름을 누르면, 과목별 점수와 미입력 과목이 별도 창으로 열립니다.</p></div><div className={styles.actions}><button onClick={exportCsv} disabled={!visibleStudents.length}>엑셀용 CSV</button><button onClick={()=>window.print()}>인쇄</button></div></div>
+   <div className={styles.panelHead}><div><h3>학생별 성적 확인</h3><p>학생 이름을 누르면 과목별 점수와 미입력 과목을 볼 수 있습니다.</p></div><div className={styles.actions}><button onClick={exportCsv} disabled={!visibleStudents.length}>엑셀용 CSV</button><button onClick={()=>window.print()}>인쇄</button></div></div>
    <input className={styles.search} value={search} onChange={e=>setSearch(e.target.value)} placeholder="학생 이름 또는 순번 검색"/>
    {loading?<p className={styles.empty}>데이터를 불러오는 중입니다…</p>:<div className={styles.tableWrap}><table><thead><tr><th>순번</th><th>학생 이름</th><th>학년</th><th>입력 과목</th><th>평균 점수</th><th></th></tr></thead><tbody>
     {visibleStudents.map(student=>{const enrolledCourses=visibleCourses.filter(course=>enrollments.some(e=>e.student_id===student.id&&e.course_id===course.id&&e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status)));const scores=enrolledCourses.map(course=>gradeByKey.get(student.id+"|"+course.id)?.score).filter((v):v is number=>v!==null&&v!==undefined);const average=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null;return <tr key={student.id} className={selectedStudentId===student.id?styles.selectedRow:""}><td>{student.student_number}</td><td><button className={styles.nameButton} onClick={()=>setSelectedStudentId(student.id)}>{student.full_name}</button></td><td>{student.cohort||"—"}</td><td>{scores.length} / {enrolledCourses.length}</td><td>{average===null?"—":average.toFixed(2)}</td><td><button className={styles.smallButton} onClick={()=>setSelectedStudentId(student.id)}>상세</button></td></tr>;})}
@@ -169,18 +168,19 @@ export default function GradeManagementModule({canManage}:{canManage:boolean}){
    </div></div>}
   </section>}
   {tab==="entry"&&<section className={styles.panel}>
-   <div className={styles.panelHead}><div><h3>과목별 일괄 입력</h3><p>과목을 선택하면 선택한 학과·학년의 학생 목록이 표시됩니다. 점수는 0~100점, 소수점 입력을 지원합니다.</p></div></div>
+   <div className={styles.panelHead}><div><h3>과목을 선택하고 점수를 저장하세요</h3><p>과목을 고르고 학생의 점수(0~100점)를 입력한 뒤 아래의 ‘점수 저장’을 누르면 됩니다. 빈칸은 저장하지 않습니다.</p></div></div>
    <div className={styles.entryFilters}>
-    <label>과목<SearchSelect value={courseId} placeholder="과목 검색" searchPlaceholder="과목 코드, 과목명 검색" options={entryCourses.map(x=>({value:x.id,label:`${x.course_code} · ${x.title}`,keywords:`${x.course_code} ${x.title}`}))} onChange={setCourseId}/></label>
+    <label>점수를 입력할 과목<SearchSelect value={courseId} placeholder="과목 검색" searchPlaceholder="과목 코드, 과목명 검색" options={entryCourses.map(x=>({value:x.id,label:`${x.course_code} · ${x.title}`,keywords:`${x.course_code} ${x.title}`}))} onChange={setCourseId}/></label>
    </div>
    {currentCourse&&<div className={styles.entryTitle}><strong>{currentCourse.title}</strong><span>{currentCourse.course_code} · {terms.find(x=>x.id===termId)?.name||"학기 미선택"}</span></div>}
    <div className={styles.tableWrap}><table><thead><tr><th>순번</th><th>학생 이름</th><th>점수</th><th>기존 점수</th><th>작업</th></tr></thead><tbody>
     {inputStudents.map(student=>{const old=gradeByKey.get(student.id+"|"+courseId);return <tr key={student.id}><td>{student.student_number}</td><td>{student.full_name}</td><td><input className={styles.scoreInput} type="number" min="0" max="100" step="0.01" disabled={!canManage||!academicMutationsEnabled||saving} value={inputValues[student.id]??""} onChange={e=>setInputValues(v=>({...v,[student.id]:e.target.value}))} aria-label={student.full_name+" 점수"}/></td><td>{old?.score??"—"}</td><td>{old&&<button className={styles.deleteButton} disabled={!academicMutationsEnabled||saving} onClick={()=>void deleteScore(student)}>삭제</button>}</td></tr>;})}
     {!inputStudents.length&&<tr><td colSpan={5} className={styles.empty}>{!termId?"먼저 학기를 선택하세요.":!courseId?"과목을 선택하세요.":"선택한 학과·학년에 등록된 학생이 없습니다."}</td></tr>}
    </tbody></table></div>
-   <div className={styles.saveRow}><span>{inputStudents.length}명 · 빈 칸은 저장하지 않습니다.</span><button className={styles.primary} disabled={!academicMutationsEnabled||!canManage||saving||!inputStudents.length||!courseId||!termId} onClick={()=>void saveScores()}>{saving?"저장 중…":"변경 점수 저장"}</button></div>
+   <div className={styles.saveRow}><span>{inputStudents.length}명 · 빈 칸은 저장하지 않습니다.</span><button className={styles.primary} disabled={!academicMutationsEnabled||!canManage||saving||!inputStudents.length||!courseId||!termId} onClick={()=>void saveScores()}>{saving?"저장 중…":"점수 저장"}</button></div>
   </section>}
   {loading&&<p className={styles.loading}>성적 데이터를 불러오는 중입니다.</p>}
-  <p className={styles.footnote}>현재는 점수만 관리합니다. 학점, 등급 환산 및 GPA 계산은 적용하지 않습니다. 미입력 점수는 0점으로 처리하지 않습니다.</p>
+  {onNext&&<div className={styles.nextStep}><span>점수 입력을 마쳤다면 다음 단계로 이동하세요.</span><button type="button" onClick={onNext}>다음: 학기 이수·진급</button></div>}
+  <p className={styles.footnote}>입력하지 않은 점수는 0점으로 계산하지 않습니다. 현재는 점수만 관리하며 학점·등급 및 GPA는 자동 계산하지 않습니다.</p>
  </div>;
 }

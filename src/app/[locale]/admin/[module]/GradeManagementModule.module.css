@@ -30,3 +30,11 @@
  .printSummary{display:flex;justify-content:space-between;margin-top:16px;font-size:12px}
  .printReport footer{display:flex;justify-content:space-between;margin-top:80px;font-size:11px}
 }
+
+
+/* Quick next action after reviewing or entering scores. */
+.nextStep{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--line,#e5e5df)}
+.nextStep span{font-size:12px;color:var(--muted,#77808a);line-height:1.5}
+.nextStep button{border:1px solid var(--navy,#17324a);border-radius:6px;background:var(--navy,#17324a);color:white;padding:10px 13px;font-size:12px;cursor:pointer;font-weight:700}
+.nextStep button:focus-visible{outline:2px solid #b89b58;outline-offset:2px}
+@media(max-width:720px){.nextStep{align-items:stretch;flex-direction:column}.nextStep button{width:100%;min-height:42px}}

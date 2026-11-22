@@ -206,3 +206,42 @@
 /* Timetable print link behaves like the existing action buttons. */
 .timetable-actions .timetable-print-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;line-height:1.35}
 .timetable-actions .timetable-print-link[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
+
+
+/* Academic student-workflow guide: three clear actions, no duplicated nested tabs. */
+.academics-workspace .academics-student-steps{margin:4px 0 16px;min-width:0}
+.academics-workspace .academics-student-steps-intro{font-size:13px;line-height:1.55;color:#637583;margin:0 0 10px}
+.academics-workspace .academics-student-step-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.academics-workspace .academics-student-step{display:flex;align-items:flex-start;gap:10px;text-align:left;padding:14px 12px;background:#fff;color:#304b5c;border:1px solid #d5dfe5;border-radius:9px;cursor:pointer;min-width:0;transition:border-color .12s,background-color .12s}
+.academics-workspace .academics-student-step:hover{border-color:#95adbc;background:#f8fbfc}
+.academics-workspace .academics-student-step:focus-visible{outline:2px solid #23628a;outline-offset:2px}
+.academics-workspace .academics-student-step.active{border:2px solid #294f69;background:#f3f7fa;padding:13px 11px}
+.academics-workspace .academics-student-step-number{display:grid;place-items:center;flex:0 0 26px;width:26px;height:26px;border:1px solid #c7d7df;border-radius:50%;font-size:12px;font-weight:700;color:#23465d}
+.academics-workspace .academics-student-step.active .academics-student-step-number{border-color:#294f69;background:#294f69;color:#fff}
+.academics-workspace .academics-student-step-content{display:flex;flex-direction:column;gap:5px;min-width:0}
+.academics-workspace .academics-student-step-content strong{font-size:14px;line-height:1.45;font-weight:700}
+.academics-workspace .academics-student-step-content small{font-size:11px;line-height:1.5;color:#657b89}
+.academics-workspace .academics-simple-filter{align-items:end;gap:12px;flex-wrap:wrap}
+.academics-workspace .academics-simple-filter>label{display:flex;flex-direction:column;gap:6px;min-width:200px;flex:0 1 285px;color:#526c7b;font-weight:650;font-size:12px}
+.academics-workspace .academics-simple-filter>label select{max-width:100%;min-height:40px}
+.academics-workspace .academics-simple-summary{font-size:12px;line-height:1.5;color:#365a70;font-weight:650;margin:12px 0}
+.academics-workspace .academics-simple-detail{display:block;margin-top:5px;font-size:11px;line-height:1.45;color:#6a7d8b;font-weight:400}
+.academics-workspace .academics-simple-done{color:#2c6147;font-size:12px;font-weight:700}
+.academics-workspace .academics-simple-readonly{color:#6b7983;font-size:12px}
+.academics-workspace .academics-simple-next{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;padding-top:15px;margin-top:8px;border-top:1px solid #e3e9ed}
+.academics-workspace .academics-simple-next span{font-size:12px;color:#647887}
+.academics-workspace .academics-semester-help{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 16px}
+.academics-workspace .academics-semester-help span{display:flex;flex-direction:column;gap:4px;padding:12px;background:#f7f9fa;border:1px solid #dde5e9;border-radius:7px;font-size:11px;line-height:1.5;color:#617684}
+.academics-workspace .academics-semester-help strong{font-size:12px;color:#284c65}
+@media(max-width:760px){
+ .academics-workspace .academics-student-step-list{grid-template-columns:1fr;gap:7px}
+ .academics-workspace .academics-student-step{padding:10px 12px;align-items:center}
+ .academics-workspace .academics-student-step.active{padding:9px 11px}
+ .academics-workspace .academics-student-step-content{gap:2px}
+ .academics-workspace .academics-student-step-content strong{font-size:13px}
+ .academics-workspace .academics-simple-filter>label{flex:1 1 100%}
+ .academics-workspace .academics-simple-next{justify-content:stretch}
+ .academics-workspace .academics-simple-next button{flex:1 1 100%;min-height:42px}
+ .academics-workspace .academics-semester-help{grid-template-columns:1fr}
+ .academics-workspace .academics-semester-help span{padding:9px 12px}
+}

@@ -23,7 +23,7 @@ export default function SemesterProgressionPanel({canManage}:{canManage:boolean}
    for(const item of [studentsResult,t,e,a,g])if(item.error)throw item.error;
    setStudents((studentsResult.data??[]) as Student[]);
    setTerms(t.data??[]);setTermRows(e.data??[]);setCourseRows(a.data??[]);setGradeRows(g.data??[]);
-   setSelectedTermId(current=>current||(t.data?.find(x=>x.status==="active")??t.data?.[0])?.id??"");
+   setSelectedTermId(current=>current||((t.data?.find(x=>x.status==="active")??t.data?.[0])?.id??""));
   }catch(err:any){setError(err.message||"학기 데이터 조회에 실패했습니다.");}finally{setLoading(false);}
  },[supabase]);
  useEffect(()=>{void loadTermData();},[loadTermData]);

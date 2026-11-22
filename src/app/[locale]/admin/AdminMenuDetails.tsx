@@ -6,7 +6,7 @@ export default function AdminMenuDetails({children}:{children:ReactNode}){
   const detailsRef=useRef<HTMLDetailsElement>(null);
 
   useEffect(()=>{
-    const query=window.matchMedia("(max-width:650px)");
+    const query=window.matchMedia("(max-width:900px)");
     const sync=()=>{if(detailsRef.current)detailsRef.current.open=!query.matches;};
     sync();
     query.addEventListener("change",sync);

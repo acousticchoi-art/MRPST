@@ -50,7 +50,19 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
   const moduleGroups=[["academic",["students","academics"]],["finance",["finance"]],["operations",["facilities","library","meetings"]],["system",["administration","website"]]] as const;
   const visibleInGroup=(keys:readonly string[])=>visible.filter(([moduleKey])=>keys.includes(moduleKey));
   const moduleNames:Record<string,string>={finance:t.finance,students:t.students,academics:t.academics,facilities:t.facilities,library:t.library,meetings:t.meetings,administration:t.administration,website:t.website};
-  const adminShell=(content:ReactNode)=>locale==="my"?<InlineAdminEditor locale={locale}>{content}</InlineAdminEditor>:<InlinePageEditor pageKey={`admin-${module}`} locale={locale}>{content}</InlinePageEditor>;
+  // Fetch the stored edit with the server-rendered page so it is available
+  // before client-side modules mount and can be reapplied after re-renders.
+  let inlineValues:Record<string,string>={};
+  if(locale!=="my"){
+    const {data}=await supabase.from("website_contents").select("body")
+      .eq("content_type","page").eq("content_key",`inline-page-admin-${module}`)
+      .eq("locale",locale).eq("is_published",true).maybeSingle();
+    try{
+      const saved=data?.body?JSON.parse(data.body):{};
+      if(saved&&typeof saved==="object"&&!Array.isArray(saved))inlineValues=saved;
+    }catch{}
+  }
+  const adminShell=(content:ReactNode)=>locale==="my"?<InlineAdminEditor locale={locale}>{content}</InlineAdminEditor>:<InlinePageEditor pageKey={`admin-${module}`} locale={locale} initialValues={inlineValues}>{content}</InlinePageEditor>;
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>} {adminShell(<div className="admin">
     <aside className="sidebar">
       <Link href={`/${locale}/admin`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>

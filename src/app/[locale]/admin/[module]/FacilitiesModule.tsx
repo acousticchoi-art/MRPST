@@ -1,4 +1,6 @@
 "use client";
+import AdminModuleHeading from "./AdminModuleHeading";
+
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {AdminFormActions,FormField,SearchSelect} from "./AdminUI";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
@@ -36,7 +38,7 @@ export default function FacilitiesModule({canManage,locale}:{canManage:boolean;l
  const openRepairs=repairs.filter(x=>!["completed","cancelled"].includes(x.status));
  const tabs=[["overview",locale==="my"?"လက်ရှိအခြေအနေ":"현황"],["buildings",locale==="my"?"နေရာနှင့် အဆောက်အအုံ":"공간·건물"],["inventory",locale==="my"?"ပစ္စည်းကိရိယာ":"비품"],["vehicles",locale==="my"?"ယာဉ်":"차량"],["vehicle-logs",locale==="my"?"ယာဉ်အသုံးပြု မှတ်တမ်း":"운행 기록"],["maintenance",locale==="my"?"ပြုပြင်မှု တောင်းဆိုရန်":"수리 요청"]];
  return <div className="facility-workspace">
-  <div className="facility-intro"><div><span className="eyebrow">CAMPUS & PROPERTY OPERATIONS</span><h2>시설 관리</h2><p>공간과 비품을 등록하고, 차량 운행과 수리 요청을 순서대로 관리합니다.</p></div></div>
+  <div className="facility-intro"><div><AdminModuleHeading moduleKey="facilities"/></div></div>
   <div className="facility-stats"><article><span>건물</span><strong>{buildings.length}</strong><small>등록 시설</small></article><article><span>비품·장비</span><strong>{items.reduce((n,x)=>n+Number(x.quantity),0)}</strong><small>{items.length}개 품목</small></article><article><span>차량</span><strong>{vehicles.length}</strong><small>등록 차량</small></article><article><span>진행 중 수리</span><strong>{openRepairs.length}</strong><small>완료·취소 제외</small></article></div>
   <div className="facility-workflow"><button onClick={()=>setTab("buildings")}><b>1</b><span><strong>공간 등록</strong><small>건물과 주요 공간을 먼저 등록합니다.</small></span></button><button onClick={()=>setTab("inventory")}><b>2</b><span><strong>비품 관리</strong><small>비품을 공간에 연결해 보관 위치를 확인합니다.</small></span></button><button onClick={()=>setTab("maintenance")}><b>3</b><span><strong>수리 요청 처리</strong><small>접수부터 완료까지 상태를 관리합니다.</small></span></button></div>
   <div className="facility-tabs">{tabs.map(([key,label])=><button key={key} className={tab===key?"selected":""} onClick={()=>{setTab(key);setSearch("");}}>{label}</button>)}</div>

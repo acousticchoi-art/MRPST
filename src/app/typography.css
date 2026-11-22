@@ -147,3 +147,41 @@
 .admin .website-workspace .website-tabs-v2 button span{color:#617784}
 .admin .website-workspace .website-preview-link{color:#173e59}
 .admin .website-workspace .website-notice-actions button:not(.danger){color:#173e59}
+
+/* The eight administration modules share one bilingual page-heading hierarchy. */
+.admin .admin-module-eyebrow{
+  display:block;
+  margin:0 0 8px;
+  color:#6f8090;
+  font-family:var(--type-heading-font);
+  font-size:12px;
+  font-weight:700;
+  line-height:1.6;
+  letter-spacing:0;
+}
+.admin .admin-module-title{
+  margin:0 0 8px;
+  color:#173e59;
+  font-family:var(--type-heading-font);
+  font-size:var(--type-page-title);
+  font-weight:750;
+  line-height:1.35;
+  letter-spacing:-.035em;
+  overflow-wrap:anywhere;
+}
+.admin .admin-module-description{
+  margin:0;
+  max-width:900px;
+  color:#526875;
+  font-family:var(--type-heading-font);
+  font-size:var(--type-body);
+  font-weight:400;
+  line-height:1.8;
+}
+[lang="my"] .admin .admin-module-title{letter-spacing:0;line-height:1.6}
+[lang="my"] .admin .admin-module-description{line-height:1.9}
+@media(max-width:650px){
+  .admin .admin-module-eyebrow{font-size:11px}
+  .admin .admin-module-title{font-size:var(--type-page-title);line-height:1.4}
+  .admin .admin-module-description{font-size:13px}
+}

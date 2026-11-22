@@ -90,25 +90,6 @@
 .academics-secondary:disabled{opacity:.45;cursor:not-allowed}
 .academics-slot-edit{align-self:flex-start;border:0;background:transparent;color:#526b82;font-size:10px;padding:2px 0;cursor:pointer}
 
-/* Academic timetable export and print layout */
-.academics-print-sheet{display:none}
-@media print{
- @page{size:A4 landscape;margin:10mm}
- body *{visibility:hidden!important}
- .academics-print-sheet,.academics-print-sheet *{visibility:visible!important}
- .academics-print-sheet{display:block!important;position:absolute;left:0;top:0;width:100%;color:#172b3c;background:#fff;font-family:Arial,sans-serif}
- .academics-print-sheet header{margin:0 0 12px;padding:0 0 9px;border-bottom:2px solid #263b4d}
- .academics-print-sheet h1{font-size:20px;margin:0 0 5px}
- .academics-print-sheet header p{font-size:12px;margin:0;color:#536273}
- .academics-print-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;align-items:start}
- .academics-print-grid>section{min-height:125mm;border:1px solid #cfd5da;border-radius:4px;padding:6px;break-inside:avoid}
- .academics-print-grid h3{font-size:12px;margin:0 0 8px;padding-bottom:5px;border-bottom:1px solid #d9dee2}
- .academics-print-grid article{display:flex;flex-direction:column;gap:4px;padding:7px 5px;margin:5px 0;border:1px solid #d9dee2;border-left:3px solid #b99b5b;border-radius:3px;break-inside:avoid}
- .academics-print-grid article strong{font-size:9px;color:#806b43}
- .academics-print-grid article b{font-size:10px}
- .academics-print-grid article span,.academics-print-grid article small,.academics-print-grid section>p{font-size:8px;color:#596775;overflow-wrap:anywhere}
-}
-
 /* Academic course syllabus cards and editor */
 .academics-syllabus-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
 .academics-syllabus-card{border:1px solid var(--line);border-radius:9px;background:#fff;padding:17px;min-width:0}
@@ -2194,5 +2175,4 @@ input,select,textarea,button{max-width:100%}
 .admin-main .content :is(.facility-delete-action,.website-notice-actions .danger,.settings-activate button){border-color:#e5c2bd!important;background:#fff7f5!important;color:#a33f36!important}
 .admin-main .content :is(.facility-delete-action,.website-notice-actions .danger,.settings-activate button):not(:disabled):hover{background:#fff0ed!important;border-color:#dca99f!important}
 .settings-backup{max-width:680px;border:1px solid var(--line);border-radius:7px;background:#f7f7f4;padding:16px}.settings-backup strong{display:block;font-size:13px;color:var(--navy)}.settings-backup p{font-size:12px;line-height:1.7;color:var(--muted);margin:8px 0 14px}
-.admin-print-button{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:6px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}.student-profile-head h3 .student-status{vertical-align:middle;margin-left:7px}.student-profile-head p b{font-size:10px;color:#637281}.student-profile-head p i{font-style:normal;color:#bdc8ce;margin:0 4px}.student-at-a-glance{margin:17px 0 0}.student-at-a-glance>div:first-child{display:flex;align-items:baseline;gap:8px}.student-at-a-glance .eyebrow{font-size:10px}.student-at-a-glance h4{font-size:13px;margin:0}.student-at-a-glance .student-summary-grid{margin:9px 0 0}.student-status-actions{position:relative}.student-status-actions summary{list-style:none;border:1px solid var(--line);background:#fff;border-radius:5px;padding:7px 10px;font-size:11px;cursor:pointer;color:var(--navy);white-space:nowrap}.student-status-actions summary::-webkit-details-marker{display:none}.student-status-actions summary:after{content:"⌄";margin-left:6px}.student-status-actions[open]>div{position:absolute;right:0;top:calc(100% + 5px);z-index:4;display:flex;flex-direction:column;gap:5px;min-width:105px;padding:6px;border:1px solid var(--line);border-radius:6px;background:#fff;box-shadow:0 8px 20px rgba(22,45,64,.15)}.student-status-actions button{width:100%;text-align:left;white-space:nowrap}
-@media print{ @page{margin:12mm} body{background:#fff!important} .admin>.sidebar,.admin>.admin-main>.admin-desktop-topbar,.sidebar-mobile-tools,.admin-print-button,.student-profile-actions,.student-detail-close,.student-detail-tabs,.settings-tabs,.settings-workflow,.academics-tabs,.timetable-actions,.facility-actions,.library-actions,.meeting-actions{display:none!important} .admin{display:block!important;background:#fff!important}.admin-main,.admin-main>.content{margin:0!important;padding:0!important;width:100%!important}.admin-main>.content{max-width:none!important}.admin :is(button,input,select,textarea){display:none!important}.admin :is(.student-roster,.student-detail,.settings-panel,.academics-panel,.finance-panel,.facility-panel,.library-panel,.meeting-detail){box-shadow:none!important;border-color:#ccd5da!important}.student-detail-overlay{position:static!important;display:block!important;padding:0!important;background:transparent!important}.student-detail-floating{width:100%!important;max-height:none!important;overflow:visible!important;padding:0!important;box-shadow:none!important;border:0!important}.student-summary-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}.student-panel{break-inside:avoid} }
+.student-profile-head h3 .student-status{vertical-align:middle;margin-left:7px}.student-profile-head p b{font-size:10px;color:#637281}.student-profile-head p i{font-style:normal;color:#bdc8ce;margin:0 4px}.student-at-a-glance{margin:17px 0 0}.student-at-a-glance>div:first-child{display:flex;align-items:baseline;gap:8px}.student-at-a-glance .eyebrow{font-size:10px}.student-at-a-glance h4{font-size:13px;margin:0}.student-at-a-glance .student-summary-grid{margin:9px 0 0}.student-status-actions{position:relative}.student-status-actions summary{list-style:none;border:1px solid var(--line);background:#fff;border-radius:5px;padding:7px 10px;font-size:11px;cursor:pointer;color:var(--navy);white-space:nowrap}.student-status-actions summary::-webkit-details-marker{display:none}.student-status-actions summary:after{content:"⌄";margin-left:6px}.student-status-actions[open]>div{position:absolute;right:0;top:calc(100% + 5px);z-index:4;display:flex;flex-direction:column;gap:5px;min-width:105px;padding:6px;border:1px solid var(--line);border-radius:6px;background:#fff;box-shadow:0 8px 20px rgba(22,45,64,.15)}.student-status-actions button{width:100%;text-align:left;white-space:nowrap}

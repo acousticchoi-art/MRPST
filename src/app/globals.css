@@ -1987,7 +1987,7 @@ html body .admin .sidebar .side-link.active::after{
   line-height:1.56!important;
 }
 [lang="ko"] .homepage .hero.hero-redesign h1{
-  font-weight:800!important;
+  font-weight:900!important;
 }
 
 .graduate-import{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;margin:0 0 20px;padding:18px 20px;border:1px solid #d8e4eb;border-radius:12px;background:#fff;box-shadow:0 3px 12px rgba(16,45,66,.04)}

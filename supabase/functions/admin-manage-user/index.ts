@@ -97,11 +97,42 @@ Deno.serve(async (req: Request) => {
         await admin.auth.admin.deleteUser(userId);
         return json({ error: linkError.message }, 400);
       }
+      const libraryMemberPayload = {
+        member_number: student.student_number,
+        full_name: student.full_name,
+        member_type: "student",
+        phone: null,
+        email,
+        department: null,
+        student_id: studentId,
+        is_active: true,
+        created_by: caller.id,
+      };
+      const { data: existingLibraryMember, error: libraryLookupError } = await admin.from("library_members")
+        .select("id,student_id").or(`student_id.eq.${studentId},member_number.eq.${student.student_number}`).maybeSingle();
+      let libraryError = libraryLookupError;
+      if (!libraryError && existingLibraryMember?.student_id && existingLibraryMember.student_id !== studentId) {
+        libraryError = { message: "같은 도서관 회원번호가 다른 학생에게 연결되어 있습니다." };
+      }
+      if (!libraryError && existingLibraryMember) {
+        const { error } = await admin.from("library_members").update(libraryMemberPayload).eq("id", existingLibraryMember.id);
+        libraryError = error;
+      } else if (!libraryError) {
+        const { error } = await admin.from("library_members").insert(libraryMemberPayload);
+        libraryError = error;
+      }
+      if (libraryError) {
+        await admin.from("students").update({ auth_user_id: null }).eq("id", studentId).eq("auth_user_id", userId);
+        await admin.from("user_roles").delete().eq("user_id", userId).eq("role", "student");
+        await admin.from("user_profiles").delete().eq("user_id", userId);
+        await admin.auth.admin.deleteUser(userId);
+        return json({ error: `도서관 회원 연결에 실패했습니다: ${libraryError.message}` }, 400);
+      }
       const { error: auditError } = await admin.from("admin_audit_log").insert({
         actor_id: caller.id, entity_type: "student_account", entity_id: studentId, action: "insert",
-        details: { event: "student_account_created", student_number: student.student_number, email },
+        details: { event: "student_account_created", student_number: student.student_number, email, library_member_number: student.student_number },
       });
-      return json({ user_id: userId, email, student_number: student.student_number, audit_logged: !auditError, audit_warning: auditError ? "학생 계정은 생성되었지만 변경 이력 기록에 실패했습니다." : undefined });
+      return json({ user_id: userId, email, student_number: student.student_number, library_member_number: student.student_number, audit_logged: !auditError, audit_warning: auditError ? "학생·도서관 계정은 생성되었지만 변경 이력 기록에 실패했습니다." : undefined });
     }
 
     if (body.action === "create") {

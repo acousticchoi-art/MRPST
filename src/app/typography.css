@@ -202,3 +202,7 @@
 .student-profile-actions .student-certificate-link:hover{background:#e7f0f5}
 @media(max-width:650px){.student-profile-actions .student-certificate-link{flex:1 1 130px;min-height:42px}}
 
+
+/* Timetable print link behaves like the existing action buttons. */
+.timetable-actions .timetable-print-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;line-height:1.35}
+.timetable-actions .timetable-print-link[aria-disabled="true"]{opacity:.55;cursor:not-allowed}

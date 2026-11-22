@@ -4,6 +4,7 @@ import "../admin.css";
 import "../admin-workflows.css";
 import "../admin-design-system.css";
 import "../registration.css";
+import "../typography.css";
 import {notFound,redirect} from "next/navigation";
 import LocalePreference from "./LocalePreference";
 const locales=["my","ko"];

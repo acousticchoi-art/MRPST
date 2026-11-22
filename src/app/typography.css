@@ -1,0 +1,125 @@
+/* MRPST shared typography: loaded after all existing page styles.
+   Consistent hierarchy without changing navigation, layout or data workflows. */
+:root{
+  --type-body:14px;
+  --type-caption:12px;
+  --type-label:13px;
+  --type-control:14px;
+  --type-table:13px;
+  --type-card-title:17px;
+  --type-section-title:22px;
+  --type-page-title:34px;
+  --type-public-body:15px;
+  --type-public-card-title:21px;
+  --type-public-section-title:36px;
+  --type-public-page-title:clamp(36px,4.7vw,60px);
+  --type-heading-font:"Noto Sans KR","Noto Sans Myanmar",Arial,sans-serif;
+}
+[lang="my"]{
+  --type-heading-font:"Noto Sans Myanmar","Myanmar Text",Arial,sans-serif;
+}
+[lang="ko"]{
+  --type-heading-font:"Noto Sans KR",Arial,sans-serif;
+}
+/* Shared reading rhythm across public and administration screens. */
+[lang] :is(.homepage,.about-page,.admin,.module-page,.registration-admin,.login-wrap){
+  font-family:var(--type-heading-font);
+}
+[lang] :is(.admin,.module-page,.registration-admin,.login-wrap){
+  font-size:var(--type-body);
+  line-height:1.7;
+}
+[lang] :is(.admin,.module-page,.registration-admin,.login-wrap) :is(h1,h2,h3,h4,h5,h6){
+  font-family:var(--type-heading-font);
+  color:var(--navy);
+  letter-spacing:-.025em;
+  line-height:1.4;
+  font-weight:750;
+}
+[lang] :is(.admin-heading,.module-page-content > h1,.registration-inner > h1,.login-card > h1){
+  font-family:var(--type-heading-font);
+  font-size:var(--type-page-title);
+  font-weight:750;
+  line-height:1.35;
+  letter-spacing:-.035em;
+}
+[lang] :is(.admin,.module-page,.registration-admin) :is(.module-heading h2,.student-section h2,.academics-section h2,.finance-section h2,.section-title){
+  font-family:var(--type-heading-font);
+  font-size:var(--type-section-title);
+  font-weight:750;
+  line-height:1.4;
+}
+[lang] :is(.admin,.module-page,.registration-admin) :is(.module h3,.module strong,.finance-panel h3,.library-panel h3,.facility-panel h3,.student-panel h3,.academics-panel h3,.settings-panel h3,.history-copy h3){
+  font-family:var(--type-heading-font);
+  font-size:var(--type-card-title);
+  font-weight:700;
+  line-height:1.5;
+}
+[lang] :is(.admin,.module-page,.registration-admin) :is(.module p,.finance-panel p,.library-panel p,.facility-panel p,.student-panel p,.admin-subtitle,.module-page-content > p){
+  font-size:var(--type-body);
+  line-height:1.8;
+}
+[lang] :is(.admin,.module-page,.registration-admin) :is(label,.form-label,.field-label){
+  font-size:var(--type-label);
+  line-height:1.6;
+}
+[lang] :is(.admin,.module-page,.registration-admin,.login-wrap) :is(input,textarea,select){
+  font-family:var(--type-heading-font);
+  font-size:var(--type-control);
+  line-height:1.6;
+}
+[lang] :is(.admin,.module-page,.registration-admin) :is(table,.finance-table,.student-table,.library-table,.facility-table,.academics-table){
+  font-size:var(--type-table);
+  line-height:1.65;
+}
+[lang] :is(.admin,.module-page,.registration-admin) :is(th,td){line-height:1.65}
+[lang] :is(.admin,.module-page,.registration-admin) :is(.stat span,.module-heading span,.help-text,.field-hint,.caption){
+  font-size:var(--type-caption);
+  line-height:1.65;
+}
+/* Public-page heading and content hierarchy. */
+[lang] :is(.homepage,.about-page) :is(.hero h1,.about-hero h1){
+  font-family:var(--type-heading-font);
+  font-size:var(--type-public-page-title);
+  font-weight:800;
+  line-height:1.25;
+  letter-spacing:-.04em;
+}
+[lang] :is(.homepage,.about-page) :is(.section h2,.section-title){
+  font-family:var(--type-heading-font);
+  font-size:var(--type-public-section-title);
+  font-weight:750;
+  line-height:1.35;
+  letter-spacing:-.025em;
+}
+[lang] :is(.homepage,.about-page) :is(.card h3,.history-copy h3){
+  font-family:var(--type-heading-font);
+  font-size:var(--type-public-card-title);
+  font-weight:700;
+  line-height:1.45;
+}
+[lang] :is(.homepage,.about-page) :is(.hero p,.section p,.card p,.history-copy p){
+  font-size:var(--type-public-body);
+  line-height:1.9;
+}
+/* Keep compact screens readable; preserve existing grids and navigation. */
+@media(max-width:650px){
+  :root{
+    --type-page-title:28px;
+    --type-section-title:20px;
+    --type-card-title:16px;
+    --type-public-body:14px;
+    --type-public-card-title:18px;
+    --type-public-section-title:29px;
+    --type-public-page-title:clamp(31px,8vw,40px);
+  }
+}
+/* Myanmar text needs taller lines for combining marks. */
+[lang="my"] :is(.admin,.module-page,.registration-admin,.homepage,.about-page) :is(h1,h2,h3,h4,h5,h6){
+  letter-spacing:0;
+  line-height:1.6;
+}
+[lang="my"] :is(.admin,.module-page,.registration-admin,.homepage,.about-page) :is(p,li,td,th,label,button){
+  letter-spacing:0;
+  line-height:1.85;
+}

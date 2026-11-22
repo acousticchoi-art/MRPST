@@ -182,9 +182,9 @@
   }
   html body .admin>.sidebar>.admin-menu-details>summary::-webkit-details-marker{display:none!important}
   html body .admin>.sidebar>.admin-menu-details>summary::after{
-    content:"메뉴 ▾";font-size:11px;white-space:nowrap;margin-left:12px;
+    content:"▾";font-size:11px;white-space:nowrap;margin-left:12px;
   }
-  html body .admin>.sidebar>.admin-menu-details[open]>summary::after{content:"닫기 ▴";}
+  html body .admin>.sidebar>.admin-menu-details[open]>summary::after{content:"▴";}
 
   html body .admin>.sidebar>.admin-menu-details:not([open])>.sidebar-nav{display:none!important}
   html body .admin>.sidebar>.admin-menu-details[open]>.sidebar-nav{

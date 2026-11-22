@@ -84,6 +84,7 @@ export default function FinanceModule(){
  const budgetTotal=(b:Budget)=>b.finance_budget_lines?.reduce((s,l)=>s+Number(l.planned_amount),0)??0;
  return <div className="finance-workspace">
  <div className="finance-intro"><div><span className="eyebrow">INTEGRATED ACCOUNTING</span><h2>Financial Management</h2><p>일반·특별·장학금 재정을 통합 관리합니다.</p></div><span className="finance-currency">BASE CURRENCY · MMK</span></div>
+ <div className="finance-sheet-action"><a className="finance-primary finance-sheet-link" href="https://docs.google.com/spreadsheets/d/1gJHIF9cGhwnAmD3d0541fMjfLkBae_uz_RNn4Nl86qc/edit?gid=2034500033#gid=2034500033" target="_blank" rel="noopener noreferrer">기존 회계 시트 열기 <span aria-hidden="true">↗</span></a></div>
  {error&&<div className="finance-alert error">{error}</div>}{notice&&<div className="finance-alert success">{notice}</div>}{!supabase&&<div className="finance-alert">Supabase 환경변수를 설정하면 실제 재정 데이터를 사용할 수 있습니다.</div>}
  {tab==="overview"&&<>
  <section className="finance-cashbook-head"><div><span className="eyebrow">2026 CASHBOOK</span><h3>수입·지출 장부</h3><p>수입과 지출을 기록하고, 월별 합계를 바로 확인하세요.</p></div><label>조회 월<input type="month" value={cashbookMonth} onChange={e=>setCashbookMonth(e.target.value)}/></label></section>

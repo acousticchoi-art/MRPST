@@ -1,4 +1,6 @@
 "use client";
+import AdminModuleHeading from "./AdminModuleHeading";
+
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {FormField} from "./AdminUI";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
@@ -113,7 +115,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
  const notices=items.filter(x=>x.content_type==="announcement").sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
  return <div className="website-workspace website-workspace-v2">{!canManage&&<div className="website-alert">읽기 전용 권한입니다. 홈페이지 콘텐츠와 공지사항을 조회할 수 있습니다.</div>}
   <div className="website-heading website-heading-v2">
-   <div><span className="eyebrow">PUBLIC WEBSITE CMS</span><h2>홈페이지 관리</h2><p>공지사항을 먼저 관리하고, 필요한 경우 아래에서 두 언어의 홈페이지 문구를 함께 수정합니다.</p></div>
+   <div><AdminModuleHeading moduleKey="website"/></div>
    <a className="website-preview-link" href="/ko" target="_blank" rel="noreferrer">홈페이지 미리보기 ↗</a>
   </div>
   <div className="website-overview">

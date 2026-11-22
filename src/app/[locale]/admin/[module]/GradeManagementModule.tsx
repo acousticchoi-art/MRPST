@@ -13,7 +13,7 @@ type Grade={id:string;student_id:string;course_id:string;term_id:string;score:nu
 
 const csvCell=(value:unknown)=>'"'+String(value??"").replace(/"/g,'""')+'"';
 
-export default function GradeManagementModule({canManage,onNext}:{canManage:boolean;onNext?:()=>void}){
+export default function GradeManagementModule({canManage,onNext,initialTermId,onTermChange}:{canManage:boolean;onNext?:()=>void;initialTermId?:string;onTermChange?:(id:string)=>void}){
  const db=useMemo(()=>createSupabaseBrowserClient(),[]); const academicMutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const [departments,setDepartments]=useState<Department[]>([]);
  const [terms,setTerms]=useState<Term[]>([]);
@@ -21,7 +21,7 @@ export default function GradeManagementModule({canManage,onNext}:{canManage:bool
  const [courses,setCourses]=useState<Course[]>([]);
  const [grades,setGrades]=useState<Grade[]>([]);
  const [enrollments,setEnrollments]=useState<Enrollment[]>([]);
- const [termId,setTermId]=useState("");
+ const [termId,setTermId]=useState(initialTermId??"");
  const [departmentId,setDepartmentId]=useState("");
  const [level,setLevel]=useState("");
  const [courseId,setCourseId]=useState("");
@@ -55,11 +55,11 @@ export default function GradeManagementModule({canManage,onNext}:{canManage:bool
    const nextTerms=(t.data??[]) as Term[];
    const nextDepartments=(d.data??[]) as Department[];
    setDepartments(nextDepartments);setTerms(nextTerms);setStudents((s.data??[]) as Student[]);setCourses((c.data??[]) as Course[]);setGrades((g.data??[]) as Grade[]);setEnrollments((e.data??[]) as Enrollment[]);
-   if(!termId&&nextTerms.length){setTermId((nextTerms.find(x=>x.status==="active")??nextTerms[0]).id);}
+   if(!termId&&nextTerms.length){const nextId=(nextTerms.find(x=>x.status==="active")??nextTerms[0]).id;setTermId(nextId);onTermChange?.(nextId);}
    
   }catch(err:any){setError(err?.message||"성적 데이터를 불러오지 못했습니다.");}
   finally{setLoading(false);}
- },[db,termId,departmentId]);
+ },[db,termId,departmentId,onTermChange]);
 
  useEffect(()=>{void load();},[load]);
 
@@ -138,7 +138,7 @@ export default function GradeManagementModule({canManage,onNext}:{canManage:bool
    <span className={styles.permission}>{canManage&&academicMutationsEnabled?"점수 입력 가능":"조회 전용"}</span>
   </div>
   <div className={styles.filters}>
-   <label>1. 학기 선택<select value={termId} onChange={e=>setTermId(e.target.value)}><option value="">학기 선택</option>{terms.map(x=><option key={x.id} value={x.id}>{x.name} ({x.academic_year})</option>)}</select></label>
+   <label>1. 학기 선택<select value={termId} onChange={e=>{setTermId(e.target.value);onTermChange?.(e.target.value);}}><option value="">학기 선택</option>{terms.map(x=><option key={x.id} value={x.id}>{x.name} ({x.academic_year})</option>)}</select></label>
    <label>2. 학과 선택<select value={departmentId} onChange={e=>{setDepartmentId(e.target.value);setSelectedStudentId("");}}><option value="">전체 학과</option>{departments.map(x=><option key={x.id} value={x.id}>{x.name_ko||x.name_en||x.code}</option>)}</select></label>
    <label>3. 학년 선택<select value={level} onChange={e=>{setLevel(e.target.value);setSelectedStudentId("");}}><option value="">전체 학년</option>{levels.map(x=><option key={x} value={x}>{x}</option>)}</select></label>
   </div>

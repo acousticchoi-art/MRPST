@@ -189,3 +189,16 @@
 /* Student account dialog opens from the student detail overlay (z-index:1000).
    Keep the account dialog above that overlay on desktop and mobile. */
 .student-account-backdrop{z-index:1100!important}
+
+
+/* Student profile dialogs open outside the student detail overlay. */
+.student-profile-backdrop{z-index:1100!important}
+.student-profile-actions .student-certificate-link{
+ display:inline-flex;align-items:center;justify-content:center;
+ min-height:38px;padding:7px 12px;border:1px solid #c8d8e1;
+ border-radius:7px;background:#f4f8fa;color:#173e59;
+ text-decoration:none;font-size:12px;font-weight:700;white-space:nowrap;
+}
+.student-profile-actions .student-certificate-link:hover{background:#e7f0f5}
+@media(max-width:650px){.student-profile-actions .student-certificate-link{flex:1 1 130px;min-height:42px}}
+

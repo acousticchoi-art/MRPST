@@ -185,3 +185,7 @@
   .admin .admin-module-title{font-size:var(--type-page-title);line-height:1.4}
   .admin .admin-module-description{font-size:13px}
 }
+
+/* Student account dialog opens from the student detail overlay (z-index:1000).
+   Keep the account dialog above that overlay on desktop and mobile. */
+.student-account-backdrop{z-index:1100!important}

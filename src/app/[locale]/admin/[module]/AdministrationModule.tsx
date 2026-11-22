@@ -1,4 +1,6 @@
 "use client";
+import AdminModuleHeading from "./AdminModuleHeading";
+
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {FormField,SearchSelect} from "./AdminUI";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
@@ -114,7 +116,7 @@ export default function AdministrationModule(){
  }
  const tabs=[["users","계정 관리"],["departments","부서 관리"],["audit","변경 이력"],["backup","운영 백업"]];
  return <div className="settings-workspace">
-  <div className="settings-heading"><span className="eyebrow">SYSTEM GOVERNANCE</span><h2>계정·권한 관리</h2><p>로그인 계정, 소속 및 시스템 접근 권한을 관리합니다.</p></div>
+  <div className="settings-heading"><AdminModuleHeading moduleKey="administration"/></div>
   <div className="settings-stats">
    <article><span>전체 회원</span><strong>{users.length}</strong></article>
    <article><span>활성 회원</span><strong>{users.filter(x=>x.is_active).length}</strong></article>

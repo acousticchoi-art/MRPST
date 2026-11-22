@@ -28,12 +28,12 @@
  .lecture-print-grid{min-width:680px;font-size:10px}
  .lecture-print-sheet h1{font-size:20px}
 }
-@page{size:A4 landscape;margin:9mm}
+@page{size:A4 landscape;margin:6mm}
 @media print{
  html,body{margin:0!important;padding:0!important;background:white!important}
  .lecture-print-page{background:#fff;padding:0;min-height:0}
  .lecture-print-toolbar{display:none!important}
- .lecture-print-sheet{max-width:none;width:100%;padding:0;border:0;box-shadow:none;overflow:visible}
+ .lecture-print-sheet{max-width:none;width:285mm;padding:0;border:0;box-shadow:none;overflow:visible;zoom:var(--timetable-print-scale,1);break-inside:avoid-page;page-break-inside:avoid}
  .lecture-print-sheet>header{padding-bottom:9px;margin-bottom:12px}
  .lecture-print-sheet h1{font-size:17pt;margin:4px 0 7px}
  .lecture-print-sheet>header>div{font-size:9pt}
@@ -48,3 +48,29 @@
  .lecture-print-course :is(span,small),.lecture-print-event small{font-size:7pt}
  .lecture-print-sheet footer{font-size:7pt}
 }
+
+/* Offscreen print-sized copy: measure the real row content before printing.
+   A4 landscape has 285mm usable width with 6mm page margins. */
+.lecture-print-measure{
+ position:fixed!important;top:0!important;left:-20000px!important;
+ visibility:hidden!important;pointer-events:none!important;
+ box-sizing:border-box!important;display:block!important;
+ width:285mm!important;min-width:0!important;max-width:none!important;
+ height:auto!important;min-height:0!important;
+ padding:0!important;margin:0!important;border:0!important;
+ box-shadow:none!important;overflow:visible!important;zoom:1!important;
+}
+.lecture-print-measure>header{padding-bottom:9px;margin-bottom:12px}
+.lecture-print-measure h1{font-size:17pt;margin:4px 0 7px}
+.lecture-print-measure>header>div{font-size:9pt}
+.lecture-print-measure .lecture-print-grid{min-width:0;width:100%;font-size:8pt}
+.lecture-print-measure .lecture-print-grid :is(th,td){padding:5px 4px}
+.lecture-print-measure .lecture-print-grid th:first-child{width:18mm}
+.lecture-print-measure .lecture-print-grid tbody th{font-size:8pt}
+.lecture-print-measure .lecture-print-course,
+.lecture-print-measure .lecture-print-event{padding:4px;margin-bottom:3px}
+.lecture-print-measure .lecture-print-course b,
+.lecture-print-measure .lecture-print-event b{font-size:8pt}
+.lecture-print-measure .lecture-print-course :is(span,small),
+.lecture-print-measure .lecture-print-event small{font-size:7pt}
+.lecture-print-measure footer{font-size:7pt}

@@ -22,14 +22,14 @@ const copy = {
   ko:{
     admin:"MRPST 관리자",dashboard:"대시보드",view:"홈페이지 보기 ↗",
     finance:"재정 관리",students:"학생 관리",academics:"학사 관리",facilities:"시설 관리",
-    library:"도서관 관리",meetings:"회의 관리",administration:"계정·권한 관리",website:"홈페이지 관리",
-    workspace:"업무 메뉴",back:"대시보드로 돌아가기",groups:{academic:"학사·학생",finance:"재정",operations:"학교 운영",system:"시스템·홈페이지"}
+    library:"도서관 관리",meetings:"회의 자료",administration:"계정·권한 관리",website:"홈페이지 관리",
+    workspace:"WORKSPACE",back:"대시보드로 돌아가기",groups:{academic:"학사·학생",finance:"재정",operations:"학교 운영",system:"시스템·홈페이지"}
   },
   my:{
     admin:"MRPST အုပ်ချုပ်ရေး",dashboard:"ဒက်ရှ်ဘုတ်",view:"ဝဘ်ဆိုက်ကြည့်ရန် ↗",
-    finance:"ဘဏ္ဍာရေး",students:"ကျောင်းသား",academics:"ပညာရေး",facilities:"အဆောက်အအုံ",
-    library:"စာကြည့်တိုက်",meetings:"အစည်းအဝေး",administration:"အကောင့်နှင့် ခွင့်ပြုချက်",website:"ဝဘ်ဆိုက်",
-    workspace:"လုပ်ငန်းမီနူး",back:"ဒက်ရှ်ဘုတ်သို့ ပြန်သွားရန်",groups:{academic:"ပညာရေးနှင့် ကျောင်းသား",finance:"ဘဏ္ဍာရေး",operations:"ကျောင်းလုပ်ငန်း",system:"စနစ်နှင့် ဝဘ်ဆိုက်"}
+    finance:"ဘဏ္ဍာရေးစီမံခန့်ခွဲမှု",students:"ကျောင်းသားစီမံခန့်ခွဲမှု",academics:"ပညာရေးစီမံခန့်ခွဲမှု",facilities:"ကျောင်းအဆောက်အအုံနှင့် ပစ္စည်းများ",
+    library:"စာကြည့်တိုက်စီမံခန့်ခွဲမှု",meetings:"အစည်းအဝေးမှတ်တမ်းများ",administration:"အကောင့်နှင့် ခွင့်ပြုချက်စီမံခန့်ခွဲမှု",website:"ဝဘ်ဆိုက်စီမံခန့်ခွဲမှု",
+    workspace:"စီမံခန့်ခွဲမှု",back:"ဒက်ရှ်ဘုတ်သို့ ပြန်သွားရန်",groups:{academic:"ပညာရေးနှင့် ကျောင်းသား",finance:"ဘဏ္ဍာရေး",operations:"ကျောင်းလုပ်ငန်း",system:"စနစ်နှင့် ဝဘ်ဆိုက်"}
   }
 } as const;
 

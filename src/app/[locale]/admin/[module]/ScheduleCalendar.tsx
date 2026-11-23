@@ -22,8 +22,39 @@ export default function ScheduleCalendar({publicOnly=false,canManage=false,local
  const monthKey=month.getFullYear()+"-"+String(month.getMonth()+1).padStart(2,"0");
  const monthStart=monthKey+"-01";
  const monthEnd=monthKey+"-"+String(new Date(month.getFullYear(),month.getMonth()+1,0).getDate()).padStart(2,"0");
- const load=useCallback(async()=>{if(!db){if(translatePublic)setError("ပြက္ခဒိန်ကို ဖွင့်၍ မရပါ။");setLoading(false);return;}setLoading(true);if(translatePublic)setError("");let q=db.from("academic_calendar_events").select("*").lte("start_date",monthEnd).or(`end_date.is.null,end_date.gte.${monthStart}`).order("start_date");if(publicOnly)q=q.eq("is_published",true);const {data,error}=await q;if(error)setError(translatePublic?"အစီအစဉ်များကို ရယူ၍ မရပါ။ ခဏစောင့်ပြီး ထပ်မံကြိုးစားပါ။":error.message);else setRows((data||[]) as EventRow[]);setLoading(false);},[db,publicOnly,translatePublic,monthStart,monthEnd]);
- useEffect(()=>{void load();},[load]);
+ const load=useCallback(async()=>{
+  if(!db)return;
+  setLoading(true);
+  const {data,error}=await db.from("academic_calendar_events").select("*").lte("start_date",monthEnd)
+    .or(`end_date.is.null,end_date.gte.${monthStart}`).order("start_date");
+  if(error)setError(error.message);
+  else setRows((data||[]) as EventRow[]);
+  setLoading(false);
+ },[db,monthStart,monthEnd]);
+ useEffect(()=>{
+  if(!publicOnly){
+   if(db)void load();
+   else setLoading(false);
+   return;
+  }
+
+  const controller=new AbortController();
+  setLoading(true);
+  setError("");
+  fetch(`/api/calendar?month=${monthKey}`,{signal:controller.signal,cache:"no-store"})
+    .then(async response=>{
+     if(!response.ok)throw new Error("Calendar unavailable");
+     const events=await response.json() as EventRow[];
+     if(!controller.signal.aborted)setRows(events);
+    })
+    .catch(()=>{
+     if(controller.signal.aborted)return;
+     setRows([]);
+     setError(translatePublic?"အစီအစဉ်များကို ရယူ၍ မရပါ။ ခဏစောင့်ပြီး ထပ်မံကြိုးစားပါ။":"일정을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    })
+    .finally(()=>{if(!controller.signal.aborted)setLoading(false);});
+  return ()=>controller.abort();
+ },[db,load,monthKey,publicOnly,translatePublic]);
  const first=new Date(month.getFullYear(),month.getMonth(),1),offset=(first.getDay()+6)%7,days=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();
  const dayKey=(d:number)=>[month.getFullYear(),String(month.getMonth()+1).padStart(2,"0"),String(d).padStart(2,"0")].join("-");
  const selected=(d:number)=>rows.filter(x=>x.start_date<=dayKey(d)&&(x.end_date||x.start_date)>=dayKey(d));
@@ -40,7 +71,7 @@ export default function ScheduleCalendar({publicOnly=false,canManage=false,local
  {error&&<p className="academics-alert error">{error}</p>}
  <div className="schedule-calendar-head"><button aria-label={translatePublic?"ယခင်လ":"이전 달"} onClick={()=>setMonth(new Date(month.getFullYear(),month.getMonth()-1,1))}>‹</button><strong>{monthLabel}</strong><button aria-label={translatePublic?"နောက်လ":"다음 달"} onClick={()=>setMonth(new Date(month.getFullYear(),month.getMonth()+1,1))}>›</button></div>
  <div className="schedule-calendar-grid">{(isMyanmar?["တနင်္လာ","အင်္ဂါ","ဗုဒ္ဓဟူး","ကြာသပတေး","သောကြာ","စနေ","တနင်္ဂနွေ"]:["월","화","수","목","금","토","일"]).map(x=><div className="schedule-weekday" key={x}>{x}</div>)}{Array.from({length:offset},(_,i)=><div className="schedule-day empty" key={"e"+i}/>)}{Array.from({length:days},(_,i)=>{const d=i+1,ev=selected(d);return <div className="schedule-day" key={d}><b>{translatePublic?myNumber.format(d):d}</b>{ev.slice(0,2).map(x=><span key={x.id} className={"schedule-dot "+x.event_type}>{eventTitle(x.title)}</span>)}{ev.length>2&&<small>+{translatePublic?myNumber.format(ev.length-2):ev.length-2}</small>}</div>;})}</div>
- <div className="schedule-event-list"><h4>{translatePublic?`${monthLabel} အစီအစဉ်များ`:`${monthLabel} 일정`}</h4>{visibleRows.map(x=><article key={x.id}><div><time>{dateLabel(x.start_date)}{x.end_date&&x.end_date!==x.start_date?(translatePublic?" – ":" ~ ")+dateLabel(x.end_date):""}{x.start_time?" · "+x.start_time.slice(0,5):""}</time><strong>{eventTitle(x.title)}</strong><p>{x.description}</p><small>{translatePublic?myTypes[x.event_type]??myTypes.other:types.find(t=>t[0]===x.event_type)?.[1]}{x.location?" · "+x.location:""}{!x.is_published?" · 비공개":""}</small></div>{!publicOnly&&canManage&&<div className="schedule-actions"><button onClick={()=>edit(x)}>수정</button><button onClick={()=>void remove(x)}>삭제</button></div>}</article>)}{!loading&&visibleRows.length===0&&(!translatePublic||!error)&&<p className="academics-empty">{translatePublic?"ဤလအတွက် အစီအစဉ် မရှိသေးပါ။":"등록된 일정이 없습니다."}</p>}</div>
+ <div className="schedule-event-list"><h4>{translatePublic?`${monthLabel} အစီအစဉ်များ`:`${monthLabel} 일정`}</h4>{visibleRows.map(x=><article key={x.id}><div><time>{dateLabel(x.start_date)}{x.end_date&&x.end_date!==x.start_date?(translatePublic?" – ":" ~ ")+dateLabel(x.end_date):""}{x.start_time?" · "+x.start_time.slice(0,5):""}</time><strong>{eventTitle(x.title)}</strong><p>{x.description}</p><small>{translatePublic?myTypes[x.event_type]??myTypes.other:types.find(t=>t[0]===x.event_type)?.[1]}{x.location?" · "+x.location:""}{!x.is_published?" · 비공개":""}</small></div>{!publicOnly&&canManage&&<div className="schedule-actions"><button onClick={()=>edit(x)}>수정</button><button onClick={()=>void remove(x)}>삭제</button></div>}</article>)}{!loading&&visibleRows.length===0&&(!publicOnly||!error)&&<p className="academics-empty">{translatePublic?"ဤလအတွက် အစီအစဉ် မရှိသေးပါ။":"등록된 일정이 없습니다."}</p>}</div>
  {show&&!publicOnly&&canManage&&<div className="academics-modal-backdrop"><section className="academics-modal"><header><h3>{editing?"일정 수정":"학사 일정 등록"}</h3><button onClick={()=>setShow(false)}>×</button></header><div className="academics-form-grid"><label>일정명 *<input value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/></label><label>분류<select value={form.event_type} onChange={e=>setForm({...form,event_type:e.target.value})}>{types.map(t=><option key={t[0]} value={t[0]}>{t[1]}</option>)}</select></label><label>시작일 *<input type="date" value={form.start_date} onChange={e=>setForm({...form,start_date:e.target.value})}/></label><label>종료일<input type="date" value={form.end_date||""} onChange={e=>setForm({...form,end_date:e.target.value})}/></label><label>시작 시간<input type="time" value={form.start_time||""} onChange={e=>setForm({...form,start_time:e.target.value})}/></label><label>종료 시간<input type="time" value={form.end_time||""} onChange={e=>setForm({...form,end_time:e.target.value})}/></label><label className="full">장소<input value={form.location||""} onChange={e=>setForm({...form,location:e.target.value})}/></label><label className="full">상세 내용<textarea rows={4} value={form.description||""} onChange={e=>setForm({...form,description:e.target.value})}/></label><label className="full"><input type="checkbox" checked={!!form.is_published} onChange={e=>setForm({...form,is_published:e.target.checked})}/> 홈페이지에 공개</label></div><div className="academics-modal-actions"><button onClick={()=>setShow(false)}>취소</button><button className="academics-primary" disabled={saving||!form.title.trim()||!form.start_date} onClick={()=>void save()}>{saving?"저장 중…":"저장"}</button></div></section></div>}
  </section>;
 }

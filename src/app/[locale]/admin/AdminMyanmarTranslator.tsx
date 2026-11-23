@@ -1966,6 +1966,19 @@ Object.assign(MY,{
   "소속 학과": "သက်ဆိုင်ရာဌာန"
 });
 
+// Additional admin feedback strings.
+Object.assign(MY,{
+  "로그아웃 서비스를 사용할 수 없습니다. 페이지를 새로고침해 주세요.": "အကောင့်ထွက်ဝန်ဆောင်မှုကို အသုံးပြု၍မရပါ။ စာမျက်နှာကို ပြန်ဖွင့်ပါ။",
+  "로그아웃에 실패했습니다. 다시 시도해 주세요.": "အကောင့်ထွက်ခြင်း မအောင်မြင်ပါ။ ထပ်မံကြိုးစားပါ။",
+  "로그아웃 중…": "အကောင့်မှ ထွက်နေပါသည်…",
+  "운행일지는 삭제됐지만 차량 현재 주행거리 갱신 확인이 실패했습니다.": "မောင်းနှင်မှတ်တမ်းကို ဖျက်ပြီးသော်လည်း ယာဉ်မောင်းနှင်အကွာအဝေး ပြင်ဆင်မှုကို အတည်မပြုနိုင်ပါ။",
+  "운행일지는 저장됐지만 차량 현재 주행거리 갱신 확인이 실패했습니다.": "မောင်းနှင်မှတ်တမ်းကို သိမ်းဆည်းပြီးသော်လည်း ယာဉ်မောင်းနှင်အကွာအဝေး ပြင်ဆင်မှုကို အတည်မပြုနိုင်ပါ။",
+  "데이터를 새로 불러왔습니다.": "ဒေတာကို ပြန်လည်ရယူပြီးပါပြီ။",
+  "km보다 낮을 수 없습니다.": "km ထက် နည်း၍ မရပါ။",
+  "km)보다 시작 수치가 낮습니다.": "km) ထက် စတင်မီတာတန်ဖိုး နည်းနေပါသည်။",
+  "km)보다 종료 수치가 높습니다.": "km) ထက် ပြီးဆုံးမီတာတန်ဖိုး မြင့်နေပါသည်။"
+});
+
 const MY_FRAGMENTS=Object.entries(MY)
   .filter(([source,target])=>/[가-힣]/.test(source)&&source.length>1&&source!==target)
   .sort(([a],[b])=>b.length-a.length);
@@ -2021,7 +2034,11 @@ export default function AdminMyanmarTranslator({locale}:{locale:string}){
   useEffect(()=>{
     if(locale!=="my") return;
     const root=document.querySelector(".admin")??document.body;
+    const portalSelector=".student-modal-backdrop";
+    const observerOptions={subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["placeholder","title","aria-label"]};
+    const translatePortals=()=>document.querySelectorAll(portalSelector).forEach(translateElement);
     translateElement(root);
+    translatePortals();
     void fetch("/api/admin/data/website",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}})
       .then(async response=>({response,data:await response.json().catch(()=>null)}))
       .then(({response,data})=>{
@@ -2032,6 +2049,7 @@ export default function AdminMyanmarTranslator({locale}:{locale:string}){
         if(!overrides||typeof overrides!=="object")return;
         for(const [source,target] of Object.entries(overrides))if(typeof target==="string"&&target.trim())MY[source]=target;
         translateElement(root);
+        translatePortals();
       }).catch(()=>{});
     let frame=0;
     const pending=new Set<Node>();
@@ -2047,8 +2065,23 @@ export default function AdminMyanmarTranslator({locale}:{locale:string}){
       }
       if(!frame&&pending.size) frame=requestAnimationFrame(flush);
     });
-    observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["placeholder","title","aria-label"]});
+    observer.observe(root,observerOptions);
+    const observePortal=(el:Element)=>{
+      translateElement(el);
+      observer.observe(el,observerOptions);
+    };
+    document.querySelectorAll(portalSelector).forEach(observePortal);
+    const portalObserver=new MutationObserver(records=>{
+      for(const record of records)for(const node of record.addedNodes){
+        if(node.nodeType!==Node.ELEMENT_NODE)continue;
+        const element=node as Element;
+        if(element.matches(portalSelector))observePortal(element);
+        element.querySelectorAll(portalSelector).forEach(observePortal);
+      }
+    });
+    portalObserver.observe(document.body,{childList:true});
     return ()=>{
+      portalObserver.disconnect();
       observer.disconnect();
       if(frame) cancelAnimationFrame(frame);
       pending.clear();

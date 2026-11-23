@@ -87,9 +87,9 @@ export default function StudentModule(){
   if(!academicMutationsEnabled||!canManage){setNotice("학적 상태 변경은 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다.");return;}
   if(!supabase||!selected)return;
   const label=statusLabel[nextStatus];
-  if(!window.confirm(selected.full_name+" 학생을 "+label+" 상태로 변경할까요? 변경 이력은 자동으로 보존됩니다."))return;
+  if(!window.confirm(locale==="my"?(selected.full_name_my||selected.full_name)+" ၏ ကျောင်းသားအခြေအနေကို "+(({active:"ကျောင်းတက်",leave:"ကျောင်းနား",graduated:"ဘွဲ့ရ",withdrawn:"ကျောင်းထွက်"} as Record<string,string>)[nextStatus]||nextStatus)+" အဖြစ် ပြောင်းမလား။ ပြောင်းလဲမှုမှတ်တမ်းကို ထိန်းသိမ်းထားပါမည်။":selected.full_name+" 학생을 "+label+" 상태로 변경할까요? 변경 이력은 자동으로 보존됩니다."))return;
   setSaving(true);setError("");
-  try{const {data:changed,error}=await supabase.rpc("mrpst_change_student_status",{p_student_id:selected.id,p_new_status:nextStatus,p_effective_date:new Date().toISOString().slice(0,10),p_reason:"관리자 학적 상태 변경"});if(error)throw error;const {data:verified,error:verifyError}=await supabase.from("students").select("id,student_status").eq("id",selected.id).single();if(verifyError)throw verifyError;if(!verified||verified.id!==selected.id||verified.student_status!==nextStatus)throw new Error("학적 변경 결과를 확인할 수 없습니다.");setNotice(changed===false?"이미 해당 학적 상태입니다.":"학생을 "+label+" 상태로 변경했습니다.");await load();}
+  try{const {data:changed,error}=await supabase.rpc("mrpst_change_student_status",{p_student_id:selected.id,p_new_status:nextStatus,p_effective_date:new Date().toISOString().slice(0,10),p_reason:"관리자 학적 상태 변경"});if(error)throw error;const {data:verified,error:verifyError}=await supabase.from("students").select("id,student_status").eq("id",selected.id).single();if(verifyError)throw verifyError;if(!verified||verified.id!==selected.id||verified.student_status!==nextStatus)throw new Error("학적 변경 결과를 확인할 수 없습니다.");setNotice(changed===false?"이미 해당 학적 상태입니다.":(locale==="my"?"ကျောင်းသားအခြေအနေကို ပြောင်းလဲပြီးပါပြီ။":"학생을 "+label+" 상태로 변경했습니다."));await load();}
   catch(e:any){setError(e.message||"학적 상태 변경에 실패했습니다.");}
   finally{setSaving(false);}
 };

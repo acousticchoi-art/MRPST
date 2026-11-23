@@ -3,6 +3,7 @@ import AdminModuleHeading from "./AdminModuleHeading";
 
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {FormField} from "./AdminUI";
+import {usePathname} from "next/navigation";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 import {MY} from "../AdminMyanmarTranslator";
 
@@ -31,6 +32,7 @@ const pageFields=[
 ] as const;
 const locales=[{value:"ko",label:"한국어"},{value:"my",label:"မြန်မာ"}];
 export default function WebsiteModule({canManage}:{canManage:boolean}){
+ const locale=usePathname().startsWith("/my/")?"my":"ko";
  const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [items,setItems]=useState<Entry[]>([]);
@@ -111,7 +113,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
  function resetNotice(){setEditingId("");setNoticeTitle("");setNoticeBody("");setNoticePublished(true);}
  function editNotice(item:Entry){setEditingId(item.id);setNoticeTitle(item.title);setNoticeBody(item.body);setNoticePublished(item.is_published);}
  async function toggleNotice(item:Entry){if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!db)return;setSaving(true);setError("");try{const {data:verified,error}=await db.from("website_contents").update({is_published:!item.is_published}).eq("id",item.id).select("id,is_published").single();if(error)throw error;if(!verified||verified.id!==item.id||verified.is_published===item.is_published)throw new Error("공지 게시 상태 변경 결과를 확인할 수 없습니다.");setNotice(item.is_published?"공지사항 게시를 중단했습니다.":"공지사항을 게시했습니다.");await load();}catch(e:any){setError(e?.message||"상태를 변경하지 못했습니다.");}finally{setSaving(false);}}
- async function deleteNotice(item:Entry){if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!db||!window.confirm("이 공지사항을 삭제할까요?"))return;setSaving(true);setError("");try{const {data:deleted,error}=await db.from("website_contents").delete().eq("id",item.id).select("id").maybeSingle();if(error)throw error;if(!deleted?.id||deleted.id!==item.id)throw new Error("삭제된 공지사항을 확인할 수 없습니다.");setNotice("공지사항을 삭제했습니다.");await load();}catch(e:any){setError(e?.message||"삭제하지 못했습니다.");}finally{setSaving(false);}}
+ async function deleteNotice(item:Entry){if(!canManage){setError("홈페이지 변경 권한이 없습니다.");return;}if(!mutationsEnabled){setError("홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다.");return;}if(!db||!window.confirm(locale==="my"?"ဤကြေညာချက်ကို ဖျက်မလား။":"이 공지사항을 삭제할까요?"))return;setSaving(true);setError("");try{const {data:deleted,error}=await db.from("website_contents").delete().eq("id",item.id).select("id").maybeSingle();if(error)throw error;if(!deleted?.id||deleted.id!==item.id)throw new Error("삭제된 공지사항을 확인할 수 없습니다.");setNotice("공지사항을 삭제했습니다.");await load();}catch(e:any){setError(e?.message||"삭제하지 못했습니다.");}finally{setSaving(false);}}
  const notices=items.filter(x=>x.content_type==="announcement").sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
  return <div className="website-workspace website-workspace-v2">{!canManage&&<div className="website-alert">읽기 전용 권한입니다. 홈페이지 콘텐츠와 공지사항을 조회할 수 있습니다.</div>}
   <div className="website-heading website-heading-v2">
@@ -155,7 +157,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
     <div className="website-section-intro website-list-intro"><div><span className="website-kicker">PUBLISHED CONTENT</span><h3>등록된 공지사항</h3><p>게시·비공개 상태를 확인하고 내용을 관리합니다.</p></div><strong className="website-count">{notices.length}건</strong></div>
     <div className="website-notice-list website-notice-list-v2">{notices.map(item=><article className="website-notice-item website-notice-item-v2" key={item.id}>
      <div className="website-notice-meta"><span className="website-locale-tag">{item.locale==="all"?"전체 홈페이지":locales.find(x=>x.value===item.locale)?.label||item.locale}</span><span className={item.is_published?"published":"draft"}>{item.is_published?"게시 중":"비공개"}</span></div>
-     <h4>{item.title}</h4><p>{item.body}</p><small className="website-updated">{new Date(item.updated_at).toLocaleDateString("ko-KR",{year:"numeric",month:"short",day:"numeric"})}</small>
+     <h4>{item.title}</h4><p>{item.body}</p><small className="website-updated">{new Date(item.updated_at).toLocaleDateString(locale==="my"?"my-MM":"ko-KR",{year:"numeric",month:"short",day:"numeric"})}</small>
      <div className="website-notice-actions"><button disabled={!canManage||saving} onClick={()=>editNotice(item)}>수정</button><button onClick={()=>void toggleNotice(item)} disabled={!canManage||saving}>{item.is_published?"게시 중단":"게시하기"}</button><button className="danger" onClick={()=>void deleteNotice(item)} disabled={!canManage||saving}>삭제</button></div>
     </article>)}{!notices.length&&!loading&&<div className="website-empty website-empty-v2"><strong>아직 등록된 공지사항이 없습니다.</strong><span>왼쪽 작성 영역에서 첫 공지사항을 등록해 보세요.</span></div>}</div>
    </section>

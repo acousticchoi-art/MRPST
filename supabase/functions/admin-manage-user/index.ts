@@ -59,12 +59,15 @@ Deno.serve(async (req: Request) => {
   const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", caller.id);
   const callerRoles = (roles ?? []).map((item: { role: string }) => item.role);
   const isSuperAdmin = callerRoles.includes("super_admin");
+  const isAdministrator = callerRoles.includes("administrator");
   const { data: canManageStudents, error: permissionError } = await admin.rpc("mrpst_can_manage_module", { target_user: caller.id, target_module: "students" });
   if (profile?.is_active !== true || permissionError || canManageStudents !== true) return json({ error: "학생 계정 발급 권한이 필요합니다." }, 403);
 
   try {
     const body = await req.json();
-    if (body.action !== "create_student" && !isSuperAdmin) return json({ error: "최고 관리자 권한이 필요합니다." }, 403);
+    if (body.action !== "create_student" && !isSuperAdmin && !(body.action === "create" && isAdministrator)) {
+      return json({ error: "이 작업에는 최고 관리자 권한이 필요합니다." }, 403);
+    }
     if (body.action === "create_student") {
       const studentId = String(body.student_id || "");
       const email = String(body.email || "").trim().toLowerCase();
@@ -144,6 +147,9 @@ Deno.serve(async (req: Request) => {
       const departmentId = body.department_id ? String(body.department_id) : null;
       const allowedRoles = ["administrator", "finance_officer", "academic_officer", "student_officer", "librarian", "facility_manager", "faculty", "staff"];
       if (!email || !fullName || password.length < 6 || !allowedRoles.includes(requestedRole)) return json({ error: "이름, 이메일, 6자 이상의 비밀번호와 유효한 역할을 입력해 주세요." }, 400);
+      if (requestedRole === "administrator" && !isSuperAdmin) {
+        return json({ error: "관리자 역할은 최고 관리자만 부여할 수 있습니다." }, 403);
+      }
       if (departmentId) {
         const { data: department } = await admin.from("departments").select("id").eq("id", departmentId).eq("is_active", true).maybeSingle();
         if (!department) return json({ error: "선택한 부서가 없거나 비활성 상태입니다." }, 400);

@@ -62,18 +62,6 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
       if(saved&&typeof saved==="object"&&!Array.isArray(saved))inlineValues=saved;
     }catch{}
   }
-  const accountAccess = <section className="settings-panel">
-    <div className="settings-panel-head"><div>
-      <h1>{t.administration}</h1>
-      <p>{lang === "my" ? "သင့်အကောင့်နှင့် ဝင်ရောက်ခွင့်များကို ကြည့်ရှုပါ။ အကောင့်နှင့် ခွင့်ပြုချက်များကို ပြင်ဆင်ရန် အကြီးအကဲ စီမံခန့်ခွဲသူ အခွင့်အရေးလိုအပ်ပါသည်။" : "내 계정과 접근 권한을 확인할 수 있습니다. 계정 및 권한 변경은 최고 관리자가 할 수 있습니다."}</p>
-    </div></div>
-    <div className="settings-panel-head"><div>
-      <h2>{lang === "my" ? "ကျွန်ုပ်၏ အကောင့်" : "내 계정"}</h2>
-      <p>{user.email} · {lang === "my" ? "စီမံခန့်ခွဲသူ" : "관리자"}</p>
-      <h3>{lang === "my" ? "ဝင်ရောက်နိုင်သော မီနူးများ" : "접근 가능한 메뉴"}</h3>
-      <ul>{visible.map(([moduleKey]) => <li key={moduleKey}>{moduleNames[moduleKey]}</li>)}</ul>
-    </div></div>
-  </section>;
   const adminShell=(content:ReactNode)=>locale==="my"?<InlineAdminEditor locale={locale}>{content}</InlineAdminEditor>:<InlinePageEditor pageKey={`admin-${module}`} locale={locale} initialValues={inlineValues}>{content}</InlinePageEditor>;
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>} {adminShell(<div className="admin">
     <aside className="sidebar">
@@ -100,7 +88,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
         {supabase&&<AdminActions locale={locale}/>}
       </div></header>
       <div className="content">
-        {key==="finance"?<FinanceModule/>:key==="students"?<StudentModule/>:key==="library"?<LibraryModule canManage={access.canManage}/>:key==="facilities"?<FacilitiesModule canManage={access.canManage} locale={locale}/>:key==="meetings"?<MeetingsModule canManage={access.canManage}/>:key==="academics"?<AcademicsModule/>:key==="administration"?(access.canManage?<AdministrationModule/>:accountAccess):key==="website"?<WebsiteModule canManage={access.canManage}/>:<><h1 className="admin-heading">{moduleNames[key]??item.title}</h1><p className="admin-subtitle">{item.description}</p><div className="module-placeholder"><strong>Module foundation</strong><p>This area is reserved for the {item.title.toLowerCase()} workflow. Data entry, approval steps, reporting and department-level database policies will be added in the next implementation phase.</p><span>Not connected to live records</span></div></>}
+        {key==="finance"?<FinanceModule/>:key==="students"?<StudentModule/>:key==="library"?<LibraryModule canManage={access.canManage}/>:key==="facilities"?<FacilitiesModule canManage={access.canManage} locale={locale}/>:key==="meetings"?<MeetingsModule canManage={access.canManage}/>:key==="academics"?<AcademicsModule/>:key==="administration"?<AdministrationModule isSuperAdmin={access.canManage} callerId={user.id}/>:key==="website"?<WebsiteModule canManage={access.canManage}/>:<><h1 className="admin-heading">{moduleNames[key]??item.title}</h1><p className="admin-subtitle">{item.description}</p><div className="module-placeholder"><strong>Module foundation</strong><p>This area is reserved for the {item.title.toLowerCase()} workflow. Data entry, approval steps, reporting and department-level database policies will be added in the next implementation phase.</p><span>Not connected to live records</span></div></>}
           </div>
     </main>
   </div>)}</>;

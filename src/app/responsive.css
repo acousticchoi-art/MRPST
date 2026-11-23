@@ -233,20 +233,35 @@
 }
 
 @media screen and (max-width:600px){
+  /* Keep the logo and all actions on one row, with the menu below. */
   html body .admin>.sidebar{
-    grid-template-columns:minmax(0,1fr)!important;
-    grid-template-rows:auto auto auto!important;
-    padding:10px 12px!important;gap:7px!important;
+    grid-template-columns:auto minmax(0,1fr)!important;
+    grid-template-rows:auto auto!important;
+    padding:8px 10px!important;gap:6px!important;
   }
   html body .admin>.sidebar>.mobile-sidebar-brand{
-    grid-column:1!important;grid-row:1!important;
+    padding:0!important;gap:4px!important;
   }
+  html body .admin>.sidebar>.mobile-sidebar-brand .brand-logo{
+    width:28px!important;height:28px!important;flex:0 0 28px!important;
+  }
+  html body .admin>.sidebar>.mobile-sidebar-brand small{display:none!important}
   html body .admin>.sidebar>.sidebar-mobile-tools{
-    grid-column:1!important;grid-row:2!important;
-    width:100%!important;justify-content:flex-start!important;
+    min-width:0!important;max-width:100%!important;
+    flex-wrap:nowrap!important;gap:3px!important;
   }
-  html body .admin>.sidebar>.admin-menu-details{
-    grid-column:1!important;grid-row:3!important;
+  html body .admin>.sidebar>.sidebar-mobile-tools>*{
+    flex:0 1 auto!important;min-width:0!important;
+  }
+  html body .admin>.sidebar>.sidebar-mobile-tools :is(.admin-language,.admin-signout){
+    padding:0!important;
+  }
+  html body .admin>.sidebar>.sidebar-mobile-tools
+    :is(.admin-language a,.top-action),
+  html body .admin>.sidebar>.sidebar-mobile-tools>a{
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;
+    box-sizing:border-box!important;min-width:0!important;min-height:36px!important;
+    padding:4px 5px!important;font-size:11px!important;text-align:center!important;
   }
   html body .admin>.sidebar>.admin-menu-details[open]>.sidebar-nav{
     grid-template-columns:repeat(2,minmax(0,1fr))!important;

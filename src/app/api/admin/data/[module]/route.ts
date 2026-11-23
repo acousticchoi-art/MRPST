@@ -19,9 +19,6 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
 
   const access=await getServerModuleAccess(moduleKey);
   if(!access.ok)return NextResponse.json({error:access.error},{status:access.status});
-  if (moduleKey === "administration" && !access.canManage) {
-    return NextResponse.json({error:"전체 계정 목록을 조회하려면 최고 관리자 권한이 필요합니다."},{status:403});
-  }
   const {supabase,roles}=access;
 
   const search=request.nextUrl.searchParams;
@@ -92,14 +89,14 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
       const [p,d,l]=await Promise.all([
         result(supabase.from("user_profiles").select("user_id,full_name,email,preferred_locale,is_active,created_at").order("created_at",{ascending:false})),
         result(supabase.from("departments").select("*").order("code")),
-        result(supabase.from("admin_audit_log").select("*").order("created_at",{ascending:false}).limit(100))
+        access.canManage ? result(supabase.from("admin_audit_log").select("*").order("created_at",{ascending:false}).limit(100)) : Promise.resolve({data:[],error:null})
       ]);
       let roleData:QueryResult={data:[],error:null},permissionData:QueryResult={data:[],error:null};
       const ids=(p.data??[]).map((row:any)=>row.user_id);
       if(ids.length){
         [roleData,permissionData]=await Promise.all([
           result(supabase.from("user_roles").select("id,user_id,role,department_id").in("user_id",ids)),
-          result(supabase.from("user_module_permissions").select("user_id,module_key,can_view,can_manage").in("user_id",ids))
+          access.canManage ? result(supabase.from("user_module_permissions").select("user_id,module_key,can_view,can_manage").in("user_id",ids)) : Promise.resolve({data:[],error:null})
         ]);
       }
       data={profiles:p,departments:d,auditLogs:l,roles:roleData,permissions:permissionData};

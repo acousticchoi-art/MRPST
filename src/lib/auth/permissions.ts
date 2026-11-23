@@ -7,12 +7,12 @@ export const MODULES:Record<ModuleKey,{title:string;description:string;roles:Mrp
  facilities:{title:"School Facilities",description:"Buildings, equipment inventory, vehicles, maintenance and repairs.",roles:["super_admin","administrator","facility_manager"]},
  library:{title:"Library Management",description:"Book catalogue, circulation, loans, returns and library members.",roles:["super_admin","administrator","librarian"]},
  meetings:{title:"Meeting Materials",description:"Academic committee, faculty and staff meeting records and documents.",roles:["super_admin","administrator","academic_officer","faculty","staff"]},
- administration:{title:"회원 및 권한 관리",description:"회원 계정 생성, 비밀번호 변경, 역할·부서 지정 및 변경 이력을 관리합니다.",roles:["super_admin"]},
+ administration:{title:"회원 및 권한 관리",description:"회원 계정 생성, 비밀번호 변경, 역할·부서 지정 및 변경 이력을 관리합니다.",roles:["super_admin","administrator"]},
  website:{title:"Website CMS",description:"Public website content, institutional history, announcements and contact details.",roles:["super_admin","administrator"]}
 };
 export function canAccessModule(roles:MrpstRole[],module:ModuleKey,overrides?:{module_key:string;can_view:boolean}[]){
  if(roles.includes("super_admin"))return true;
- if(module==="administration")return false;
+ if(module==="administration")return roles.includes("administrator");
  if(roles.includes("administrator"))return true;
  const override=overrides?.find(x=>x.module_key===module);
  if(override)return override.can_view;

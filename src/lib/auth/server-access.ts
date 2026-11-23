@@ -44,7 +44,7 @@ export async function getServerModuleAccess(module: ModuleKey): Promise<AccessFa
   };
   const canManage = roles.includes("super_admin") ||
     (module !== "administration" && roles.includes("administrator")) ||
-    (override ? override.can_manage === true : roles.some((role) => manageRoles[module].includes(role)));
+    (module !== "administration" && (override ? override.can_manage === true : roles.some((role) => manageRoles[module].includes(role))));
 
   return { ok: true, supabase, user, roles, permissions: allowedPermissions, canManage };
 }

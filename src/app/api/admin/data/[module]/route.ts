@@ -19,6 +19,9 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
 
   const access=await getServerModuleAccess(moduleKey);
   if(!access.ok)return NextResponse.json({error:access.error},{status:access.status});
+  if (moduleKey === "administration" && !access.canManage) {
+    return NextResponse.json({error:"전체 계정 목록을 조회하려면 최고 관리자 권한이 필요합니다."},{status:403});
+  }
   const {supabase,roles}=access;
 
   const search=request.nextUrl.searchParams;

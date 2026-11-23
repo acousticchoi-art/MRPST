@@ -1766,7 +1766,8 @@ input,select,textarea,button{max-width:100%}
 .student-directory-switch button:hover{background:#f0f5f7;color:var(--navy)}
 .student-directory-switch button.selected{background:#1b455f;color:#fff}
 .student-directory-switch button b{margin-left:4px;font-size:10px}
-.student-directory-table{width:100%;overflow-x:auto}
+/* Keep the visually hidden column heading inside the roster scroll container. */
+.student-directory-table{position:relative;width:100%;overflow-x:auto;overscroll-behavior-x:contain}
 .student-directory-table table{width:100%;min-width:760px;border-collapse:collapse;text-align:left}
 .student-directory-table th{padding:11px 20px;background:#f4f7f8;color:#6b7b87;font-size:10px;font-weight:750;letter-spacing:.02em}
 .student-directory-table td{height:58px;padding:11px 20px;border-bottom:1px solid #edf1f3;color:#395163;font-size:12px;vertical-align:middle}

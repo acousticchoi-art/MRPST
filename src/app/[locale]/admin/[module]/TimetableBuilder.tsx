@@ -102,7 +102,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
   }catch(e:any){setError(e.message||"저장하지 못했습니다.");}finally{setSaving(false);}
  };
  const remove=async(id:string,type:"course"|"event")=>{
-  if(!db||!mutationsEnabled){setNotice("학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다.");return;}if(!window.confirm("이 항목을 삭제할까요?"))return;
+  if(!db||!mutationsEnabled){setNotice("학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다.");return;}if(!window.confirm(locale==="my"?"ဤအချက်အလက်ကို ဖျက်မလား။":"이 항목을 삭제할까요?"))return;
   const {data:deleted,error:e}=await db.from(type==="event"?"academic_timetable_events":"academic_timetable_entries").delete().eq("id",id).select("id").maybeSingle();
   if(e)setError(e.message);else if(!deleted?.id||deleted.id!==id)setError("삭제된 시간표 항목을 확인할 수 없습니다.");else{setNotice("항목을 삭제했습니다.");await load();}
  };
@@ -129,7 +129,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
  };
  const copySchedule=async()=>{
   if(!db||!mutationsEnabled){setNotice("학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다.");return;}if(!copyFrom||copyFrom===termId)return;
-  if(!window.confirm("선택한 학기의 시간표를 현재 학기로 복사할까요? 현재 학기에 이미 등록된 항목은 유지되고, 기존 항목과 시간이 완전히 같은 복사 항목은 건너뜁니다."))return;
+  if(!window.confirm(locale==="my"?"ရွေးထားသော စာသင်ကာလ၏ အချိန်ဇယားကို လက်ရှိစာသင်ကာလသို့ ကူးယူမလား။ ရှိပြီးသား အချက်အလက်များကို ထိန်းသိမ်းထားပါမည်။":"선택한 학기의 시간표를 현재 학기로 복사할까요? 현재 학기에 이미 등록된 항목은 유지되고, 기존 항목과 시간이 완전히 같은 복사 항목은 건너뜁니다."))return;
   setSaving(true);setError("");
   try{
    const {data:{user},error:userError}=await db.auth.getUser();

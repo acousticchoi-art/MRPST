@@ -2,18 +2,20 @@
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 import {SearchSelect} from "./AdminUI";
+import {usePathname} from "next/navigation";
 import styles from "./GradeManagementModule.module.css";
 
 type Department={id:string;code:string;name_en:string;name_ko:string|null;name_my:string|null};
 type Term={id:string;term_code:string;name:string;academic_year:number;status:string};
 type Student={id:string;student_number:string;full_name:string;program_code:string|null;cohort:string|null;student_status:string};
-type Course={id:string;course_code:string;title:string;department_id:string|null;level:string|null;is_active:boolean};
+type Course={id:string;course_code:string;title:string;title_my:string|null;department_id:string|null;level:string|null;is_active:boolean};
 type Enrollment={student_id:string;course_id:string;term_id:string;enrollment_status:string};
 type Grade={id:string;student_id:string;course_id:string;term_id:string;score:number|null;grade:string|null;remarks:string|null;updated_at:string;entered_by:string|null};
 
 const csvCell=(value:unknown)=>'"'+String(value??"").replace(/"/g,'""')+'"';
 
 export default function GradeManagementModule({canManage,initialTermId,onTermChange}:{canManage:boolean;initialTermId?:string;onTermChange?:(id:string)=>void}){
+ const locale=usePathname().startsWith("/my/")?"my":"ko";
  const db=useMemo(()=>createSupabaseBrowserClient(),[]); const academicMutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const [departments,setDepartments]=useState<Department[]>([]);
  const [terms,setTerms]=useState<Term[]>([]);
@@ -46,7 +48,7 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
     db.from("departments").select("id,code,name_en,name_ko,name_my").eq("is_active",true).order("code"),
     db.from("academic_terms").select("id,term_code,name,academic_year,status").order("academic_year",{ascending:false}).order("term_code",{ascending:false}),
     db.from("students").select("id,student_number,full_name,program_code,cohort,student_status").order("full_name"),
-    db.from("academic_courses").select("id,course_code,title,department_id,level,is_active").order("course_code"),
+    db.from("academic_courses").select("id,course_code,title,title_my,department_id,level,is_active").order("course_code"),
     db.from("academic_grades").select("id,student_id,course_id,term_id,score,grade,remarks,updated_at,entered_by").order("updated_at",{ascending:false}),
     db.from("academic_enrollments").select("student_id,course_id,term_id,enrollment_status")
    ]);
@@ -63,6 +65,7 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
 
  useEffect(()=>{void load();},[load]);
 
+ const displayCourse=(c:Course)=>locale==="my"?(c.title_my||c.title):c.title;
  const department=departments.find(x=>x.id===departmentId);
  const programCode=departmentId?(department?.code?.toUpperCase().includes("ECE")?"ece":"theology"):null;
  const levels=useMemo(()=>Array.from(new Set([
@@ -163,7 +166,7 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
   </div>
   <div className={styles.filters}>
    <label>1. 학기 선택<select value={termId} onChange={e=>{setTermId(e.target.value);onTermChange?.(e.target.value);}}><option value="">학기 선택</option>{terms.map(x=><option key={x.id} value={x.id}>{x.name} ({x.academic_year})</option>)}</select></label>
-   <label>2. 학과 선택<select value={departmentId} onChange={e=>{setDepartmentId(e.target.value);setSelectedStudentId("");}}><option value="">전체 학과</option>{departments.map(x=><option key={x.id} value={x.id}>{x.name_ko||x.name_en||x.code}</option>)}</select></label>
+   <label>2. 학과 선택<select value={departmentId} onChange={e=>{setDepartmentId(e.target.value);setSelectedStudentId("");}}><option value="">전체 학과</option>{departments.map(x=><option key={x.id} value={x.id}>{locale==="my"?(x.name_my||x.name_en||x.name_ko||x.code):(x.name_ko||x.name_en||x.code)}</option>)}</select></label>
    <label>3. 학년 선택<select value={level} onChange={e=>{setLevel(e.target.value);setSelectedStudentId("");}}><option value="">전체 학년</option>{levels.map(x=><option key={x} value={x}>{x}</option>)}</select></label>
   </div>
   <div className={styles.stats}>
@@ -184,9 +187,9 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
     {!visibleStudents.length&&<tr><td colSpan={6} className={styles.empty}>선택한 조건에 해당하는 학생이 없습니다.</td></tr>}
    </tbody></table></div>}
    {selectedStudent&&<div className={styles.detailBackdrop} role="dialog" aria-modal="true" aria-label="학생 성적 상세" onMouseDown={()=>setSelectedStudentId("")}><div className={styles.detail} onMouseDown={event=>event.stopPropagation()}>
-    <div className={styles.panelHead}><div><h3>{selectedStudent.full_name}</h3><p>순번 {selectedStudent.student_number} · {department?.name_ko||department?.name_en||selectedStudent.program_code||""} · {selectedStudent.cohort||""}</p></div><div className={styles.actions}><button onClick={()=>window.print()}>성적표 출력 / PDF 저장</button><button onClick={()=>setSelectedStudentId("")}>닫기</button></div></div><div className={styles.printReport}><header><h1>MRPST</h1><h2>STUDENT REPORT CARD</h2><p>{terms.find(x=>x.id===termId)?.name||"Academic Term"}</p></header><div className={styles.printStudent}><span><b>Student Name</b>{selectedStudent.full_name}</span><span><b>Student Number</b>{selectedStudent.student_number}</span><span><b>Department</b>{department?.name_en||selectedStudent.program_code||"—"}</span><span><b>Academic Year</b>{selectedStudent.cohort||"—"}</span></div><table><thead><tr><th>Course Code</th><th>Course Title</th><th>Score</th></tr></thead><tbody>{studentCourses.map(({course,grade})=><tr key={course.id}><td>{course.course_code}</td><td>{course.title}</td><td>{grade?.score??"—"}</td></tr>)}</tbody></table><div className={styles.printSummary}><span>Entered Subjects: {studentCourses.filter(x=>x.grade?.score!==null&&x.grade?.score!==undefined).length} / {studentCourses.length}</span><b>Average Score: {(()=>{const scores=studentCourses.map(x=>x.grade?.score).filter((v):v is number=>v!==null&&v!==undefined);return scores.length?(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(2):"—";})()}</b></div><footer><span>Academic Officer</span><span>Principal</span></footer></div>
+    <div className={styles.panelHead}><div><h3>{selectedStudent.full_name}</h3><p>순번 {selectedStudent.student_number} · {locale==="my"?(department?.name_my||department?.name_en||department?.name_ko||selectedStudent.program_code||""):(department?.name_ko||department?.name_en||selectedStudent.program_code||"")} · {selectedStudent.cohort||""}</p></div><div className={styles.actions}><button onClick={()=>window.print()}>성적표 출력 / PDF 저장</button><button onClick={()=>setSelectedStudentId("")}>닫기</button></div></div><div className={styles.printReport}><header><h1>MRPST</h1><h2>STUDENT REPORT CARD</h2><p>{terms.find(x=>x.id===termId)?.name||"Academic Term"}</p></header><div className={styles.printStudent}><span><b>Student Name</b>{selectedStudent.full_name}</span><span><b>Student Number</b>{selectedStudent.student_number}</span><span><b>Department</b>{department?.name_en||selectedStudent.program_code||"—"}</span><span><b>Academic Year</b>{selectedStudent.cohort||"—"}</span></div><table><thead><tr><th>Course Code</th><th>Course Title</th><th>Score</th></tr></thead><tbody>{studentCourses.map(({course,grade})=><tr key={course.id}><td>{course.course_code}</td><td>{displayCourse(course)}</td><td>{grade?.score??"—"}</td></tr>)}</tbody></table><div className={styles.printSummary}><span>Entered Subjects: {studentCourses.filter(x=>x.grade?.score!==null&&x.grade?.score!==undefined).length} / {studentCourses.length}</span><b>Average Score: {(()=>{const scores=studentCourses.map(x=>x.grade?.score).filter((v):v is number=>v!==null&&v!==undefined);return scores.length?(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(2):"—";})()}</b></div><footer><span>Academic Officer</span><span>Principal</span></footer></div>
     <div className={styles.tableWrap}><table><thead><tr><th>과목 코드</th><th>과목명</th><th>점수</th><th>상태</th></tr></thead><tbody>
-     {studentCourses.map(({course,grade})=><tr key={course.id}><td>{course.course_code}</td><td>{course.title}</td><td>{grade?.score??"—"}</td><td>{grade?.score===null||grade?.score===undefined?<span className={styles.missing}>미입력</span>:<span className={styles.complete}>입력 완료</span>}</td></tr>)}
+     {studentCourses.map(({course,grade})=><tr key={course.id}><td>{course.course_code}</td><td>{displayCourse(course)}</td><td>{grade?.score??"—"}</td><td>{grade?.score===null||grade?.score===undefined?<span className={styles.missing}>미입력</span>:<span className={styles.complete}>입력 완료</span>}</td></tr>)}
      {!studentCourses.length&&<tr><td colSpan={4} className={styles.empty}>등록된 과목이 없습니다.</td></tr>}
     </tbody></table></div>
    </div></div>}
@@ -194,9 +197,9 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
   {tab==="entry"&&<section className={styles.panel}>
    <div className={styles.panelHead}><div><h3>과목별 점수 입력</h3><p>과목을 고르면 해당 학과·학년 학생이 표시됩니다. 0~100점을 적고 저장하세요. 아직 수강 기록이 없는 학생은 점수 저장 시 자동으로 연결됩니다.</p></div></div>
    <div className={styles.entryFilters}>
-    <label>점수를 입력할 과목<SearchSelect value={courseId} placeholder="과목 검색" searchPlaceholder="과목 코드, 과목명 검색" options={entryCourses.map(x=>({value:x.id,label:`${x.course_code} · ${x.title}`,keywords:`${x.course_code} ${x.title}`}))} onChange={setCourseId}/></label>
+    <label>점수를 입력할 과목<SearchSelect value={courseId} placeholder="과목 검색" searchPlaceholder="과목 코드, 과목명 검색" options={entryCourses.map(x=>({value:x.id,label:`${x.course_code} · ${displayCourse(x)}`,keywords:`${x.course_code} ${x.title}`}))} onChange={setCourseId}/></label>
    </div>
-   {currentCourse&&<div className={styles.entryTitle}><strong>{currentCourse.title}</strong><span>{currentCourse.course_code} · {terms.find(x=>x.id===termId)?.name||"학기 미선택"}</span></div>}
+   {currentCourse&&<div className={styles.entryTitle}><strong>{displayCourse(currentCourse)}</strong><span>{currentCourse.course_code} · {terms.find(x=>x.id===termId)?.name||"학기 미선택"}</span></div>}
    <div className={styles.tableWrap}><table><thead><tr><th>순번</th><th>학생 이름</th><th>점수</th><th>기존 점수</th><th>작업</th></tr></thead><tbody>
     {inputStudents.map(student=>{const old=gradeByKey.get(student.id+"|"+courseId);return <tr key={student.id}><td>{student.student_number}</td><td>{student.full_name}</td><td><input className={styles.scoreInput} type="number" min="0" max="100" step="0.01" disabled={!canManage||!academicMutationsEnabled||saving} value={inputValues[student.id]??""} onChange={e=>setInputValues(v=>({...v,[student.id]:e.target.value}))} aria-label={student.full_name+" 점수"}/></td><td>{old?.score??"—"}</td><td>{old&&<button className={styles.deleteButton} disabled={!academicMutationsEnabled||saving} onClick={()=>void deleteScore(student)}>삭제</button>}</td></tr>;})}
     {!inputStudents.length&&<tr><td colSpan={5} className={styles.empty}>{!termId?"먼저 학기를 선택하세요.":!courseId?"과목을 선택하세요.":"해당 과목·학년에 재학 중인 학생이 없습니다."}</td></tr>}

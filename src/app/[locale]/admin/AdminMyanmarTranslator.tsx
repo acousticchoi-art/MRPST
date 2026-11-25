@@ -2150,6 +2150,19 @@ Object.assign(MY,{
   "1주차: 오리엔테이션\\\\n2주차: 핵심 주제": "ပထမပတ်: မိတ်ဆက်ခြင်း\\nဒုတိယပတ်: အဓိကအကြောင်းအရာ"
 });
 
+Object.assign(MY,{
+  "Early Childhood Education": "ရှေးဦးကလေးသူငယ် ပညာရေး",
+  "Theology": "ဓမ္မပညာ",
+  "General Fund": "အထွေထွေရန်ပုံငွေ",
+  "Scholarship Fund": "ပညာသင်ဆုရန်ပုံငွေ",
+  "Special Projects Fund": "အထူးစီမံကိန်းရန်ပုံငွေ",
+  "일반 재정": "အထွေထွေရန်ပုံငွေ",
+  "장학금 재정": "ပညာသင်ဆုရန်ပုံငွေ",
+  "특별 재정": "အထူးစီမံကိန်းရန်ပုံငွေ",
+  "유아교육과": "ရှေးဦးကလေးသူငယ် ပညာရေးဌာန",
+  "신학과": "ဓမ္မပညာဌာန"
+});
+
 const MY_FRAGMENTS=Object.entries(MY)
   .filter(([source,target])=>/[가-힣]/.test(source)&&source.length>1&&source!==target)
   .sort(([a],[b])=>b.length-a.length);

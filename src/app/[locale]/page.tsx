@@ -104,7 +104,8 @@ export default async function Home({params}:{params:Promise<{locale:string}>}) {
     contactText:page("contact")?.body||base.contactText,
     addressText:page("address")?.body||base.addressText
   };
-  const announcements=cmsRows.filter(x=>x.content_type==="announcement").sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
+  const myNoticeTranslations:Record<string,string>={"MRPST 홈페이지에 오신 여러분을 환영합니다.":"MRPST ဝဘ်ဆိုက်မှ ကြိုဆိုပါသည်။","2026 개강 안내":"၂၀၂၆ ခုနှစ် သင်တန်းစတင်မည့်အကြောင်း ကြေညာချက်","밍글라바\nMRPST 홈페이지에 오신 여러분을 환영합니다!":"မင်္ဂလာပါ။\nMRPST ဝဘ်ဆိုက်မှ ကြိုဆိုပါသည်။","2026 개강 안내 입니다.":"၂၀၂၆ ခုနှစ် သင်တန်းစတင်မည့်အကြောင်း ကြေညာချက်ဖြစ်ပါသည်။"};
+  const announcements=cmsRows.filter(x=>x.content_type==="announcement").map(x=>locale==="my"?{...x,title:myNoticeTranslations[x.title.trim()]??x.title,body:myNoticeTranslations[x.body.trim()]??x.body}:x).sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
   return <InlinePageEditor pageKey="home" locale={locale} initialValues={inlineValues}>
     <SiteHeader locale={locale} active="home" />
     <main className="homepage">

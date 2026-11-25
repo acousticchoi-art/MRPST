@@ -1,8 +1,8 @@
-import SiteHeader from "../SiteHeader";
+import SiteHeader from "../../[locale]/SiteHeader";
 import Link from "next/link";
 import ContactForm from "./ContactForm";
 import {getPublishedWebsiteContent,inlinePageValues,websiteCopy} from "@/lib/website-content";
-import InlinePageEditor from "../InlinePageEditor";
+import InlinePageEditor from "../../[locale]/InlinePageEditor";
 
 const copy = {en:{"eyebrow":"CONTACT MRPST","title":"Contact us","intro":"Send us your questions about admissions, academic programs or the school. Your message can be sent through your email application.","address":"No.286, 10th Kaya St, Thingangyungyi, Mingladon Township, Yangon, Myanmar","map":"View on Google Maps","email":"Email","formTitle":"Enquiry form"}} as const;
 

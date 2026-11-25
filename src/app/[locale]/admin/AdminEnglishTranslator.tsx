@@ -3193,10 +3193,28 @@ const EN:Record<string,string>={
   "1주차: 오리엔테이션\\n2주차: 핵심 주제": "Week 1: Orientation\\nWeek 2: Key topic",
   "1주차: 오리엔테이션\n2주차: 핵심 주제": "Week 1: Orientation\nWeek 2: Key topic",
   "1주차: 오리엔테이션\\\\n2주차: 핵심 주제": "Week 1: Orientation\\nWeek 2: Key topic",
-  "회계 전표": "Accounting voucher"
+  "회계 전표": "Accounting voucher",
+  "졸업 연도": "Graduation year",
+  "과목 *": "Course *",
+  "점수 (0–100)": "Score (0–100)",
+  "수리 결과": "Repair outcome",
+  "수리 장소": "Repair location",
+  "수리 내용": "Repair details",
+  "비품 관리": "Equipment management",
+  "과정코드": "Program code",
+  "졸업연도": "Graduation year",
+  "졸업학기": "Graduation semester",
+  "일괄등록에 실패했습니다. 파일과 중복 학번을 확인해 주세요.": "Bulk registration failed. Check the file and duplicate student numbers.",
+  "복사한 강의 시간표 저장 개수가 일치하지 않습니다.": "The number of saved class timetable entries does not match the copied entries.",
+  "복사한 공통 일정 저장 개수가 일치하지 않습니다.": "The number of saved shared events does not match the copied events.",
+  "성적표 출력 / PDF 저장": "Print transcript / Save PDF",
+  "졸업생 일괄등록": "Bulk register graduates",
+  "양식 내려받기": "Download template",
+  "CSV 파일 선택": "Select CSV file",
+  "Excel에서 양식을 작성한 뒤 CSV UTF-8 형식으로 저장해 올리세요. 저장 전 중복과 필수 항목을 확인하며, 학생·졸업이력·학적이력을 함께 등록합니다.": "Complete the template in Excel, save it as CSV UTF-8 and upload it. Duplicate and required fields are checked before student, graduation and enrollment records are saved together."
 };
 function translated(raw:string){const key=raw.trim();const v=EN[key]??EN[key.replace(/\s+/g," ")];return v?raw.replace(key,v):raw;}
-const controls="button,label,legend,th,h1,h2,h3,h4,h5,summary,[role=tab],[role=alert],[role=status],.academics-empty,.student-empty,.dashboard-empty,.module-placeholder,.notice,.schedule-weekday,.academics-panel-head p,.student-status,.admin-heading,.admin-subtitle,.admin-search-select-empty,.admin-search-select-trigger .placeholder,.website-section-intro p,.website-footer-actions>span,.website-notice-audience,.website-publish-check small,.finance-panel-head p,.student-panel-head p,.facility-panel-head p,.library-panel-head p,.meeting-panel-head p,.settings-panel-head p,.admin-form-actions,.academics-grade-simple-guide p,.dashboard-stat small,.website-stat-grid span,.website-stat-grid small,.finance-note,.empty-state,.settings-form-hint,.finance-alert,.student-alert,.settings-alert,.website-alert,.facility-alert,.library-alert,.meeting-alert,.academics-notice";
+const controls="button,label,legend,th,h1,h2,h3,h4,h5,summary,[role=tab],[role=alert],[role=status],.academics-empty,.student-empty,.dashboard-empty,.module-placeholder,.notice,.schedule-weekday,.academics-panel-head p,.student-status,.admin-heading,.admin-subtitle,.admin-search-select-empty,.admin-search-select-trigger .placeholder,.website-section-intro p,.website-footer-actions>span,.website-notice-audience,.website-publish-check small,.finance-panel-head p,.student-panel-head p,.facility-panel-head p,.library-panel-head p,.meeting-panel-head p,.settings-panel-head p,.admin-form-actions,.academics-grade-simple-guide p,.dashboard-stat small,.website-stat-grid span,.website-stat-grid small,.finance-note,.empty-state,.settings-form-hint,.finance-alert,.student-alert,.settings-alert,.website-alert,.facility-alert,.library-alert,.meeting-alert,.academics-notice,.academics-alert,.academics-readonly-note,.academics-form-hint,.student-readonly,.student-manual-year-hint,.facility-empty,.library-empty,.meetings-alert,.meetings-empty,.graduate-import-message,.graduate-import-preview,.website-loading,.finance-donation-convert,.timetable-heading p,[class*="GradeManagementModule_alert"],[class*="GradeManagementModule_notice"],[class*="GradeManagementModule_warning"]";
 const excluded="script,style,textarea,[contenteditable=true],.notranslate,[data-no-translate],.website-translation-language h5";
 function visit(root:Node){
  if(root.nodeType===Node.TEXT_NODE){const p=root.parentElement;if(!p||p.closest(excluded)||p.closest(".admin-search-select-results,.admin-search-select-trigger .selected")||!p.closest(controls+",option[value]"))return;const next=translated(root.nodeValue||"");if(next!==root.nodeValue)root.nodeValue=next;return;}

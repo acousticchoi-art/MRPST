@@ -15,6 +15,7 @@ type Grade={id:string;student_id:string;course_id:string;term_id:string;score:nu
 const csvCell=(value:unknown)=>'"'+String(value??"").replace(/"/g,'""')+'"';
 
 export default function GradeManagementModule({canManage,initialTermId,onTermChange}:{canManage:boolean;initialTermId?:string;onTermChange?:(id:string)=>void}){
+ const englishUI=usePathname().startsWith("/en/");
  const pathname=usePathname();
  const locale=pathname.startsWith("/en/")?"en":pathname.startsWith("/my/")?"my":"ko";
  const db=useMemo(()=>createSupabaseBrowserClient(),[]); const academicMutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
@@ -43,7 +44,7 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
   setLoading(true);setError("");
   try{
    const {data:{user}}=await db.auth.getUser();
-   if(!user){setCurrentUserId("");setError("로그인이 필요합니다.");setLoading(false);return;}
+   if(!user){setCurrentUserId("");setError((englishUI?"Login required.":"로그인이 필요합니다."));setLoading(false);return;}
    setCurrentUserId(user.id);
    const [d,t,s,c,g,e]=await Promise.all([
     db.from("departments").select("id,code,name_en,name_ko,name_my").eq("is_active",true).order("code"),
@@ -117,12 +118,12 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
  };
 
  const saveScores=async()=>{
-  if(!academicMutationsEnabled){setNotice("성적 변경은 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다.");return;}
+  if(!academicMutationsEnabled){setNotice((englishUI?"Grade changes are locked until the development database is separated and safety verified.":"성적 변경은 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다."));return;}
   if(!db||!termId||!courseId||!canManage)return;
   const rows=inputStudents.filter(student=>String(inputValues[student.id]??"").trim()!=="").map(student=>({student_id:student.id,course_id:courseId,term_id:termId,score:Number(inputValues[student.id]),entered_by:gradeByKey.get(student.id+"|"+courseId)?.entered_by??currentUserId}));
-  if(rows.some(x=>!Number.isFinite(x.score)||x.score<0||x.score>100)){setError("점수는 0점부터 100점 사이의 숫자로 입력해 주세요.");return;}
+  if(rows.some(x=>!Number.isFinite(x.score)||x.score<0||x.score>100)){setError((englishUI?"Enter a numeric score between 0 and 100.":"점수는 0점부터 100점 사이의 숫자로 입력해 주세요."));return;}
   const changed=rows.filter(row=>{const old=gradeByKey.get(row.student_id+"|"+courseId);return !old||Number(old.score)!==row.score;});
-  if(!changed.length){setNotice("변경된 점수가 없습니다.");return;}
+  if(!changed.length){setNotice((englishUI?"No scores have changed.":"변경된 점수가 없습니다."));return;}
   setSaving(true);setError("");setNotice("");
   try{
     if(!currentUserId)throw new Error("로그인 상태를 다시 확인해 주세요.");
@@ -142,12 +143,12 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
  };
 
  const deleteScore=async(student:Student)=>{
-  if(!academicMutationsEnabled){setNotice("성적 삭제는 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다.");return;}
+  if(!academicMutationsEnabled){setNotice((englishUI?"Grade deletion is locked until the development database is separated and safety verified.":"성적 삭제는 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다."));return;}
   if(!db||!canManage)return;
-  if(enrollments.some(e=>e.student_id===student.id&&e.course_id===courseId&&e.term_id===termId&&e.enrollment_status==="completed")){setError("이미 이수 완료된 과목의 성적은 삭제할 수 없습니다. 수강 이수 상태를 먼저 변경해야 합니다.");return;}
+  if(enrollments.some(e=>e.student_id===student.id&&e.course_id===courseId&&e.term_id===termId&&e.enrollment_status==="completed")){setError((englishUI?"Grades for completed courses cannot be deleted. Change the course completion status first.":"이미 이수 완료된 과목의 성적은 삭제할 수 없습니다. 수강 이수 상태를 먼저 변경해야 합니다."));return;}
   if(!window.confirm(window.location.pathname.startsWith("/en/")?("Delete "+student.full_name+"'s grade for this course?"):student.full_name+(locale==="my"?" ၏ ဤဘာသာရပ်အမှတ်ကို ဖျက်မလား။":" 학생의 이 과목 성적을 삭제할까요?")))return;
   setSaving(true);setError("");setNotice("");
-  try{const {data:deleted,error}=await db.from("academic_grades").delete().eq("student_id",student.id).eq("course_id",courseId).eq("term_id",termId).select("id");if(error)throw error;if(!deleted?.length)throw new Error("성적 삭제 결과를 확인할 수 없습니다.");setNotice("성적을 삭제했습니다.");await load();}
+  try{const {data:deleted,error}=await db.from("academic_grades").delete().eq("student_id",student.id).eq("course_id",courseId).eq("term_id",termId).select("id");if(error)throw error;if(!deleted?.length)throw new Error("성적 삭제 결과를 확인할 수 없습니다.");setNotice((englishUI?"Grade deleted.":"성적을 삭제했습니다."));await load();}
   catch(err:any){setError(err?.message||"성적 삭제에 실패했습니다.");}
   finally{setSaving(false);}
  };
@@ -162,46 +163,46 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
 
  return <div className={styles.workspace}>
   <div className={styles.heading}>
-   <div><span className={styles.eyebrow}>GRADE MANAGEMENT</span><h2>점수 입력·확인</h2><p>학기와 과목을 선택하고 점수를 적어 저장하세요. 학기 등록·이수 확정 없이 성적을 관리합니다.</p></div>
+   <div><span className={styles.eyebrow}>GRADE MANAGEMENT</span><h2>{(englishUI?"Enter and review scores":"점수 입력·확인")}</h2><p>{(englishUI?"Select a semester and course, enter scores and save. Manage grades without semester registration or completion confirmation.":"학기와 과목을 선택하고 점수를 적어 저장하세요. 학기 등록·이수 확정 없이 성적을 관리합니다.")}</p></div>
    <span className={styles.permission}>{canManage&&academicMutationsEnabled?"점수 입력 가능":"조회 전용"}</span>
   </div>
   <div className={styles.filters}>
-   <label>1. 학기 선택<select value={termId} onChange={e=>{setTermId(e.target.value);onTermChange?.(e.target.value);}}><option value="">학기 선택</option>{terms.map(x=><option key={x.id} value={x.id}>{x.name} ({x.academic_year})</option>)}</select></label>
-   <label>2. 학과 선택<select value={departmentId} onChange={e=>{setDepartmentId(e.target.value);setSelectedStudentId("");}}><option value="">전체 학과</option>{departments.map(x=><option key={x.id} value={x.id}>{locale==="en"?(x.name_en||x.name_ko||x.code):locale==="my"?(x.name_my||x.name_en||x.name_ko||x.code):(x.name_ko||x.name_en||x.code)}</option>)}</select></label>
-   <label>3. 학년 선택<select value={level} onChange={e=>{setLevel(e.target.value);setSelectedStudentId("");}}><option value="">전체 학년</option>{levels.map(x=><option key={x} value={x}>{x}</option>)}</select></label>
+   <label>{(englishUI?"1. Select semester":"1. 학기 선택")}<select value={termId} onChange={e=>{setTermId(e.target.value);onTermChange?.(e.target.value);}}><option value="">학기 선택</option>{terms.map(x=><option key={x.id} value={x.id}>{x.name} ({x.academic_year})</option>)}</select></label>
+   <label>{(englishUI?"2. Select department":"2. 학과 선택")}<select value={departmentId} onChange={e=>{setDepartmentId(e.target.value);setSelectedStudentId("");}}><option value="">전체 학과</option>{departments.map(x=><option key={x.id} value={x.id}>{locale==="en"?(x.name_en||x.name_ko||x.code):locale==="my"?(x.name_my||x.name_en||x.name_ko||x.code):(x.name_ko||x.name_en||x.code)}</option>)}</select></label>
+   <label>{(englishUI?"3. Select year":"3. 학년 선택")}<select value={level} onChange={e=>{setLevel(e.target.value);setSelectedStudentId("");}}><option value="">전체 학년</option>{levels.map(x=><option key={x} value={x}>{x}</option>)}</select></label>
   </div>
   <div className={styles.stats}>
-   <article><span>학생</span><strong>{stats.students}</strong></article>
-   <article><span>과목</span><strong>{stats.courses}</strong></article>
-   <article><span>점수 입력 완료</span><strong>{stats.entered}</strong></article>
-   <article><span>점수 미입력</span><strong>{stats.missing}</strong></article>
+   <article><span>{(englishUI?"Student":"학생")}</span><strong>{stats.students}</strong></article>
+   <article><span>{(englishUI?"Course":"과목")}</span><strong>{stats.courses}</strong></article>
+   <article><span>{(englishUI?"Scores entered":"점수 입력 완료")}</span><strong>{stats.entered}</strong></article>
+   <article><span>{(englishUI?"Scores missing":"점수 미입력")}</span><strong>{stats.missing}</strong></article>
   </div>
   {error&&<div className={styles.alertError}>{error}</div>}{notice&&<div className={styles.alertSuccess}>{notice}</div>}{!academicMutationsEnabled&&<div className={styles.alert}>성적 변경 기능이 안전 모드로 잠겨 있습니다. 조회와 출력은 사용할 수 있습니다.</div>}
   {!db&&<div className={styles.alert}>Supabase 연결 설정이 필요합니다.</div>}
   {!canManage&&db&&<div className={styles.alert}>성적관리 권한이 확인되지 않았습니다. Super Admin 또는 행정 담당자 계정으로 로그인해 주세요.</div>}
-  <div className={styles.tabs} aria-label="성적 업무 선택"><button type="button" className={tab==="entry"?styles.activeTab:""} onClick={()=>setTab("entry")}>과목별 점수 입력</button><button type="button" className={tab==="lookup"?styles.activeTab:""} onClick={()=>setTab("lookup")}>학생별 성적 확인</button></div>
+  <div className={styles.tabs} aria-label={(englishUI?"Select grading task":"성적 업무 선택")}><button type="button" className={tab==="entry"?styles.activeTab:""} onClick={()=>setTab("entry")}>과목별 점수 입력</button><button type="button" className={tab==="lookup"?styles.activeTab:""} onClick={()=>setTab("lookup")}>학생별 성적 확인</button></div>
   {tab==="lookup"&&<section className={styles.panel}>
-   <div className={styles.panelHead}><div><h3>학생별 성적 확인</h3><p>학생 이름을 누르면 과목별 점수와 미입력 과목을 볼 수 있습니다.</p></div><div className={styles.actions}><button onClick={exportCsv} disabled={!visibleStudents.length}>엑셀용 CSV</button><button onClick={()=>window.print()}>인쇄</button></div></div>
-   <input className={styles.search} value={search} onChange={e=>setSearch(e.target.value)} placeholder="학생 이름 또는 순번 검색"/>
-   {loading?<p className={styles.empty}>데이터를 불러오는 중입니다…</p>:<div className={styles.tableWrap}><table><thead><tr><th>순번</th><th>학생 이름</th><th>학년</th><th>입력 과목</th><th>평균 점수</th><th></th></tr></thead><tbody>
+   <div className={styles.panelHead}><div><h3>{(englishUI?"View grades by student":"학생별 성적 확인")}</h3><p>{(englishUI?"Select a student name to view course scores and courses with missing scores.":"학생 이름을 누르면 과목별 점수와 미입력 과목을 볼 수 있습니다.")}</p></div><div className={styles.actions}><button onClick={exportCsv} disabled={!visibleStudents.length}>엑셀용 CSV</button><button onClick={()=>window.print()}>인쇄</button></div></div>
+   <input className={styles.search} value={search} onChange={e=>setSearch(e.target.value)} placeholder={(englishUI?"Search student name or sequence number":"학생 이름 또는 순번 검색")}/>
+   {loading?<p className={styles.empty}>데이터를 불러오는 중입니다…</p>:<div className={styles.tableWrap}><table><thead><tr><th>{(englishUI?"No.":"순번")}</th><th>{(englishUI?"Student name":"학생 이름")}</th><th>{(englishUI?"Year":"학년")}</th><th>{(englishUI?"Courses with entries":"입력 과목")}</th><th>{(englishUI?"Average score":"평균 점수")}</th><th></th></tr></thead><tbody>
     {visibleStudents.map(student=>{const enrolledCourses=visibleCourses.filter(course=>enrollments.some(e=>e.student_id===student.id&&e.course_id===course.id&&e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status)));const scores=enrolledCourses.map(course=>gradeByKey.get(student.id+"|"+course.id)?.score).filter((v):v is number=>v!==null&&v!==undefined);const average=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null;return <tr key={student.id} className={selectedStudentId===student.id?styles.selectedRow:""}><td>{student.student_number}</td><td><button className={styles.nameButton} onClick={()=>setSelectedStudentId(student.id)}>{student.full_name}</button></td><td>{student.cohort||"—"}</td><td>{scores.length} / {enrolledCourses.length}</td><td>{average===null?"—":average.toFixed(2)}</td><td><button className={styles.smallButton} onClick={()=>setSelectedStudentId(student.id)}>상세</button></td></tr>;})}
     {!visibleStudents.length&&<tr><td colSpan={6} className={styles.empty}>선택한 조건에 해당하는 학생이 없습니다.</td></tr>}
    </tbody></table></div>}
-   {selectedStudent&&<div className={styles.detailBackdrop} role="dialog" aria-modal="true" aria-label="학생 성적 상세" onMouseDown={()=>setSelectedStudentId("")}><div className={styles.detail} onMouseDown={event=>event.stopPropagation()}>
+   {selectedStudent&&<div className={styles.detailBackdrop} role="dialog" aria-modal="true" aria-label={(englishUI?"Student grade details":"학생 성적 상세")} onMouseDown={()=>setSelectedStudentId("")}><div className={styles.detail} onMouseDown={event=>event.stopPropagation()}>
     <div className={styles.panelHead}><div><h3>{selectedStudent.full_name}</h3><p>순번 {selectedStudent.student_number} · {locale==="en"?(department?.name_en||department?.name_ko||selectedStudent.program_code||""):locale==="my"?(department?.name_my||department?.name_en||department?.name_ko||selectedStudent.program_code||""):(department?.name_ko||department?.name_en||selectedStudent.program_code||"")} · {selectedStudent.cohort||""}</p></div><div className={styles.actions}><button onClick={()=>window.print()}>성적표 출력 / PDF 저장</button><button onClick={()=>setSelectedStudentId("")}>닫기</button></div></div><div className={styles.printReport}><header><h1>MRPST</h1><h2>STUDENT REPORT CARD</h2><p>{terms.find(x=>x.id===termId)?.name||"Academic Term"}</p></header><div className={styles.printStudent}><span><b>Student Name</b>{selectedStudent.full_name}</span><span><b>Student Number</b>{selectedStudent.student_number}</span><span><b>Department</b>{department?.name_en||selectedStudent.program_code||"—"}</span><span><b>Academic Year</b>{selectedStudent.cohort||"—"}</span></div><table><thead><tr><th>Course Code</th><th>Course Title</th><th>Score</th></tr></thead><tbody>{studentCourses.map(({course,grade})=><tr key={course.id}><td>{course.course_code}</td><td>{displayCourse(course)}</td><td>{grade?.score??"—"}</td></tr>)}</tbody></table><div className={styles.printSummary}><span>Entered Subjects: {studentCourses.filter(x=>x.grade?.score!==null&&x.grade?.score!==undefined).length} / {studentCourses.length}</span><b>Average Score: {(()=>{const scores=studentCourses.map(x=>x.grade?.score).filter((v):v is number=>v!==null&&v!==undefined);return scores.length?(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(2):"—";})()}</b></div><footer><span>Academic Officer</span><span>Principal</span></footer></div>
-    <div className={styles.tableWrap}><table><thead><tr><th>과목 코드</th><th>과목명</th><th>점수</th><th>상태</th></tr></thead><tbody>
+    <div className={styles.tableWrap}><table><thead><tr><th>{(englishUI?"Course code":"과목 코드")}</th><th>{(englishUI?"Course name":"과목명")}</th><th>{(englishUI?"Score":"점수")}</th><th>{(englishUI?"Status":"상태")}</th></tr></thead><tbody>
      {studentCourses.map(({course,grade})=><tr key={course.id}><td>{course.course_code}</td><td>{displayCourse(course)}</td><td>{grade?.score??"—"}</td><td>{grade?.score===null||grade?.score===undefined?<span className={styles.missing}>미입력</span>:<span className={styles.complete}>입력 완료</span>}</td></tr>)}
      {!studentCourses.length&&<tr><td colSpan={4} className={styles.empty}>등록된 과목이 없습니다.</td></tr>}
     </tbody></table></div>
    </div></div>}
   </section>}
   {tab==="entry"&&<section className={styles.panel}>
-   <div className={styles.panelHead}><div><h3>과목별 점수 입력</h3><p>과목을 고르면 해당 학과·학년 학생이 표시됩니다. 0~100점을 적고 저장하세요. 아직 수강 기록이 없는 학생은 점수 저장 시 자동으로 연결됩니다.</p></div></div>
+   <div className={styles.panelHead}><div><h3>{(englishUI?"Enter scores by course":"과목별 점수 입력")}</h3><p>{(englishUI?"Select a course to display students in the relevant department and year. Enter scores from 0 to 100 and save. Students without enrollment records are linked automatically when scores are saved.":"과목을 고르면 해당 학과·학년 학생이 표시됩니다. 0~100점을 적고 저장하세요. 아직 수강 기록이 없는 학생은 점수 저장 시 자동으로 연결됩니다.")}</p></div></div>
    <div className={styles.entryFilters}>
-    <label>점수를 입력할 과목<SearchSelect value={courseId} placeholder="과목 검색" searchPlaceholder="과목 코드, 과목명 검색" options={entryCourses.map(x=>({value:x.id,label:`${x.course_code} · ${displayCourse(x)}`,keywords:`${x.course_code} ${x.title}`}))} onChange={setCourseId}/></label>
+    <label>{(englishUI?"Course to enter scores for":"점수를 입력할 과목")}<SearchSelect value={courseId} placeholder={(englishUI?"Search courses":"과목 검색")} searchPlaceholder={(englishUI?"Search by course code or name":"과목 코드, 과목명 검색")} options={entryCourses.map(x=>({value:x.id,label:`${x.course_code} · ${displayCourse(x)}`,keywords:`${x.course_code} ${x.title}`}))} onChange={setCourseId}/></label>
    </div>
    {currentCourse&&<div className={styles.entryTitle}><strong>{displayCourse(currentCourse)}</strong><span>{currentCourse.course_code} · {terms.find(x=>x.id===termId)?.name||"학기 미선택"}</span></div>}
-   <div className={styles.tableWrap}><table><thead><tr><th>순번</th><th>학생 이름</th><th>점수</th><th>기존 점수</th><th>작업</th></tr></thead><tbody>
+   <div className={styles.tableWrap}><table><thead><tr><th>{(englishUI?"No.":"순번")}</th><th>{(englishUI?"Student name":"학생 이름")}</th><th>{(englishUI?"Score":"점수")}</th><th>{(englishUI?"Existing score":"기존 점수")}</th><th>{(englishUI?"Action":"작업")}</th></tr></thead><tbody>
     {inputStudents.map(student=>{const old=gradeByKey.get(student.id+"|"+courseId);return <tr key={student.id}><td>{student.student_number}</td><td>{student.full_name}</td><td><input className={styles.scoreInput} type="number" min="0" max="100" step="0.01" disabled={!canManage||!academicMutationsEnabled||saving} value={inputValues[student.id]??""} onChange={e=>setInputValues(v=>({...v,[student.id]:e.target.value}))} aria-label={student.full_name+" 점수"}/></td><td>{old?.score??"—"}</td><td>{old&&<button className={styles.deleteButton} disabled={!academicMutationsEnabled||saving} onClick={()=>void deleteScore(student)}>삭제</button>}</td></tr>;})}
     {!inputStudents.length&&<tr><td colSpan={5} className={styles.empty}>{!termId?"먼저 학기를 선택하세요.":!courseId?"과목을 선택하세요.":"해당 과목·학년에 재학 중인 학생이 없습니다."}</td></tr>}
    </tbody></table></div>

@@ -13,10 +13,10 @@ const clock=(value:unknown)=>String(value??"").slice(0,5);
 
 export default async function TimetablePrintPage({params,searchParams}:{params:Promise<{locale:string}>;searchParams:Promise<{term?:string;department?:string}>}){
  const {locale}=await params;
- const lang=locale==="my"?"my":"ko";
+ const lang=locale==="en"?"en":locale==="my"?"my":"ko";
  const {term:termId,department:departmentId}=await searchParams;
  const back=`/${locale}/admin/academics`;
- const copy=lang==="my"?{
+ const copy=lang==="en"?{back:"Back to Academic Management",print:"Print / Save PDF",title:"Class Timetable",empty:"No timetable for the selected semester and department.",invalid:"Select a semester and department first.",fail:"Unable to load the timetable.",time:"TIME / DAY",event:"Shared event",self:"Independent study",term:"Semester",dept:"Department"}:lang==="my"?{
   back:"ပညာရေးစီမံခန့်ခွဲမှုသို့ ပြန်သွားရန်",print:"ပုံနှိပ်ရန် / PDF သိမ်းရန်",title:"သင်တန်းအချိန်ဇယား",
   empty:"ရွေးချယ်ထားသော စာသင်ကာလနှင့် ဌာနအတွက် အချိန်ဇယား မရှိပါ။",
   invalid:"စာသင်ကာလနှင့် ဌာနကို ဦးစွာ ရွေးချယ်ပါ။",fail:"အချိန်ဇယားကို ဖတ်၍မရပါ။",
@@ -52,7 +52,7 @@ export default async function TimetablePrintPage({params,searchParams}:{params:P
  const instructorNames=new Map((instructors.data??[]).map(row=>[row.id,row.full_name]));
  const slots=[...new Set([...entries,...events].map(row=>`${clock(row.start_time)}|${clock(row.end_time)}`))]
   .filter(x=>x.length>1).sort((a,b)=>a.localeCompare(b));
- const departmentName=lang==="my"?(department.data?.name_my||department.data?.name_en||department.data?.code):(department.data?.name_ko||department.data?.name_en||department.data?.code);
+ const departmentName=lang==="en"?(department.data?.name_en||department.data?.name_ko||department.data?.code):lang==="my"?(department.data?.name_my||department.data?.name_en||department.data?.code):(department.data?.name_ko||department.data?.name_en||department.data?.code);
  const title=`${term.data?.name??""} · ${departmentName??""}`;
  return <main className="lecture-print-page">
   <nav className="lecture-print-toolbar"><Link href={back}>{copy.back}</Link><strong>{copy.title}</strong>{!error&&term.data&&department.data&&<PrintActions label={copy.print}/>}</nav>

@@ -1,3 +1,4 @@
+import LanguageSwitcher from "../LanguageSwitcher";
 import Link from "next/link";
 import type {ReactNode} from "react";
 import dynamic from "next/dynamic";
@@ -67,10 +68,10 @@ const copy = {
 
 export default async function Admin({params}:{params:Promise<{locale:string}>}) {
   const {locale}=await params;
-  const lang=(locale==="my"?"my":"ko") as "my"|"ko";
+  const lang=(locale==="en"?"en":locale==="my"?"my":"ko") as "my"|"en"|"ko";
   const t=copy[lang];
   const supabase=await createSupabaseServerClient();
-  if(!supabase) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>{lang==="my"?"စီမံခန့်ခွဲသူ ဝန်ဆောင်မှုသို့ ချိတ်ဆက်၍ မရပါ":"관리자 서비스에 연결할 수 없습니다"}</h1><p className="login-intro">{lang==="my"?"အကောင့်ဝင်ရောက်မှု ဝန်ဆောင်မှုကို မသတ်မှတ်ရသေးသောကြောင့် စီမံခန့်ခွဲသူစာမျက်နှာကို ဖွင့်၍မရပါ။ ဝန်ဆောင်မှုဆက်တင်များကို စစ်ဆေးပြီး ထပ်မံကြိုးစားပါ။":"로그인 서비스 설정이 확인되지 않아 관리자 화면을 열 수 없습니다. 서비스 설정을 확인한 뒤 다시 시도해 주세요."}</p><Link className="btn secondary" href={`/${locale}`}>{lang==="my"?"ဝဘ်ဆိုက်သို့ ပြန်သွားရန်":"홈페이지로 돌아가기"}</Link></section></main>;
+  if(!supabase) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>{lang==="en"?"Could not connect to the administration service":lang==="my"?"စီမံခန့်ခွဲသူ ဝန်ဆောင်မှုသို့ ချိတ်ဆက်၍ မရပါ":"관리자 서비스에 연결할 수 없습니다"}</h1><p className="login-intro">{lang==="en"?"The authentication service is unavailable. Check the configuration and try again.":lang==="my"?"အကောင့်ဝင်ရောက်မှု ဝန်ဆောင်မှုကို မသတ်မှတ်ရသေးသောကြောင့် စီမံခန့်ခွဲသူစာမျက်နှာကို ဖွင့်၍မရပါ။ ဝန်ဆောင်မှုဆက်တင်များကို စစ်ဆေးပြီး ထပ်မံကြိုးစားပါ။":"로그인 서비스 설정이 확인되지 않아 관리자 화면을 열 수 없습니다. 서비스 설정을 확인한 뒤 다시 시도해 주세요."}</p><Link className="btn secondary" href={`/${locale}`}>{lang==="en"?"Return to website":lang==="my"?"ဝဘ်ဆိုက်သို့ ပြန်သွားရန်":"홈페이지로 돌아가기"}</Link></section></main>;
   let userEmail="";
   let roles:MrpstRole[]=[];
   let moduleOverrides:{module_key:string;can_view:boolean}[]=[];
@@ -121,7 +122,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   const moduleGroups=[["academic",["students","academics"]],["finance",["finance"]],["operations",["facilities","library","meetings"]],["system",["administration","website"]]] as const;
   const visibleInGroup=(keys:readonly string[])=>visible.filter(([key])=>keys.includes(key));
   let dashboardInlineValues:Record<string,string>={};
-  if(locale!=="my"){
+  if(locale==="ko"){
     const {data}=await supabase.from("website_contents").select("body")
       .eq("content_type","page").eq("content_key","inline-page-admin-dashboard")
       .eq("locale",locale).eq("is_published",true).maybeSingle();
@@ -130,7 +131,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
       if(saved&&typeof saved==="object"&&!Array.isArray(saved))dashboardInlineValues=saved;
     }catch{}
   }
-  const adminShell=(content:ReactNode)=>locale==="my"?<InlineAdminEditor locale={locale}>{content}</InlineAdminEditor>:<InlinePageEditor pageKey="admin-dashboard" locale={locale} initialValues={dashboardInlineValues}>{content}</InlinePageEditor>;
+  const adminShell=(content:ReactNode)=>locale==="en"?content:locale==="my"?<InlineAdminEditor locale={locale}>{content}</InlineAdminEditor>:<InlinePageEditor pageKey="admin-dashboard" locale={locale} initialValues={dashboardInlineValues}>{content}</InlinePageEditor>;
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>} {adminShell(<div className="admin">
     <aside className="sidebar">
       <Link href={`/${locale}/admin`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
@@ -143,13 +144,11 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
           {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([key,item])=><Link className="side-link" href={`/${locale}/admin/${key}`} key={key}>{(t as any)[key]?.[0]??item.title}</Link>)}</div>:null;})}
         </nav>
       </AdminMenuDetails>
-      <div className="sidebar-mobile-tools"><nav className="admin-language" aria-label="Language"><a className={locale==="my"?"selected":""} href="/my/admin">မြန်မာ</a><a className={locale==="ko"?"selected":""} href="/ko/admin">한국어</a></nav><Link href={`/${locale}`}>{t.view}</Link>{supabase&&<AdminActions locale={locale}/>}</div>
+      <div className="sidebar-mobile-tools"><div data-no-inline-edit data-no-translate><LanguageSwitcher locale={lang}/></div><Link href={`/${locale}`}>{t.view}</Link>{supabase&&<AdminActions locale={locale}/>}</div>
     </aside>
     <main className="admin-main">
       <header className="topbar admin-desktop-topbar"><Link href={`/${locale}/admin`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">
-        <nav className="admin-language" aria-label="Language">
-          <a className={locale==="my"?"selected":""} href="/my/admin">မြန်မာ</a><a className={locale==="ko"?"selected":""} href="/ko/admin">한국어</a>
-        </nav>
+        <div data-no-inline-edit data-no-translate><LanguageSwitcher locale={lang}/></div>
         
         <Link href={`/${locale}`}>{t.view}</Link>
         {supabase&&<AdminActions locale={locale}/>}
@@ -157,18 +156,18 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
       <div className="content">{dashboardQueryErrors.length>0&&<div className="notice" role="alert">{lang==="ko"?"일부 대시보드 데이터를 불러오지 못했습니다: "+dashboardQueryErrors.join(", "):"ဒက်ရှ်ဘုတ်ဒေတာအချို့ကို မရယူနိုင်ပါ: "+dashboardQueryErrors.join(", ")}</div>}<span className="eyebrow" data-no-inline-edit="" data-no-translate="">INTEGRATED SCHOOL MANAGEMENT</span><h1 className="admin-heading" data-no-inline-edit="" data-no-translate="">{t.title}</h1><p className="admin-subtitle" data-no-inline-edit="" data-no-translate="">{t.subtitle}</p>
         {!isSupabaseConfigured&&<div className="notice">{t.preview}</div>}
         <section className="dashboard-stats">
-          <article className="dashboard-stat"><span>{t.currentStudents}</span><strong>{hasStudentStats?activeStudentCount.count?.toLocaleString("en-US"):"—"}</strong><small>{lang==="ko"?"현재 재학 상태":"လက်ရှိတက်ရောက်နေသော ကျောင်းသား"}</small></article>
-          <article className="dashboard-stat"><span>{t.graduateTotal}</span><strong>{hasStudentStats?graduateCount.count?.toLocaleString("en-US"):"—"}</strong><small>{lang==="ko"?"졸업 처리된 학생":"ဘွဲ့ရပြီးသော ကျောင်းသားများ"}</small></article>
-          <article className="dashboard-stat"><span>{lang==="ko"?"이번 주 일정":"ယခုအပတ်အတွင်း"}</span><strong>{upcomingCount}</strong><small>{lang==="ko"?"이번 주 전체 일정":"ယခုအပတ်အစီအစဉ်များ"}</small></article>
+          <article className="dashboard-stat"><span>{t.currentStudents}</span><strong>{hasStudentStats?activeStudentCount.count?.toLocaleString("en-US"):"—"}</strong><small>{lang==="en"?"Currently enrolled":lang==="ko"?"현재 재학 상태":"လက်ရှိတက်ရောက်နေသော ကျောင်းသား"}</small></article>
+          <article className="dashboard-stat"><span>{t.graduateTotal}</span><strong>{hasStudentStats?graduateCount.count?.toLocaleString("en-US"):"—"}</strong><small>{lang==="en"?"Graduated students":lang==="ko"?"졸업 처리된 학생":"ဘွဲ့ရပြီးသော ကျောင်းသားများ"}</small></article>
+          <article className="dashboard-stat"><span>{lang==="en"?"This week":lang==="ko"?"이번 주 일정":"ယခုအပတ်အတွင်း"}</span><strong>{upcomingCount}</strong><small>{lang==="en"?"All events this week":lang==="ko"?"이번 주 전체 일정":"ယခုအပတ်အစီအစဉ်များ"}</small></article>
         </section>
         <div className="dashboard-columns">
           <section className="dashboard-panel dashboard-schedule">
-            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</span><h2>{lang==="ko"?"다가오는 일정":"လာမည့် အစီအစဉ်များ"}</h2></div>{canAccessAcademics&&<Link href={`/${locale}/admin/academics`}>{lang==="ko"?"일정 관리 →":"စီမံခန့်ခွဲရန် →"}</Link>}</div>
-            {upcomingEvents.length? <div className="dashboard-event-list">{upcomingEvents.map((event:any)=><article key={event.id}><time>{event.start_date}{event.start_time?" · "+String(event.start_time).slice(0,5):""}</time><div><strong>{event.title}</strong>{event.location&&<small>{event.location}</small>}</div></article>)}</div>:<p className="dashboard-empty">{lang==="ko"?"예정된 일정이 없습니다.":"မှတ်ပုံတင်ထားသော အစီအစဉ် မရှိသေးပါ။"}</p>}
+            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="en"?"Academic calendar":lang==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</span><h2>{lang==="en"?"Upcoming events":lang==="ko"?"다가오는 일정":"လာမည့် အစီအစဉ်များ"}</h2></div>{canAccessAcademics&&<Link href={`/${locale}/admin/academics`}>{lang==="en"?"Manage calendar →":lang==="ko"?"일정 관리 →":"စီမံခန့်ခွဲရန် →"}</Link>}</div>
+            {upcomingEvents.length? <div className="dashboard-event-list">{upcomingEvents.map((event:any)=><article key={event.id}><time>{event.start_date}{event.start_time?" · "+String(event.start_time).slice(0,5):""}</time><div><strong>{event.title}</strong>{event.location&&<small>{event.location}</small>}</div></article>)}</div>:<p className="dashboard-empty">{lang==="en"?"No upcoming events.":lang==="ko"?"예정된 일정이 없습니다.":"မှတ်ပုံတင်ထားသော အစီအစဉ် မရှိသေးပါ။"}</p>}
           </section>
           <section className="dashboard-panel dashboard-announcements">
-            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="ko"?"MRPST NEWS":"MRPST NEWS"}</span><h2>{lang==="ko"?"최근 공지사항":"နောက်ဆုံး ကြေညာချက်များ"}</h2></div>{canAccessWebsite&&<Link href={`/${locale}/admin/website`}>{lang==="ko"?"공지사항 관리 →":"စီမံခန့်ခွဲရန် →"}</Link>}</div>
-            {recentAnnouncements.length?<div className="dashboard-announcement-list">{recentAnnouncements.map((item:any)=><article key={item.content_key}><div><strong>{item.title}</strong><p>{item.body}</p></div><span className={item.is_published?"published":"draft"}>{item.is_published?(lang==="ko"?"게시":"Published"):(lang==="ko"?"임시저장":"Draft")}</span></article>)}</div>:<p className="dashboard-empty">{lang==="ko"?"등록된 공지사항이 없습니다.":"ကြေညာချက် မရှိသေးပါ။"}</p>}
+            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="en"?"MRPST NEWS":lang==="ko"?"MRPST NEWS":"MRPST NEWS"}</span><h2>{lang==="en"?"Recent announcements":lang==="ko"?"최근 공지사항":"နောက်ဆုံး ကြေညာချက်များ"}</h2></div>{canAccessWebsite&&<Link href={`/${locale}/admin/website`}>{lang==="en"?"Manage announcements →":lang==="ko"?"공지사항 관리 →":"စီမံခန့်ခွဲရန် →"}</Link>}</div>
+            {recentAnnouncements.length?<div className="dashboard-announcement-list">{recentAnnouncements.map((item:any)=><article key={item.content_key}><div><strong>{item.title}</strong><p>{item.body}</p></div><span className={item.is_published?"published":"draft"}>{item.is_published?(lang==="en"?"Published":lang==="ko"?"게시":"Published"):(lang==="en"?"Draft":lang==="ko"?"임시저장":"Draft")}</span></article>)}</div>:<p className="dashboard-empty">{lang==="en"?"No announcements yet.":lang==="ko"?"등록된 공지사항이 없습니다.":"ကြေညာချက် မရှိသေးပါ။"}</p>}
           </section>
         </div>
       </div>

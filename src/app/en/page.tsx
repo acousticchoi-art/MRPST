@@ -39,7 +39,7 @@ export default async function Home(){
   if(supabase){
     const [{data:pageData},{data:announcementData}]=await Promise.all([
       supabase.from("website_contents").select("content_type,content_key,title,body,is_published,created_at,updated_at").eq("content_type","page").eq("locale",locale).eq("is_published",true),
-      supabase.from("website_contents").select("content_type,content_key,title,body,is_published,created_at,updated_at").eq("content_type","announcement").in("locale",[locale]).eq("is_published",true)
+      supabase.from("website_contents").select("content_type,content_key,title,body,is_published,created_at,updated_at").eq("content_type","announcement").in("locale",["all",locale]).eq("is_published",true)
     ]);
     cmsRows=[...(pageData??[]),...(announcementData??[])] as typeof cmsRows;
   }
@@ -57,7 +57,10 @@ export default async function Home(){
     contactText:page("contact")?.body||base.contactText,
     addressText:page("address")?.body||base.addressText
   };
-  const announcements=cmsRows.filter(x=>x.content_type==="announcement").sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
+  // Translate the two existing public notices only when their original text still matches.
+  // New or edited notice content remains original until an English translation is supplied.
+  const noticeTranslations:Record<string,string>={"MRPST 홈페이지에 오신 여러분을 환영합니다.":"Welcome to the MRPST website.","2026 개강 안내":"2026 Opening of Classes","밍글라바\nMRPST 홈페이지에 오신 여러분을 환영합니다!":"Mingalaba!\nWelcome to the MRPST website!","2026 개강 안내 입니다.":"Announcement of the opening of classes in 2026."};
+  const announcements=cmsRows.filter(x=>x.content_type==="announcement").map(x=>({...x,title:noticeTranslations[x.title.trim()]??x.title,body:noticeTranslations[x.body.trim()]??x.body})).sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
   return <InlinePageEditor pageKey="home" locale={locale} initialValues={inlineValues}>
     <SiteHeader locale={locale} active="home" />
     <main className="homepage">

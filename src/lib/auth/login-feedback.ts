@@ -14,6 +14,7 @@ const messages = {
 } as const;
 
 export function loginFeedback(key: keyof typeof messages, locale: string) {
+  if(locale==="en")return {"credentials":"Email or password is incorrect.","unconfirmed":"Email verification is incomplete.","blocked":"This account is restricted.","rate":"Too many login attempts. Try again later.","network":"Unable to connect to the login server. Try again later.","failed":"Unable to process the login request.","access":"Unable to verify account status or role. Try again.","inactive":"This account is inactive.","noProfile":"No account profile is registered.","noRole":"No login role is assigned to this account.","noStudent":"No student record is linked to this account.","studentLookup":"Unable to verify student information. Try again."}[key];
   return messages[key][locale === "my" ? 1 : 0];
 }
 

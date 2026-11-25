@@ -39,7 +39,7 @@ export default async function Home(){
   if(supabase){
     const [{data:pageData},{data:announcementData}]=await Promise.all([
       supabase.from("website_contents").select("content_type,content_key,title,body,is_published,created_at,updated_at").eq("content_type","page").eq("locale",locale).eq("is_published",true),
-      supabase.from("website_contents").select("content_type,content_key,title,body,is_published,created_at,updated_at").eq("content_type","announcement").in("locale",[locale]).eq("is_published",true)
+      supabase.from("website_contents").select("content_type,content_key,title,body,is_published,created_at,updated_at").eq("content_type","announcement").in("locale",["all",locale]).eq("is_published",true)
     ]);
     cmsRows=[...(pageData??[]),...(announcementData??[])] as typeof cmsRows;
   }

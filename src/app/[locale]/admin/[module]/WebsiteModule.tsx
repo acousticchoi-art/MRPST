@@ -30,9 +30,12 @@ const pageFields=[
  {key:"contact-info",label:"연락처 페이지 · 방문 안내",hint:"주소와 지도 버튼 위에 표시할 안내"},
  {key:"calendar-hero",label:"학사 일정 페이지 · 첫 화면",hint:"학사 일정 페이지의 제목과 소개"}
 ] as const;
-const locales=[{value:"ko",label:"한국어"},{value:"my",label:"မြန်မာ"}];
+const originalLocales=[{value:"ko",label:"한국어"},{value:"my",label:"မြန်မာ"}];
+const englishLocales=[{value:"en",label:"English"}];
 export default function WebsiteModule({canManage}:{canManage:boolean}){
- const locale=usePathname().startsWith("/my/")?"my":"ko";
+ const pathname=usePathname();
+ const locale=pathname.startsWith("/en/")?"en":pathname.startsWith("/my/")?"my":"ko";
+ const locales=locale==="en"?englishLocales:originalLocales;
  const mutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [items,setItems]=useState<Entry[]>([]);
@@ -140,13 +143,13 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
     <div className="website-field-title"><span>{String(index+1).padStart(2,"0")}</span><div><h4>{field.label}</h4><p>{field.hint}</p></div></div>
     <div className="website-translation-columns">{locales.map(language=><section key={language.value} className="website-translation-language"><h5>{language.label}</h5>{field.key!=="address"&&<FormField label="제목"><input disabled={!canManage||saving} value={translationValues[field.key]?.[language.value]?.title||""} onChange={e=>setTranslationValues(values=>({...values,[field.key]:{...values[field.key],[language.value]:{...values[field.key]?.[language.value],title:e.target.value}}}))}/></FormField>}<FormField label={field.key==="address"?"주소":"본문 및 소개 문구"}><textarea disabled={!canManage||saving} rows={field.key==="about"?6:4} value={translationValues[field.key]?.[language.value]?.body||""} onChange={e=>setTranslationValues(values=>({...values,[field.key]:{...values[field.key],[language.value]:{...values[field.key]?.[language.value],body:e.target.value}}}))}/></FormField></section>)}</div>
    </article>)}</div>}
-   <div className="website-footer-actions"><span>두 언어를 함께 저장합니다. 비어 있는 항목도 그대로 저장되니 내용을 확인해 주세요.</span><button className="website-primary" disabled={!canManage||saving||loading} onClick={()=>void saveTranslations()}>{saving?"저장 중…":"두 언어 저장 및 게시"}</button></div>
+   <div className="website-footer-actions"><span>{locale==="en"?"Only English content is saved here. Review all fields before publishing.":"두 언어를 함께 저장합니다. 비어 있는 항목도 그대로 저장되니 내용을 확인해 주세요."}</span><button className="website-primary" disabled={!canManage||saving||loading} onClick={()=>void saveTranslations()}>{saving?"저장 중…":locale==="en"?"Save and publish English":"두 언어 저장 및 게시"}</button></div>
   </section>}
   {tab==="notices"&&<div className="website-notice-layout website-notice-layout-v2">
    <section className="website-panel website-panel-v2 website-notice-editor">
     <div className="website-section-intro"><div><span className="website-kicker">ANNOUNCEMENT EDITOR</span><h3>{editingId?"공지사항 수정":"새 공지사항 작성"}</h3><p>공지사항은 한 번만 등록하면 한국어와 미얀마어 홈페이지에 함께 공개됩니다.</p></div></div>
     <div className="website-form website-form-v2">
-     <p className="website-notice-audience">공개 대상 <strong>전체 홈페이지 · 한국어 / 미얀마어</strong></p>
+     <p className="website-notice-audience">공개 대상 <strong>{locale==="en"?"All website languages":"전체 홈페이지 · 한국어 / 미얀마어"}</strong></p>
      <FormField label="공지사항 제목"><input disabled={!canManage||saving} value={noticeTitle} onChange={e=>setNoticeTitle(e.target.value)} placeholder="예: 2026학년도 2학기 개강 안내"/></FormField>
      <FormField label="공지사항 내용"><textarea disabled={!canManage||saving} rows={9} value={noticeBody} onChange={e=>setNoticeBody(e.target.value)} placeholder="공지할 내용을 입력하세요."/></FormField>
      <label className="website-publish-check website-publish-check-v2"><input type="checkbox" disabled={!canManage||saving} checked={noticePublished} onChange={e=>setNoticePublished(e.target.checked)}/><span><strong>저장 후 홈페이지에 게시</strong><small>체크를 해제하면 비공개 상태로 저장됩니다.</small></span></label>

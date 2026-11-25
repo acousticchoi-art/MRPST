@@ -22,7 +22,9 @@ export default async function CalendarPage({ params }: { params: Promise<{ local
           <h1>{hero.title}</h1>
           <p>{hero.body}</p>
         </div>
-        <ScheduleCalendar publicOnly locale={locale} />
+        <div data-no-inline-edit>
+          <ScheduleCalendar publicOnly locale={locale} />
+        </div>
       </main>
     </InlinePageEditor>
   );

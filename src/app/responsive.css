@@ -328,3 +328,14 @@
   }
   .admin .content :is(.module-heading,.dashboard-panel-head){flex-wrap:wrap}
 }
+
+/* Language popup is mounted outside the admin header to avoid overflow clipping. */
+.mrpst-language-options{position:fixed;z-index:2147483000;box-sizing:border-box;width:160px;max-width:calc(100vw - 16px);padding:4px;background:#fff;border:1px solid #d9e3e9;border-radius:8px;box-shadow:0 8px 24px #173c5522;color:#173c55;}
+.mrpst-language-options a{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:40px;padding:9px 10px;border-radius:5px;background:#fff;color:#173c55;font-size:13px;line-height:1.4;text-decoration:none;}
+.mrpst-language-options a[aria-current=true]{background:#edf2f5;font-weight:700;}
+.mrpst-language-options a:hover,.mrpst-language-options a:focus-visible{background:#e9f0f4;color:#173c55;}
+/* Keep the public mobile Admin link legible in every interaction state. */
+@media(max-width:1100px){
+ html body .header>.mobile-menu>.mobile-nav>a[href$="/admin"]{background:#173c55!important;color:#fff!important;}
+ html body .header>.mobile-menu>.mobile-nav>a[href$="/admin"]:is(:hover,:focus-visible,:active){background:#102d42!important;color:#fff!important;}
+}

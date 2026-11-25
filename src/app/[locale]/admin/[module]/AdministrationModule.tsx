@@ -29,10 +29,11 @@ function hasRoleManageAccess(userRoles:UserRole[],moduleKey:string){
  return userRoles.some(userRole=>userRole.role==="super_admin"||userRole.role==="administrator"||(manageRolesByPage[moduleKey]||[]).includes(userRole.role));
 }
 export default function AdministrationModule({isSuperAdmin,callerId}:{isSuperAdmin:boolean;callerId:string}){
- const locale=usePathname().startsWith("/my/")?"my":"ko";
+ const pathname=usePathname();
+ const locale=pathname.startsWith("/en/")?"en":pathname.startsWith("/my/")?"my":"ko";
  const db=useMemo(()=>createSupabaseBrowserClient(),[]);
  const [users,setUsers]=useState<P[]>([]),[deps,setDeps]=useState<D[]>([]),[logs,setLogs]=useState<any[]>([]);
- const depName=(d:D|undefined)=>locale==="my"?(d?.name_my||d?.name_en||d?.name_ko||""):(d?.name_ko||d?.name_en||d?.name_my||"");
+ const depName=(d:D|undefined)=>locale==="en"?(d?.name_en||d?.name_ko||d?.name_my||""):locale==="my"?(d?.name_my||d?.name_en||d?.name_ko||""):(d?.name_ko||d?.name_en||d?.name_my||"");
  const [tab,setTab]=useState("users"),[search,setSearch]=useState(""),[statusFilter,setStatusFilter]=useState("all");
  const [auditSearch,setAuditSearch]=useState(""),[auditActionFilter,setAuditActionFilter]=useState("all");
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
@@ -70,7 +71,7 @@ export default function AdministrationModule({isSuperAdmin,callerId}:{isSuperAdm
   setSelectedPageKeys(isSuperAdmin||isAdministrator?pageOptions.map(option=>option.key):pageOptions.filter(option=>{const override=p.permissions.find(permission=>permission.module_key===option.key);return override?override.can_view:p.roles.some(userRole=>MODULES[option.key].roles.includes(userRole.role as MrpstRole));}).map(option=>option.key));
  }
  const actorName=(id:string|null)=>id?users.find(u=>u.user_id===id)?.full_name||"알 수 없는 사용자":"시스템 작업 · 실행자 미확인";
- const auditLabel=(x:any)=>{const b=x.details?.before||{},a=x.details?.after||{};if(x.entity_type==="user_profile")return users.find(u=>u.user_id===x.entity_id)?.full_name||a.full_name||b.full_name||x.details?.full_name||"회원";if(x.entity_type==="user_role"){const uid=a.user_id||b.user_id||x.details?.user_id||((x.details?.event==="account_created")?x.entity_id:null);return users.find(u=>u.user_id===uid)?.full_name||x.details?.full_name||"권한 대상";}if(x.entity_type==="department")return depName(deps.find(d=>d.id===x.entity_id))||(locale==="my"?(a.name_my||a.name_en||a.name_ko):(a.name_ko||a.name_en))||"부서";return x.entity_id||"—";};
+ const auditLabel=(x:any)=>{const b=x.details?.before||{},a=x.details?.after||{};if(x.entity_type==="user_profile")return users.find(u=>u.user_id===x.entity_id)?.full_name||a.full_name||b.full_name||x.details?.full_name||"회원";if(x.entity_type==="user_role"){const uid=a.user_id||b.user_id||x.details?.user_id||((x.details?.event==="account_created")?x.entity_id:null);return users.find(u=>u.user_id===uid)?.full_name||x.details?.full_name||"권한 대상";}if(x.entity_type==="department")return depName(deps.find(d=>d.id===x.entity_id))||(locale==="en"?(a.name_en||a.name_ko):locale==="my"?(a.name_my||a.name_en||a.name_ko):(a.name_ko||a.name_en))||"부서";return x.entity_id||"—";};
  const auditActionName=(a:string)=>({insert:"등록",update:"수정",delete:"삭제"} as Record<string,string>)[a]||a;
  const auditEntityName=(e:string)=>({user_profile:"회원 정보",user_role:"계정 권한",department:"부서"} as Record<string,string>)[e]||e;
  const auditSummary=(x:any)=>{
@@ -84,7 +85,7 @@ export default function AdministrationModule({isSuperAdmin,callerId}:{isSuperAdm
    return (x.action==="insert"?"권한 부여":x.action==="delete"?"권한 해제":"권한 변경")+" · "+roleName+(dept?" ("+dept+")":"");
   }
   if(x.entity_type==="department"){
-   const b=(locale==="my"?(before.name_my||before.name_en||before.name_ko):(before.name_ko||before.name_en)),a=(locale==="my"?(after.name_my||after.name_en||after.name_ko):(after.name_ko||after.name_en));
+   const b=(locale==="en"?(before.name_en||before.name_ko):locale==="my"?(before.name_my||before.name_en||before.name_ko):(before.name_ko||before.name_en)),a=(locale==="en"?(after.name_en||after.name_ko):locale==="my"?(after.name_my||after.name_en||after.name_ko):(after.name_ko||after.name_en));
    if(x.action==="insert")return "부서 등록 · "+(a||"부서");
    if(x.action==="delete")return "부서 삭제 · "+(b||"부서");
    return "부서 정보 수정"+(b||a?" · "+(b||"이전 부서")+" → "+(a||"수정된 부서"):"");

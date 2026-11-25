@@ -21,7 +21,8 @@ const emptyProfile={student_number:"",full_name:"",full_name_en:"",full_name_my:
 
 export default function StudentModule(){
  const supabase=useMemo(()=>createSupabaseBrowserClient(),[]);
- const locale=usePathname().startsWith("/my/")?"my":"ko";
+ const pathname=usePathname();
+ const locale=pathname.startsWith("/en/")?"en":pathname.startsWith("/my/")?"my":"ko";
  const academicMutationsEnabled=process.env.NEXT_PUBLIC_MRPST_ACADEMIC_MUTATIONS_ENABLED!=="false";
  const [students,setStudents]=useState<Student[]>([]),[records,setRecords]=useState<any[]>([]),[awards,setAwards]=useState<Award[]>([]),[graduations,setGraduations]=useState<Graduation[]>([]),[statusHistory,setStatusHistory]=useState<StatusHistory[]>([]);
  const [selectedId,setSelectedId]=useState(""),[tab,setTab]=useState("profiles"),[search,setSearch]=useState(""),[directory,setDirectory]=useState<"current"|"graduates">("current");
@@ -58,7 +59,7 @@ export default function StudentModule(){
  const currentStudents=students.filter(s=>s.student_status==="active");
  const graduateStudents=students.filter(s=>s.student_status==="graduated"||graduations.some(g=>g.student_id===s.id));
  const directoryStudents=directory==="current"?currentStudents:graduateStudents;
- const displayStudentName=(s:Student)=>locale==="my"?(s.full_name_my||s.full_name):s.full_name;
+ const displayStudentName=(s:Student)=>locale==="en"?(s.full_name_en||s.full_name):locale==="my"?(s.full_name_my||s.full_name):s.full_name;
  const visible=directoryStudents.filter(s=>!search.trim()||[s.student_number,s.full_name,s.full_name_en,s.full_name_my,s.program,s.cohort].some(v=>(v??"").toLowerCase().includes(search.toLowerCase())));
  const studentRecords=records.filter(r=>r.student_id===selectedId),studentAwards=awards.filter(a=>a.student_id===selectedId),studentGraduations=graduations.filter(g=>g.student_id===selectedId),studentStatusHistory=statusHistory.filter(h=>h.student_id===selectedId);
  const activeStudents=currentStudents.length,graduatedStudentCount=graduateStudents.length;

@@ -127,7 +127,7 @@ const EN:Record<string,string>={
   "비활성": "Inactive",
   "검색...": "Search...",
   "검색어": "Search",
-  "선택하세요": "Select",
+  "선택하세요": "Select an option",
   "선택해 주세요": "Select",
   "로그아웃": "Sign out",
   "목록": "Account",
@@ -3043,13 +3043,23 @@ const EN:Record<string,string>={
   "데이터를 새로 불러왔습니다.": "Data refreshed.",
   "km보다 낮을 수 없습니다.": "cannot be lower than the stated mileage (km).",
   "km)보다 시작 수치가 낮습니다.": " km) exceeds the starting reading.",
-  "km)보다 종료 수치가 높습니다.": " km) is below the ending reading."
+  "km)보다 종료 수치가 높습니다.": " km) is below the ending reading.",
+  "회의 자료 관리": "Meeting Management",
+  "로그인 계정, 소속 및 시스템 접근 권한을 관리합니다.": "Manage login accounts, affiliations and system access permissions.",
+  "공지사항을 먼저 관리하고, 필요한 경우 아래에서 두 언어의 홈페이지 문구를 함께 수정합니다.": "Manage announcements and website copy.",
+  "작업 취소": "Undo",
+  "이전": "Previous",
+  "다음": "Next",
+  "다시 불러오기": "Reload",
+  "학사 일정 관리": "Manage academic calendar",
+  "신학과": "Theology",
+  "유아교육과": "Early Childhood Education"
 };
 function translated(raw:string){const key=raw.trim();const v=EN[key]??EN[key.replace(/\s+/g," ")];return v?raw.replace(key,v):raw;}
-const controls="button,label,legend,th,h1,h2,h3,h4,h5,summary,[role=tab],[role=alert],[role=status],.academics-empty,.student-empty,.dashboard-empty,.module-placeholder,.notice,.schedule-weekday,.academics-panel-head p,.student-status,.admin-heading,.admin-subtitle";
+const controls="button,label,legend,th,h1,h2,h3,h4,h5,summary,[role=tab],[role=alert],[role=status],.academics-empty,.student-empty,.dashboard-empty,.module-placeholder,.notice,.schedule-weekday,.academics-panel-head p,.student-status,.admin-heading,.admin-subtitle,.admin-search-select-empty,.admin-search-select-trigger .placeholder,.website-section-intro p,.website-footer-actions>span,.website-notice-audience,.website-publish-check small,.finance-panel-head p,.student-panel-head p,.facility-panel-head p,.library-panel-head p,.meeting-panel-head p,.settings-panel-head p,.admin-form-actions,.academics-grade-simple-guide p,.dashboard-stat small,.website-stat-grid span,.website-stat-grid small";
 const excluded="script,style,textarea,[contenteditable=true],.notranslate,[data-no-translate],.website-translation-language h5";
 function visit(root:Node){
- if(root.nodeType===Node.TEXT_NODE){const p=root.parentElement;if(!p||p.closest(excluded)||!p.closest(controls+",option[value]"))return;const next=translated(root.nodeValue||"");if(next!==root.nodeValue)root.nodeValue=next;return;}
+ if(root.nodeType===Node.TEXT_NODE){const p=root.parentElement;if(!p||p.closest(excluded)||p.closest(".admin-search-select-results,.admin-search-select-trigger .selected")||!p.closest(controls+",option[value]"))return;const next=translated(root.nodeValue||"");if(next!==root.nodeValue)root.nodeValue=next;return;}
  if(root.nodeType!==Node.ELEMENT_NODE)return;const el=root as Element;if(el.closest(excluded))return;
  for(const x of [el,...el.querySelectorAll("[placeholder],[title],[aria-label]")]){if(x.closest(excluded))continue;for(const attr of ["placeholder","title","aria-label"]){const v=x.getAttribute(attr);if(v){const next=translated(v);if(next!==v)x.setAttribute(attr,next);}}}
  const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);while(w.nextNode())visit(w.currentNode);

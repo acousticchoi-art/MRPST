@@ -48,7 +48,7 @@ export default function AdministrationModule({isSuperAdmin,callerId}:{isSuperAdm
  const load=useCallback(async()=>{setLoading(true);setError("");try{
   const response=await fetch("/api/admin/data/administration",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
   const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
-  if(!response.ok)throw new Error(data.error||`회원·권한 데이터 조회 실패 (HTTP ${response.status})`);
+  if(!response.ok)throw new Error(data.error||(englishUI?`Unable to load users and permissions (HTTP ${response.status})`:locale==="my"?`အသုံးပြုသူနှင့် ခွင့်ပြုချက်ဒေတာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`회원·권한 데이터 조회 실패 (HTTP ${response.status})`));
   const errors=[data.profiles,data.departments,data.auditLogs,data.roles,data.permissions].map(x=>x?.error).filter(Boolean);
   if(errors.length)throw new Error(errors.join(" · "));
   const rows=(data.profiles?.data||[]) as Omit<P,"roles">[],rr=(data.roles?.data||[]) as UserRole[],pp=(data.permissions?.data||[]) as (UserModulePermission & {user_id:string})[];
@@ -57,7 +57,7 @@ export default function AdministrationModule({isSuperAdmin,callerId}:{isSuperAdm
   setSelectedId(current=>current&&mapped.some(x=>x.user_id===current)?current:"");
  }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[]);
  useEffect(()=>{void load();},[load]);
- async function invokeAdmin(body:Record<string,unknown>){const response=await fetch("/api/admin/manage-user",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(body),cache:"no-store"});const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));if(!response.ok||data?.error)throw new Error(data?.error||`계정 관리 요청 실패 (HTTP ${response.status})`);return data;}
+ async function invokeAdmin(body:Record<string,unknown>){const response=await fetch("/api/admin/manage-user",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(body),cache:"no-store"});const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));if(!response.ok||data?.error)throw new Error(data?.error||(englishUI?`Account management request failed (HTTP ${response.status})`:locale==="my"?`အကောင့်စီမံခန့်ခွဲမှု တောင်းဆိုချက် မအောင်မြင်ပါ (HTTP ${response.status})`:`계정 관리 요청 실패 (HTTP ${response.status})`));return data;}
  async function createAccount(){if(!newUser.full_name.trim()||!newUser.email.trim()||newUser.password.length<6){setCreateError((englishUI?"Enter a name, email and password of at least six characters.":"이름, 이메일, 6자 이상의 비밀번호를 입력해 주세요."));return;}setSaving(true);setCreateError("");try{const result=await invokeAdmin({action:"create",...newUser,full_name:newUser.full_name.trim(),email:newUser.email.trim()});if(!result?.user_id)throw new Error("계정 생성 결과를 확인할 수 없습니다.");setNotice(result.audit_warning||"새 계정을 생성했습니다.");setCreateOpen(false);setNewUser({full_name:"",email:"",password:"",preferred_locale:"ko",role:"staff",department_id:""});await load();}catch(e:any){setCreateError(e?.message||"계정을 생성하지 못했습니다. 입력한 내용은 유지됩니다.");}finally{setSaving(false);}}
  async function run(fn:()=>any,msg:string){
   setSaving(true);setError("");setNotice("");

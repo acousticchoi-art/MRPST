@@ -35,7 +35,7 @@ export default function StudentModule(){
   // 브라우저에서 Supabase로 직접 요청하지 않고 동일 출처의 Vercel API를 통해 조회합니다.
   const response=await fetch("/api/admin/students",{method:"GET",cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
   const payload=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
-  if(!response.ok)throw new Error(payload.error||`학생 데이터 조회 실패 (HTTP ${response.status})`);
+  if(!response.ok)throw new Error(payload.error||(englishUI?`Unable to load student data (HTTP ${response.status})`:locale==="my"?`ကျောင်းသားဒေတာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`학생 데이터 조회 실패 (HTTP ${response.status})`));
   setCanManage(payload.canManage===true);
   const errors:string[]=[];
   const s=payload.students,r=payload.grades,a=payload.scholarships,g=payload.graduations,h=payload.statusHistory;

@@ -42,7 +42,7 @@ export default function FinanceModule(){
  const load=useCallback(async()=>{setLoading(true);setError("");try{
  const response=await fetch("/api/admin/data/finance",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
  const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
- if(!response.ok)throw new Error(data.error||`재정 데이터 조회 실패 (HTTP ${response.status})`);
+ if(!response.ok)throw new Error(data.error||(englishUI?`Unable to load financial data (HTTP ${response.status})`:isMyanmar?`ဘဏ္ဍာရေးဒေတာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`재정 데이터 조회 실패 (HTTP ${response.status})`));
  const keys=["funds","accounts","entries","donors","budgets","actuals","donations","students","awards","disbursements"];
  const errors=keys.map(key=>data[key]?.error).filter(Boolean);
  if(errors.length)throw new Error(errors.join(" · "));
@@ -55,7 +55,7 @@ export default function FinanceModule(){
   const params=new URLSearchParams({scope:"reports",from:reportFrom,to:reportTo});
   const response=await fetch("/api/admin/data/finance?"+params.toString(),{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
   const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
-  if(!response.ok)throw new Error(data.error||`재정 보고서 조회 실패 (HTTP ${response.status})`);
+  if(!response.ok)throw new Error(data.error||(englishUI?`Unable to load financial report (HTTP ${response.status})`:isMyanmar?`ဘဏ္ဍာရေးအစီရင်ခံစာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`재정 보고서 조회 실패 (HTTP ${response.status})`));
   const keys=["monthlyReports","fundBalanceReports","donorReports","scholarshipReports","ledgerReports"],errors=keys.map(key=>data[key]?.error).filter(Boolean);if(errors.length)throw new Error(errors.join(" · "));
   setMonthlyReports(data.monthlyReports?.data??[]);setFundBalanceReports(data.fundBalanceReports?.data??[]);setDonorReports(data.donorReports?.data??[]);setScholarshipReports(data.scholarshipReports?.data??[]);setLedgerReports(data.ledgerReports?.data??[]);
  }catch(x:any){setError(x.message??"보고서를 불러오지 못했습니다.");}finally{setReportLoading(false);}};

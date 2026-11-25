@@ -105,7 +105,7 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
  },[inputStudents,gradeByKey,courseId]);
 
  const exportCsv=()=>{
-  const rows=[["Serial No.","Student Name","Department","Year","Average Score","Entered Subjects","Total Subjects"],...visibleStudents.map(student=>{
+  const rows=[locale==="my"?["စဉ်","ကျောင်းသားအမည်","ဌာန","အတန်းနှစ်","ပျမ်းမျှရမှတ်","ရမှတ်ထည့်ပြီး ဘာသာရပ်များ","ဘာသာရပ် စုစုပေါင်း"]:["Serial No.","Student Name","Department","Year","Average Score","Entered Subjects","Total Subjects"],...visibleStudents.map(student=>{
    const studentEnrollments=enrollments.filter(e=>e.student_id===student.id&&e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status));
    const enrolledCourseIds=[...new Set(studentEnrollments.map(e=>e.course_id))];
    const scores=enrolledCourseIds.map(id=>gradeByKey.get(student.id+"|"+id)?.score).filter((v):v is number=>v!==null&&v!==undefined);

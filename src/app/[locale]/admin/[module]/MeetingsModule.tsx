@@ -22,14 +22,14 @@ export default function MeetingsModule({canManage}:{canManage:boolean}){
  const load=useCallback(async()=>{setLoading(true);setError("");try{
  const response=await fetch("/api/admin/data/meetings",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
  const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
- if(!response.ok)throw new Error(data.error||`회의 데이터 조회 실패 (HTTP ${response.status})`);
+ if(!response.ok)throw new Error(data.error||(englishUI?`Unable to load meeting data (HTTP ${response.status})`:window.location.pathname.startsWith("/my/")?`အစည်းအဝေးဒေတာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`회의 데이터 조회 실패 (HTTP ${response.status})`));
  if(data.meetings?.error)throw new Error(data.meetings.error);setMeetings(data.meetings?.data||[]);
  }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[]);
  useEffect(()=>{void load();},[load]);
  const loadDetails=useCallback(async(id:string)=>{setError("");try{
   const response=await fetch("/api/admin/data/meetings?id="+encodeURIComponent(id),{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
   const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
-  if(!response.ok)throw new Error(data.error||`회의 상세 조회 실패 (HTTP ${response.status})`);
+  if(!response.ok)throw new Error(data.error||(englishUI?`Unable to load meeting details (HTTP ${response.status})`:window.location.pathname.startsWith("/my/")?`အစည်းအဝေးအသေးစိတ်ကို မရယူနိုင်ပါ (HTTP ${response.status})`:`회의 상세 조회 실패 (HTTP ${response.status})`));
   const errors=[data.participants?.error,data.actions?.error,data.materials?.error,data.meeting?.error].filter(Boolean);if(errors.length)throw new Error(errors.join(" · "));
   const meeting=data.meeting?.data;setParticipants(data.participants?.data||[]);setActions(data.actions?.data||[]);setMaterials(data.materials?.data||[]);setSelected(meeting);setMinutes({minutes:meeting.minutes||"",decisions:meeting.decisions||""});setTab("detail");
  }catch(e:any){setError(e?.message||String(e)||"회의 상세 정보를 불러오지 못했습니다.");}},[]);

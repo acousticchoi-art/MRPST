@@ -51,7 +51,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
  const load=useCallback(async()=>{setLoading(true);setError("");try{
   const response=await fetch("/api/admin/data/website",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
   const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
-  if(!response.ok)throw new Error(data.error||`홈페이지 콘텐츠 조회 실패 (HTTP ${response.status})`);
+  if(!response.ok)throw new Error(data.error||(englishUI?`Unable to load website content (HTTP ${response.status})`:locale==="my"?`ဝဘ်ဆိုက်အကြောင်းအရာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`홈페이지 콘텐츠 조회 실패 (HTTP ${response.status})`));
   if(data.items?.error)throw new Error("홈페이지 콘텐츠를 불러오지 못했습니다: "+data.items.error);
   const rows=(data.items?.data||[]) as Entry[];setItems(rows);
   const adminRow=rows.find(row=>row.content_type==="page"&&row.content_key==="admin-translations"&&row.locale==="my");
@@ -161,7 +161,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
     <div className="website-section-intro website-list-intro"><div><span className="website-kicker">PUBLISHED CONTENT</span><h3>{(englishUI?"Announcements":"등록된 공지사항")}</h3><p>{(englishUI?"Review publication status and manage content.":"게시·비공개 상태를 확인하고 내용을 관리합니다.")}</p></div><strong className="website-count">{notices.length}건</strong></div>
     <div className="website-notice-list website-notice-list-v2">{notices.map(item=><article className="website-notice-item website-notice-item-v2" key={item.id}>
      <div className="website-notice-meta"><span className="website-locale-tag">{item.locale==="all"?"전체 홈페이지":locales.find(x=>x.value===item.locale)?.label||item.locale}</span><span className={item.is_published?"published":"draft"}>{item.is_published?"게시 중":"비공개"}</span></div>
-     <h4>{item.title}</h4><p>{item.body}</p><small className="website-updated">{new Date(item.updated_at).toLocaleDateString(locale==="my"?"my-MM":"ko-KR",{year:"numeric",month:"short",day:"numeric"})}</small>
+     <h4>{item.title}</h4><p>{item.body}</p><small className="website-updated">{new Date(item.updated_at).toLocaleDateString(locale==="en"?"en-GB":locale==="my"?"my-MM":"ko-KR",{year:"numeric",month:"short",day:"numeric"})}</small>
      <div className="website-notice-actions"><button disabled={!canManage||saving} onClick={()=>editNotice(item)}>수정</button><button onClick={()=>void toggleNotice(item)} disabled={!canManage||saving}>{item.is_published?"게시 중단":"게시하기"}</button><button className="danger" onClick={()=>void deleteNotice(item)} disabled={!canManage||saving}>삭제</button></div>
     </article>)}{!notices.length&&!loading&&<div className="website-empty website-empty-v2"><strong>{(englishUI?"No announcements registered yet.":"아직 등록된 공지사항이 없습니다.")}</strong><span>{(englishUI?"Use the editor to register your first announcement.":"왼쪽 작성 영역에서 첫 공지사항을 등록해 보세요.")}</span></div>}</div>
    </section>

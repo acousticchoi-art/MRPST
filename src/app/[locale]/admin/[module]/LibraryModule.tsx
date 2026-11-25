@@ -27,7 +27,7 @@ export default function LibraryModule({canManage}:{canManage:boolean}){
  const load=useCallback(async()=>{setLoading(true);setError("");try{
   const response=await fetch("/api/admin/data/library",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
   const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
-  if(!response.ok)throw new Error(data.error||`도서관 데이터 조회 실패 (HTTP ${response.status})`);
+  if(!response.ok)throw new Error(data.error||(englishUI?`Unable to load library data (HTTP ${response.status})`:window.location.pathname.startsWith("/my/")?`စာကြည့်တိုက်ဒေတာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`도서관 데이터 조회 실패 (HTTP ${response.status})`));
   const keys=["books","members","loans","students","studentLinks"],errors=keys.map(key=>data[key]?.error).filter(Boolean);if(errors.length)throw new Error(errors.join(" · "));
   setBooks((data.books?.data??[]) as Book[]);setMembers((data.members?.data??[]) as Member[]);setLoans((data.loans?.data??[]) as unknown as Loan[]);setStudents((data.students?.data??[]) as Student[]);setStudentLinks((data.studentLinks?.data??[]) as StudentLink[]);
  }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[]);

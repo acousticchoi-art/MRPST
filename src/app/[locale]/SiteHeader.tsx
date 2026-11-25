@@ -28,16 +28,16 @@ export default function SiteHeader({ locale, active }: { locale: string; active:
       </nav>
       <div className="header-tools">
         <LanguageSwitcher locale={lang} />
-        <Link className="admin-link" href={`/${lang==="en"?"my":lang}/student-login`}>{t.student}</Link>
-        <Link className="admin-link" href={`/${lang==="en"?"ko":lang}/admin`}>{t.admin}</Link>
+        <Link className="admin-link" href={`/${lang}/student-login`}>{t.student}</Link>
+        <Link className="admin-link" href={`/${lang}/admin`}>{t.admin}</Link>
       </div>
       <LanguageSwitcher locale={lang} mobile />
       <details className="mobile-menu">
         <summary aria-label="Open navigation menu"><span></span><span></span><span></span></summary>
         <nav className="mobile-nav">
           {links.map(link => <Link key={link.key} href={link.href} className={active === link.key ? "active" : undefined} aria-current={active === link.key ? "page" : undefined}>{link.label}</Link>)}
-          <Link href={`/${lang==="en"?"my":lang}/student-login`}>{t.student}</Link>
-          <Link href={`/${lang==="en"?"ko":lang}/admin`}>{t.admin}</Link>
+          <Link href={`/${lang}/student-login`}>{t.student}</Link>
+          <Link href={`/${lang}/admin`}>{t.admin}</Link>
         </nav>
       </details>
     </header>

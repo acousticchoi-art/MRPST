@@ -1,3 +1,4 @@
+import LanguageSwitcher from "../../LanguageSwitcher";
 import Link from "next/link";
 import type {ReactNode} from "react";
 import dynamic from "next/dynamic";
@@ -8,6 +9,7 @@ import AdminActions from "../AdminActions";
 import AdminMenuDetails from "../AdminMenuDetails";
 import InlineAdminEditor from "../InlineAdminEditor";
 import InlinePageEditor from "../../InlinePageEditor";
+const AdminEnglishTranslator=dynamic(()=>import("../AdminEnglishTranslator"));
 const AdminMyanmarTranslator=dynamic(()=>import("../AdminMyanmarTranslator"));
 const FinanceModule=dynamic(()=>import("./FinanceModule"));
 const StudentModule=dynamic(()=>import("./StudentModule"));
@@ -19,6 +21,7 @@ const AdministrationModule=dynamic(()=>import("./AdministrationModule"));
 const WebsiteModule=dynamic(()=>import("./WebsiteModule"));
 
 const copy = {
+  en:{admin:"MRPST Administration",dashboard:"Dashboard",view:"View website ↗",finance:"Finance",students:"Student Management",academics:"Academic Management",facilities:"Facilities",library:"Library",meetings:"Meeting Records",administration:"Accounts & Permissions",website:"Website Management",workspace:"WORKSPACE",back:"Back to dashboard",groups:{academic:"Academic & Students",finance:"Finance",operations:"School Operations",system:"System & Website"}},
   ko:{
     admin:"MRPST 관리자",dashboard:"대시보드",view:"홈페이지 보기 ↗",
     finance:"재정 관리",students:"학생 관리",academics:"학사 관리",facilities:"시설 관리",
@@ -35,7 +38,7 @@ const copy = {
 
 export default async function ModulePage({params}:{params:Promise<{locale:string;module:string}>}){
   const {locale,module}=await params;
-  const lang=locale==="my"?"my":"ko";
+  const lang=locale==="en"?"en":locale==="my"?"my":"ko";
   const t=copy[lang];
   const key=getModuleKey(module);
   if(!key)notFound();
@@ -53,7 +56,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
   // Fetch the stored edit with the server-rendered page so it is available
   // before client-side modules mount and can be reapplied after re-renders.
   let inlineValues:Record<string,string>={};
-  if(locale!=="my"){
+  if(locale==="ko"){
     const {data}=await supabase.from("website_contents").select("body")
       .eq("content_type","page").eq("content_key",`inline-page-admin-${module}`)
       .eq("locale",locale).eq("is_published",true).maybeSingle();
@@ -62,8 +65,8 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
       if(saved&&typeof saved==="object"&&!Array.isArray(saved))inlineValues=saved;
     }catch{}
   }
-  const adminShell=(content:ReactNode)=>locale==="my"?<InlineAdminEditor locale={locale}>{content}</InlineAdminEditor>:<InlinePageEditor pageKey={`admin-${module}`} locale={locale} initialValues={inlineValues}>{content}</InlinePageEditor>;
-  return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>} {adminShell(<div className="admin">
+  const adminShell=(content:ReactNode)=>locale==="en"?content:locale==="my"?<InlineAdminEditor locale={locale}>{content}</InlineAdminEditor>:<InlinePageEditor pageKey={`admin-${module}`} locale={locale} initialValues={inlineValues}>{content}</InlinePageEditor>;
+  return <>{locale==="en"&&<AdminEnglishTranslator/>}{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>} {adminShell(<div className="admin">
     <aside className="sidebar">
       <Link href={`/${locale}/admin`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
       <AdminMenuDetails>
@@ -75,14 +78,11 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
           {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([moduleKey,entry])=><Link className={moduleKey===key?"side-link active":"side-link"} href={`/${locale}/admin/${moduleKey}`} key={moduleKey}>{moduleNames[moduleKey]??entry.title}</Link>)}</div>:null;})}
         </nav>
       </AdminMenuDetails>
-      <div className="sidebar-mobile-tools"><nav className="admin-language" aria-label="Language"><a className={lang==="my"?"selected":""} href={`/my/admin/${module}`}>မြန်မာ</a><a className={lang==="ko"?"selected":""} href={`/ko/admin/${module}`}>한국어</a></nav><Link href={`/${locale}`}>{t.view}</Link>{supabase&&<AdminActions locale={locale}/>}</div>
+      <div className="sidebar-mobile-tools"><div data-no-inline-edit data-no-translate><LanguageSwitcher locale={lang}/></div><Link href={`/${locale}`}>{t.view}</Link>{supabase&&<AdminActions locale={locale}/>}</div>
       </aside>
     <main className="admin-main">
       <header className="topbar admin-desktop-topbar"><Link href={`/${locale}/admin`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">
-        <nav className="admin-language" aria-label="Language">
-          <a className={lang==="my"?"selected":""} href={`/my/admin/${module}`}>မြန်မာ</a>
-          <a className={lang==="ko"?"selected":""} href={`/ko/admin/${module}`}>한국어</a>
-        </nav>
+        <div data-no-inline-edit data-no-translate><LanguageSwitcher locale={lang}/></div>
         
         <Link href={`/${locale}`}>{t.view}</Link>
         {supabase&&<AdminActions locale={locale}/>}

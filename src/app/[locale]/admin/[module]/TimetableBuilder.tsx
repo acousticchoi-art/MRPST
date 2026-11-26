@@ -55,7 +55,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
  const selectedTerm=terms.find(x=>x.id===termId),selectedDepartment=departments.find(x=>x.id===departmentId);
  const deptCourses=courses.filter(x=>x.course_kind==="general"||x.department_id===departmentId||(x.department==="Theology"&&selectedDepartment?.code==="THEOLOGY")||(x.department==="Early Childhood Education"&&selectedDepartment?.code==="ECE"));
  const instructorLabel=(id:string)=>instructors.find(x=>x.id===id)?.full_name||"";
- const courseLabel=(id:string)=>{const c=courses.find(x=>x.id===id);return (locale==="my"?(c?.title_my||c?.title):c?.title)||"과목 정보 없음";};
+ const courseLabel=(id:string)=>{const c=courses.find(x=>x.id===id);return (locale==="my"?(c?.title_my||c?.title):c?.title)||(englishUI?"Course information unavailable":"과목 정보 없음");};
  const timeSlots=useMemo(()=>{
   const keys=new Map<string,{start:string,end:string}>();
   [...entries,...events].forEach(x=>{const start=time(x.start_time),end=time(x.end_time);if(start&&end)keys.set(start+"|"+end,{start,end});});
@@ -182,7 +182,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
   {!mutationsEnabled&&<div className="academics-alert">{(englishUI?"Academic data changes are locked until the development database is separated and safety verified. Currently read-only.":"학사 데이터 변경 기능은 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다. 현재는 조회만 가능합니다.")}</div>}
 {error&&<div className="academics-alert error">{error}</div>}{notice&&<div className="academics-alert">{notice}</div>}
   <div className="timetable-paper">
-   <header className="timetable-paper-title"><h1>MRPST LECTURE SCHEDULE ({selectedDepartment?.code==="ECE"?"E.C.E":"Theology"})</h1><strong>{selectedTerm?.name||"학기를 선택해 주세요"}</strong><span>{selectedDepartment?.name_en||""}</span></header>
+   <header className="timetable-paper-title"><h1>MRPST LECTURE SCHEDULE ({selectedDepartment?.code==="ECE"?"E.C.E":"Theology"})</h1><strong>{selectedTerm?.name||(englishUI?"Select a semester":"학기를 선택해 주세요")}</strong><span>{selectedDepartment?.name_en||""}</span></header>
    {loading?<p className="academics-empty">{(englishUI?"Loading timetable.":"시간표를 불러오는 중입니다.")}</p>:<div className="timetable-scroll"><table className="timetable-grid"><thead><tr><th>TIME / DAY</th>{days.map(d=><th key={d.value}>{d.label}</th>)}</tr></thead><tbody>
     {timeSlots.length===0?<tr><td colSpan={7} className="academics-empty">{(englishUI?"No timetable entries. Register a class or shared event.":"등록된 시간표가 없습니다. 강의 또는 공통 일정을 등록해 주세요.")}</td></tr>:timeSlots.map(slot=><tr key={slot.start+"|"+slot.end}><th className="timetable-time">{slot.start}–{slot.end}</th>{days.map(d=>{
       const items=entries.filter(x=>x.day_of_week===d.value&&time(x.start_time)===slot.start&&time(x.end_time)===slot.end);
@@ -196,7 +196,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
    <footer className="timetable-paper-footer">{selectedTerm?.name||""} · {selectedDepartment?.name_en||""}</footer>
   </div>
   {canManage&&<section className="timetable-course-library"><div><h3>{(englishUI?"Registered courses and assigned instructors":"등록된 과목 및 담당 교수")}</h3><p>{(englishUI?"Manage course and instructor information in the Courses and Faculty & Teaching Assignments tabs.":"과목과 교수 정보는 과목 관리와 교수·강의 배정 탭에서 관리합니다.")}</p></div><div className="timetable-course-list">{deptCourses.map(c=><article key={c.id}><strong>{locale==="my"?(c.title_my||c.title):c.title}</strong><span>{c.course_code}</span></article>)}</div></section>}
-  {modal&&<div className="academics-modal-backdrop"><section className="academics-modal timetable-modal"><header><h3>{editing?(editingType==="event"?"공통 일정 수정":"강의 시간표 수정"):(editingType==="event"?"공통 일정 등록":"강의 시간표 등록")}</h3><button onClick={()=>setModal(false)}>×</button></header><div className="academics-form-grid">
+  {modal&&<div className="academics-modal-backdrop"><section className="academics-modal timetable-modal"><header><h3>{editing?(editingType==="event"?(englishUI?"Edit shared event":"공통 일정 수정"):(englishUI?"Edit class timetable":"강의 시간표 수정")):(editingType==="event"?(englishUI?"Add shared event":"공통 일정 등록"):(englishUI?"Add class timetable":"강의 시간표 등록"))}</h3><button onClick={()=>setModal(false)}>×</button></header><div className="academics-form-grid">
    <label>{(englishUI?"Day of week":"요일")}<select value={form.day_of_week} onChange={e=>setForm({...form,day_of_week:e.target.value})}>{days.map(d=><option key={d.value} value={d.value}>{englishUI?["","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][d.value]:dayName(d.value)}</option>)}</select></label>
    <label>{(englishUI?"Start time":"시작 시간")}<input type="time" value={form.start_time} onChange={e=>setForm({...form,start_time:e.target.value})}/></label>
    <label>{(englishUI?"End time":"종료 시간")}<input type="time" value={form.end_time} onChange={e=>setForm({...form,end_time:e.target.value})}/></label>

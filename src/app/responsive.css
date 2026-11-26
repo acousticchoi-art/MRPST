@@ -345,3 +345,8 @@
  html body [lang="en"] .admin > .sidebar > .admin-menu-details > summary::after{content:"Open menu  ▾"!important;}
  html body [lang="en"] .admin > .sidebar > .admin-menu-details[open] > summary::after{content:"Close menu  ▴"!important;}
 }
+
+@media(max-width:900px){
+ html body [lang="my"] .admin > .sidebar > .admin-menu-details > summary::after{content:"မီနူးဖွင့်ရန်  ▾"!important;}
+ html body [lang="my"] .admin > .sidebar > .admin-menu-details[open] > summary::after{content:"မီနူးပိတ်ရန်  ▴"!important;}
+}

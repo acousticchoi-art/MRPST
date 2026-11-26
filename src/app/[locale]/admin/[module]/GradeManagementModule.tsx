@@ -164,7 +164,7 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
  return <div className={styles.workspace}>
   <div className={styles.heading}>
    <div><span className={styles.eyebrow}>GRADE MANAGEMENT</span><h2>{(englishUI?"Enter and review scores":"점수 입력·확인")}</h2><p>{(englishUI?"Select a semester and course, enter scores and save. Manage grades without semester registration or completion confirmation.":"학기와 과목을 선택하고 점수를 적어 저장하세요. 학기 등록·이수 확정 없이 성적을 관리합니다.")}</p></div>
-   <span className={styles.permission}>{canManage&&academicMutationsEnabled?"점수 입력 가능":"조회 전용"}</span>
+   <span className={styles.permission}>{canManage&&academicMutationsEnabled?(englishUI?"Grade entry enabled":"점수 입력 가능"):(englishUI?"Read only":"조회 전용")}</span>
   </div>
   <div className={styles.filters}>
    <label>{(englishUI?"1. Select semester":"1. 학기 선택")}<select value={termId} onChange={e=>{setTermId(e.target.value);onTermChange?.(e.target.value);}}><option value="">{(englishUI?"Select semester":"학기 선택")}</option>{terms.map(x=><option key={x.id} value={x.id}>{x.name} ({x.academic_year})</option>)}</select></label>
@@ -204,7 +204,7 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
    {currentCourse&&<div className={styles.entryTitle}><strong>{displayCourse(currentCourse)}</strong><span>{currentCourse.course_code} · {terms.find(x=>x.id===termId)?.name||"학기 미선택"}</span></div>}
    <div className={styles.tableWrap}><table><thead><tr><th>{(englishUI?"No.":"순번")}</th><th>{(englishUI?"Student name":"학생 이름")}</th><th>{(englishUI?"Score":"점수")}</th><th>{(englishUI?"Existing score":"기존 점수")}</th><th>{(englishUI?"Action":"작업")}</th></tr></thead><tbody>
     {inputStudents.map(student=>{const old=gradeByKey.get(student.id+"|"+courseId);return <tr key={student.id}><td>{student.student_number}</td><td>{student.full_name}</td><td><input className={styles.scoreInput} type="number" min="0" max="100" step="0.01" disabled={!canManage||!academicMutationsEnabled||saving} value={inputValues[student.id]??""} onChange={e=>setInputValues(v=>({...v,[student.id]:e.target.value}))} aria-label={student.full_name+" 점수"}/></td><td>{old?.score??"—"}</td><td>{old&&<button className={styles.deleteButton} disabled={!academicMutationsEnabled||saving} onClick={()=>void deleteScore(student)}>{(englishUI?"Delete":"삭제")}</button>}</td></tr>;})}
-    {!inputStudents.length&&<tr><td colSpan={5} className={styles.empty}>{!termId?"먼저 학기를 선택하세요.":!courseId?"과목을 선택하세요.":"해당 과목·학년에 재학 중인 학생이 없습니다."}</td></tr>}
+    {!inputStudents.length&&<tr><td colSpan={5} className={styles.empty}>{!termId?(englishUI?"Select a semester first.":"먼저 학기를 선택하세요."):!courseId?(englishUI?"Select a course.":"과목을 선택하세요."):(englishUI?"No enrolled students in this course and year.":"해당 과목·학년에 재학 중인 학생이 없습니다.")}</td></tr>}
    </tbody></table></div>
    <div className={styles.saveRow}><span>{inputStudents.length}{locale==="my"?" ဦး · အလွတ်ကွက်များကို သိမ်းဆည်းမည်မဟုတ်ပါ။":"명 · 빈 칸은 저장하지 않습니다."}</span><button className={styles.primary} disabled={!academicMutationsEnabled||!canManage||saving||!inputStudents.length||!courseId||!termId} onClick={()=>void saveScores()}>{saving?"저장 중…":"점수 저장"}</button></div>
   </section>}

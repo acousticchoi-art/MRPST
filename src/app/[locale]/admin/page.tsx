@@ -81,12 +81,12 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
     const {data:{user}}=await supabase.auth.getUser();
     if(!user) redirect(`/${locale}/login`);
     userEmail=user.email??"";
-    const [{data:roleRows,error},{data:profile},{data:overrides}]=await Promise.all([
+    const [{data:roleRows,error},{data:profile,error:profileError},{data:overrides,error:permissionsError}]=await Promise.all([
       supabase.from("user_roles").select("role, department_id").eq("user_id",user.id),
       supabase.from("user_profiles").select("is_active").eq("user_id",user.id).maybeSingle(),
       supabase.from("user_module_permissions").select("module_key,can_view").eq("user_id",user.id)
     ]);
-    accessDenied=Boolean(error||!roleRows?.length||profile?.is_active!==true);
+    accessDenied=Boolean(error||profileError||permissionsError||!roleRows?.length||profile?.is_active!==true);
     roles=(roleRows??[]).map(row=>row.role as MrpstRole);
     moduleOverrides=overrides??[];
   }
@@ -110,11 +110,11 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
     supabase?supabase.from("website_contents").select("content_key,title,body,is_published,updated_at").eq("content_type","announcement").in("locale",["all",locale]).order("updated_at",{ascending:false}).limit(3):Promise.resolve({data:[],error:null})
   ]);
   const dashboardQueryErrors=[
-    activeStudentCount.error&&(lang==="en"?"Current student statistics":"재학생 통계"),
-    graduateCount.error&&(lang==="en"?"Graduate statistics":"졸업생 통계"),
-    upcomingResult.error&&(lang==="en"?"Academic calendar":"학사 일정"),
-    upcomingCountResult.error&&(lang==="en"?"Event count":"일정 집계"),
-    announcementResult.error&&(lang==="en"?"Announcements":"공지사항")
+    activeStudentCount.error&&(lang==="en"?"Current student statistics":lang==="my"?"လက်ရှိကျောင်းသား စာရင်းအင်း":"재학생 통계"),
+    graduateCount.error&&(lang==="en"?"Graduate statistics":lang==="my"?"ဘွဲ့ရကျောင်းသား စာရင်းအင်း":"졸업생 통계"),
+    upcomingResult.error&&(lang==="en"?"Academic calendar":lang==="my"?"ပညာရေးပြက္ခဒိန်":"학사 일정"),
+    upcomingCountResult.error&&(lang==="en"?"Event count":lang==="my"?"အစီအစဉ် အရေအတွက်":"일정 집계"),
+    announcementResult.error&&(lang==="en"?"Announcements":lang==="my"?"ကြေညာချက်များ":"공지사항")
   ].filter(Boolean);
   const hasStudentStats=activeStudentCount.count!==null&&graduateCount.count!==null;
   const upcomingEvents=upcomingResult.data??[];
@@ -137,7 +137,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
     <aside className="sidebar">
       <Link href={`/${locale}/admin`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
       <AdminMenuDetails>
-        <summary>{lang==="ko"?"관리 메뉴":"Menu"}</summary>
+        <summary>{lang==="ko"?"관리 메뉴":lang==="my"?"စီမံခန့်ခွဲမှု မီနူး":"Menu"}</summary>
         <nav className="sidebar-nav">
           
           <div className="side-label">WORKSPACE</div>
@@ -154,7 +154,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
         <Link href={`/${locale}`}>{t.view}</Link>
         {supabase&&<AdminActions locale={locale}/>}
       </div></header>
-      <div className="content">{dashboardQueryErrors.length>0&&<div className="notice" role="alert">{lang==="en"?"Some dashboard data could not be loaded: "+dashboardQueryErrors.join(", "):lang==="ko"?"일부 대시보드 데이터를 불러오지 못했습니다: "+dashboardQueryErrors.join(", "):"ဒက်ရှ်ဘုတ်ဒေတာအချို့ကို မရယူနိုင်ပါ: "+dashboardQueryErrors.join(", ")}</div>}<span className="eyebrow" data-no-inline-edit="" data-no-translate="">INTEGRATED SCHOOL MANAGEMENT</span><h1 className="admin-heading" data-no-inline-edit="" data-no-translate="">{t.title}</h1><p className="admin-subtitle" data-no-inline-edit="" data-no-translate="">{t.subtitle}</p>
+      <div className="content">{dashboardQueryErrors.length>0&&<div className="notice" role="alert">{lang==="en"?"Some dashboard data could not be loaded: "+dashboardQueryErrors.join(", "):lang==="ko"?"일부 대시보드 데이터를 불러오지 못했습니다: "+dashboardQueryErrors.join(", "):"ဒက်ရှ်ဘုတ်ဒေတာအချို့ကို မရယူနိုင်ပါ: "+dashboardQueryErrors.join(", ")}</div>}<span className="eyebrow" data-no-inline-edit="" data-no-translate="">{t.eyebrow}</span><h1 className="admin-heading" data-no-inline-edit="" data-no-translate="">{t.title}</h1><p className="admin-subtitle" data-no-inline-edit="" data-no-translate="">{t.subtitle}</p>
         {!isSupabaseConfigured&&<div className="notice">{t.preview}</div>}
         <section className="dashboard-stats">
           <article className="dashboard-stat"><span>{t.currentStudents}</span><strong>{hasStudentStats?activeStudentCount.count?.toLocaleString("en-US"):"—"}</strong><small>{lang==="en"?"Currently enrolled":lang==="ko"?"현재 재학 상태":"လက်ရှိတက်ရောက်နေသော ကျောင်းသား"}</small></article>

@@ -47,7 +47,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
   const access=await getServerModuleAccess(key);
   if(!access.ok){
     if(access.status===401)redirect(`/${locale}/login`);
-    return <main className="login-wrap"><section className="login-card"><span className="eyebrow">PERMISSION REQUIRED</span><h1>Access restricted</h1><p className="login-intro">{locale==="en"?englishDisplay(access.error):access.error}</p></section></main>;
+    return <main className="login-wrap"><section className="login-card"><span className="eyebrow">{lang==="en"?"PERMISSION REQUIRED":lang==="my"?"ဝင်ရောက်ခွင့် လိုအပ်ပါသည်":"접근 권한 필요"}</span><h1>{lang==="en"?"Access restricted":lang==="my"?"ဝင်ရောက်ခွင့် မရှိပါ":"접근이 제한되었습니다"}</h1><p className="login-intro">{lang==="en"?englishDisplay(access.error):lang==="my"?(access.status===503?"ဆာဗာ ဒေတာဘေ့စ်ဆက်တင်ကို စစ်ဆေး၍မရပါ။":"ဤမီနူး၏ ဒေတာကို ဝင်ရောက်ကြည့်ရှုခွင့် မရှိပါ။"):access.error}</p></section></main>;
   }
   const {supabase,roles,permissions:overrides,user}=access;
   const visible=Object.entries(MODULES).filter(([moduleKey])=>canAccessModule(roles,moduleKey as keyof typeof MODULES,overrides));
@@ -71,7 +71,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
     <aside className="sidebar">
       <Link href={`/${locale}/admin`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
       <AdminMenuDetails>
-        <summary>{lang==="ko"?"관리 메뉴":"Menu"}</summary>
+        <summary>{lang==="ko"?"관리 메뉴":lang==="my"?"စီမံခန့်ခွဲမှု မီနူး":"Menu"}</summary>
         <nav className="sidebar-nav">
           
           <div className="side-label">{t.workspace}</div>

@@ -11,6 +11,27 @@ async function result(query:PromiseLike<{data:any;error:any}>):Promise<QueryResu
   return {data:data??null,error:error?.message??null};
 }
 
+// Do not silently truncate totals or approvals at the PostgREST row limit.
+// Stable unique ordering and exact counts catch incomplete/changing reads.
+async function allRows(fetchPage:(start:number,end:number)=>PromiseLike<{data:any;error:any;count:number|null}>):Promise<QueryResult>{
+  const rows:any[]=[];
+  const ids=new Set<string>();
+  let expected:number|null=null;
+  const pageSize=250;
+  for(let start=0;;start+=pageSize){
+    const {data,error,count}=await fetchPage(start,start+pageSize-1);
+    if(error)return {data:null,error:error.message||"Data query failed."};
+    if(!Array.isArray(data)||count===null||count>10000||count<0|| (expected!==null&&count!==expected))return {data:null,error:"Incomplete or changed data. Please refresh."};
+    expected=count;
+    for(const row of data){
+      if(typeof row.id!=="string"||ids.has(row.id))return {data:null,error:"Duplicate or invalid record. Please refresh."};
+      ids.add(row.id);rows.push(row);
+    }
+    if(rows.length===expected)return {data:rows,error:null};
+    if(data.length!==pageSize||rows.length>expected)return {data:null,error:"Incomplete data. Please refresh."};
+  }
+}
+
 export async function GET(request:NextRequest,{params}:{params:Promise<{module:string}>}){
   const {module}=await params;
   const moduleKey=module as ModuleKey;
@@ -46,11 +67,11 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
       const queries=[
         supabase.from("finance_funds").select("id,code,name_ko,name_en").eq("is_active",true).order("code"),
         supabase.from("finance_accounts").select("id,code,name_my,name_ko,name_en,account_type,expense_nature").eq("is_active",true).order("code"),
-        supabase.from("journal_entries").select("id,entry_no,entry_date,description,status,fund_id,reference_no,journal_lines(account_id,description,debit,credit)").order("entry_date",{ascending:false}).limit(300),
+        allRows((start,end)=>supabase.from("journal_entries").select("id,entry_no,entry_date,description,status,fund_id,reference_no,journal_lines(account_id,description,debit,credit)",{count:"exact"}).order("entry_date",{ascending:false}).order("id").range(start,end)),
         supabase.from("finance_donors").select("id,donor_code,display_name,donor_type,phone,email,country").eq("is_active",true).order("display_name"),
         supabase.from("finance_budgets").select("id,fiscal_year,title,fund_id,status,finance_budget_lines(id,account_id,planned_amount,notes,finance_accounts(code,name_ko,name_en))").order("fiscal_year",{ascending:false}),
         supabase.from("finance_budget_vs_actual").select("*"),
-        supabase.from("donor_contributions").select("id,contribution_date,purpose,original_currency,original_amount,exchange_rate,base_amount,donor_id,fund_id,journal_entry_id").order("contribution_date",{ascending:false}).limit(300),
+        allRows((start,end)=>supabase.from("donor_contributions").select("id,contribution_date,purpose,original_currency,original_amount,exchange_rate,base_amount,donor_id,fund_id,journal_entry_id",{count:"exact"}).order("contribution_date",{ascending:false}).order("id").range(start,end)),
         supabase.from("students").select("id,student_number,full_name,program,cohort,admission_year,student_status").order("student_number"),
         supabase.from("scholarship_award_balances").select("*").order("academic_year",{ascending:false}),
         supabase.from("scholarship_disbursements").select("id,award_id,installment_no,paid_date,original_currency,original_amount,exchange_rate,base_amount,journal_entry_id").order("paid_date",{ascending:false})

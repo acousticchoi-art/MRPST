@@ -91,7 +91,7 @@ export default async function CertificatePage({params,searchParams}:{params:Prom
    }
  }
  const title=typeTitle[lang][kind];
- const date=new Intl.DateTimeFormat(lang==="ko"?"ko-KR":"en-GB",{timeZone:"Asia/Yangon",year:"numeric",month:"long",day:"numeric"}).format(new Date());
+ const date=new Intl.DateTimeFormat(lang==="ko"?"ko-KR":lang==="my"?"my-MM":"en-GB",{timeZone:"Asia/Yangon",year:"numeric",month:"long",day:"numeric"}).format(new Date());
  const graduateDate=graduation?.graduation_date??student.graduation_date;
  const fields=[
   [t.number,student.student_number],[t.name,lang==="en"?(student.full_name_en||student.full_name):lang==="my"?(student.full_name_my||student.full_name):student.full_name],
@@ -104,7 +104,7 @@ export default async function CertificatePage({params,searchParams}:{params:Prom
    <div className="student-cert-toolbar"><Link href={`/${locale}/admin/students`}>{t.back}</Link><strong>{t.page}</strong><div className="student-cert-links">{(["enrollment","graduation","record","transcript"] as Kind[]).map(type=><Link key={type} className={type===kind?"active":""} href={`/${locale}/admin/students/certificates/${studentId}?type=${type}`}>{typeTitle[lang][type]}</Link>)}</div>{valid&&<CertificatePrintButton label={t.print}/>}</div>
    {valid?<article className="student-cert-sheet">
     <header><img src="/mrpst-logo.png" alt="" width="72" height="72"/><div><span>MRPST</span><strong>Myanmar Reformed Presbyterian School of Theology</strong></div></header>
-    <p className="student-cert-kicker">STUDENT CERTIFICATE</p><h1>{title}</h1>
+    <p className="student-cert-kicker">{lang==="my"?"ကျောင်းသားထောက်ခံစာ":"STUDENT CERTIFICATE"}</p><h1>{title}</h1>
     <dl>{fields.map(([label,value],index)=><div key={index}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
     {kind==="transcript"?<div className="student-transcript">
        {transcriptError?<p className="student-transcript-error" role="alert">{transcriptError}</p>:

@@ -28,18 +28,20 @@ export default function LibraryModule({canManage}:{canManage:boolean}){
  const [loanForm,setLoanForm]=useState({book_id:"",member_id:"",checkout_date:today(),due_date:""});
  const load=useCallback(async()=>{setLoading(true);setError("");try{
   const response=await fetch("/api/admin/data/library",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
-  const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
-  if(!response.ok)throw new Error(data.error||(englishUI?`Unable to load library data (HTTP ${response.status})`:window.location.pathname.startsWith("/my/")?`စာကြည့်တိုက်ဒေတာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`도서관 데이터 조회 실패 (HTTP ${response.status})`));
-  const keys=["books","members","loans","students","studentLinks"],errors=keys.map(key=>data[key]?.error).filter(Boolean);if(errors.length)throw new Error(errors.join(" · "));
+  const data=await response.json().catch(()=>{throw new Error((englishUI?"Invalid server response. Please try again.":window.location.pathname.startsWith("/my/")?"ဆာဗာမှ အချက်အလက် မှန်ကန်စွာ မရရှိပါ။ ထပ်မံကြိုးစားပါ။":"서버 응답이 올바르지 않습니다. 다시 시도해 주세요."));});
+  if(!response.ok)throw new Error(data?.error||(englishUI?`Unable to load library data (HTTP ${response.status})`:window.location.pathname.startsWith("/my/")?`စာကြည့်တိုက်ဒေတာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`도서관 데이터 조회 실패 (HTTP ${response.status})`));
+  const keys=["books","members","loans","students","studentLinks"],errors=keys.map(key=>data?.[key]?.error).filter(Boolean);if(errors.length)throw new Error(errors.join(" · "));if(!keys.every(key=>Array.isArray(data?.[key]?.data)))throw new Error((englishUI?"Invalid server response. Please try again.":window.location.pathname.startsWith("/my/")?"ဆာဗာမှ အချက်အလက် မှန်ကန်စွာ မရရှိပါ။ ထပ်မံကြိုးစားပါ။":"서버 응답이 올바르지 않습니다. 다시 시도해 주세요."));
   setBooks((data.books?.data??[]) as Book[]);setMembers((data.members?.data??[]) as Member[]);setLoans((data.loans?.data??[]) as unknown as Loan[]);setStudents((data.students?.data??[]) as Student[]);setStudentLinks((data.studentLinks?.data??[]) as StudentLink[]);
  }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[]);
  useEffect(()=>{void load();},[load]);
  const setB=(k:string,v:string)=>setBookForm((x:any)=>({...x,[k]:v}));
  const setM=(k:string,v:string)=>setMemberForm((x:any)=>({...x,[k]:v}));
- const available=(book:Book)=>Math.max(0,book.total_copies-loans.filter(l=>l.book_id===book.id&&l.status==="active").length);
+ const activeLoanCounts=useMemo(()=>{const counts=new Map<string,number>();for(const loan of loans){if(loan.status==="active")counts.set(loan.book_id,(counts.get(loan.book_id)??0)+1);}return counts;},[loans]);
+ const available=(book:Book)=>Math.max(0,book.total_copies-(activeLoanCounts.get(book.id)??0));
  const filteredBooks=books.filter(b=>!search.trim()||[b.title,b.author,b.isbn,b.category,b.shelf_location].some(v=>(v??"").toLowerCase().includes(search.toLowerCase())));
  const activeLoans=loans.filter(l=>l.status==="active");
- const loanableMembers=members.filter(m=>m.is_active&&(m.member_type!=="student"||students.some(s=>s.id===m.student_id&&s.student_status==="active")));
+ const activeStudentIds=useMemo(()=>new Set(students.filter(s=>s.student_status==="active").map(s=>s.id)),[students]);
+ const loanableMembers=members.filter(m=>m.is_active&&(m.member_type!=="student"||(m.student_id!==null&&activeStudentIds.has(m.student_id))));
  const overdue=activeLoans.filter(l=>l.due_date<today());
  const saveBook=async()=>{if(!canManage){setError((englishUI?"You do not have permission to modify library records.":"도서관 변경 권한이 없습니다."));return;}if(!mutationsEnabled){setError((englishUI?"Library data changes are locked by the development safety setting.":"도서관 데이터 변경은 개발 안전 잠금이 활성화되어 있습니다."));return;}if(!supabase)return;setSaving(true);setError("");try{
   const {data:{user},error:userError}=await supabase.auth.getUser();if(userError)throw userError;if(!user)throw new Error("로그인이 필요합니다.");const payload={isbn:bookForm.isbn.trim()||null,title:bookForm.title.trim(),author:bookForm.author.trim()||null,publisher:bookForm.publisher.trim()||null,publication_year:bookForm.publication_year?Number(bookForm.publication_year):null,category:bookForm.category.trim()||null,language:bookForm.language.trim()||null,shelf_location:bookForm.shelf_location.trim()||null,total_copies:Number(bookForm.total_copies),description:bookForm.description.trim()||null};

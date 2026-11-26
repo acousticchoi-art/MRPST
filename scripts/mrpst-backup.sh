@@ -17,7 +17,7 @@ if [[ -z "${MRPST_DB_URL:-}" ]]; then
   printf '\n'
 fi
 case "$MRPST_DB_URL" in
-  postgresql://postgres.rxbnxkntianqktvhjllv:*@*:5432/postgres*|postgresql://postgres:*@db.rxbnxkntianqktvhjllv.supabase.co:5432/postgres*) ;;
+  postgresql://postgres.rxbnxkntianqktvhjllv:*@aws-*-ap-southeast-2.pooler.supabase.com:5432/postgres|postgresql://postgres:*@db.rxbnxkntianqktvhjllv.supabase.co:5432/postgres) ;;
   *) echo "URL does not identify the MRPST production database on session/direct port 5432" >&2; exit 1;;
 esac
 export PGSSLMODE=require

@@ -1,4 +1,6 @@
 "use client";
+import {englishDisplay} from "@/lib/english-display";
+
 import {useEffect} from "react";
 const EN:Record<string,string>={
   "일정 등록": "Add event",
@@ -3228,7 +3230,7 @@ Object.assign(EN,{
   "학생 번호 ·": "Student number ·",
   "미상": "Unknown"
 });
-function translated(raw:string){const key=raw.trim();const v=EN[key]??EN[key.replace(/\s+/g," ")];return v?raw.replace(key,v):raw;}
+function translated(raw:string){const key=raw.trim();const v=EN[key]??EN[key.replace(/\s+/g," ")];return v?raw.replace(key,v):raw.replace(key,englishDisplay(key));}
 const controls=".student-directory-tools,.student-directory-tools + .student-directory-table thead,.student-number,.student-profile-actions,.student-directory-head,.academics-assignment-flow,.academics-workload-hours,.academics-grade-simple-guide a,.student-certificate-link,.academics-syllabus-actions,[class*='GradeManagementModule_footnote'],[class*='GradeManagementModule_loading'],button,label,legend,th,h1,h2,h3,h4,h5,summary,[role=tab],[role=alert],[role=status],.academics-empty,.student-empty,.dashboard-empty,.module-placeholder,.notice,.schedule-weekday,.academics-panel-head p,.student-status,.admin-heading,.admin-subtitle,.admin-search-select-empty,.admin-search-select-trigger .placeholder,.website-section-intro p,.website-footer-actions>span,.website-notice-audience,.website-publish-check small,.finance-panel-head p,.student-panel-head p,.facility-panel-head p,.library-panel-head p,.meeting-panel-head p,.settings-panel-head p,.admin-form-actions,.academics-grade-simple-guide p,.dashboard-stat small,.website-stat-grid span,.website-stat-grid small,.finance-note,.empty-state,.settings-form-hint,.finance-alert,.student-alert,.settings-alert,.website-alert,.facility-alert,.library-alert,.meeting-alert,.academics-notice,.academics-alert,.academics-readonly-note,.academics-form-hint,.student-readonly,.student-manual-year-hint,.facility-empty,.library-empty,.meetings-alert,.meetings-empty,.graduate-import-message,.graduate-import-preview,.website-loading,.finance-donation-convert,.timetable-heading p,[class*='GradeManagementModule_alert'],[class*='GradeManagementModule_notice'],[class*='GradeManagementModule_warning']";
 const excluded="script,style,textarea,[contenteditable=true],.notranslate,[data-no-translate],.website-translation-language h5";
 function visit(root:Node){

@@ -36,7 +36,7 @@ export default async function StudentPortal({ params }: { params: Promise<{ loca
         <div><span>{t.program}</span><strong>{portal.student.program || t.unspecified}</strong></div>
         <div><span>{t.semester}</span><strong>{portal.student.current_semester ?? "—"}</strong></div>
         <div><span>{t.admission}</span><strong>{portal.student.admission_year ?? "—"}</strong></div>
-        <div><span>{t.status}</span><strong>{portal.student.student_status}</strong></div>
+        <div><span>{t.status}</span><strong>{locale==="en"?(({active:"Enrolled",leave:"On leave",graduated:"Graduated",withdrawn:"Withdrawn"} as Record<string,string>)[portal.student.student_status]??portal.student.student_status):portal.student.student_status}</strong></div>
       </div>
       <section className="student-section"><h2>{t.schedule}{schedule[0] ? ` · ${schedule[0].term_name}` : ""}</h2>
         {schedule.length ? <div className="student-schedule">{schedule.map((row, index) => <article key={`${row.term_code}-${row.course_code}-${index}`}><b>{days[Math.max(0, Math.min(6, row.day_of_week - 1))] || row.day_of_week} · {row.start_time}–{row.end_time}</b><strong>{courseName(row)}</strong><span>{row.course_code}{row.room ? ` · ${t.room} ${row.room}` : ""}</span></article>)}</div> : <p className="module-placeholder">{t.noSchedule}</p>}</section>

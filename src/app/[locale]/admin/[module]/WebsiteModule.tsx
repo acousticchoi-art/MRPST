@@ -52,17 +52,19 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
  const [adminQuery,setAdminQuery]=useState(""),[adminKey,setAdminKey]=useState("");
  const load=useCallback(async()=>{setLoading(true);setError("");try{
   const response=await fetch("/api/admin/data/website",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
-  const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
-  if(!response.ok)throw new Error(data.error||(englishUI?`Unable to load website content (HTTP ${response.status})`:locale==="my"?`ဝဘ်ဆိုက်အကြောင်းအရာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`홈페이지 콘텐츠 조회 실패 (HTTP ${response.status})`));
-  if(data.items?.error)throw new Error((englishUI?"Unable to load website content: ":"홈페이지 콘텐츠를 불러오지 못했습니다: ")+data.items.error);
-  const rows=(data.items?.data||[]) as Entry[];setItems(rows);
+  const invalidResponse=englishUI?"Invalid server response. Please try again.":locale==="my"?"ဆာဗာမှ အချက်အလက် မှန်ကန်စွာ မရရှိပါ။ ထပ်မံကြိုးစားပါ။":"서버 응답이 올바르지 않습니다. 다시 시도해 주세요.";
+  const data=await response.json().catch(()=>{throw new Error(invalidResponse);});
+  if(!response.ok)throw new Error(data?.error||(englishUI?`Unable to load website content (HTTP ${response.status})`:locale==="my"?`ဝဘ်ဆိုက်အကြောင်းအရာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`홈페이지 콘텐츠 조회 실패 (HTTP ${response.status})`));
+  if(data?.items?.error)throw new Error((englishUI?"Unable to load website content: ":"홈페이지 콘텐츠를 불러오지 못했습니다: ")+data.items.error);
+  if(!Array.isArray(data?.items?.data))throw new Error(invalidResponse);
+  const rows=data.items.data as Entry[];setItems(rows);
   const adminRow=rows.find(row=>row.content_type==="page"&&row.content_key==="admin-translations"&&row.locale==="my");
   try{setAdminTranslations(adminRow?.body?JSON.parse(adminRow.body):{});}catch{setAdminTranslations({});}
   const translations:Record<string,Record<string,{title:string;body:string}>>={};
   const allPageKeys=Array.from(new Set([...pageFields.map(field=>field.key),...rows.filter(row=>row.content_type==="page").map(row=>row.content_key)]));
   for(const key of allPageKeys){translations[key]={};for(const language of locales){const row=rows.find(x=>x.content_type==="page"&&x.content_key===key&&x.locale===language.value);translations[key][language.value]={title:row?.title||"",body:row?.body||""};}}
   setTranslationValues(translations);
- }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[]);
+ }catch(e:any){setError(e instanceof TypeError?(englishUI?"Network connection failed. Check your connection and try again.":locale==="my"?"အင်တာနက် ချိတ်ဆက်မှုကို စစ်ဆေးပြီး ထပ်မံကြိုးစားပါ။":"네트워크 연결을 확인한 후 다시 시도해 주세요."):e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[]);
  useEffect(()=>{void load();},[load]);
  const translationFields=useMemo(()=>{
   const known=new Map<string,{key:string;label:string;hint:string}>(pageFields.map(field=>[field.key,{...field}]));

@@ -113,7 +113,7 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
    const scores=enrolledCourseIds.map(id=>gradeByKey.get(student.id+"|"+id)?.score).filter((v):v is number=>v!==null&&v!==undefined);
    const average=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null;
    const studentDepartment=departments.find(d=>d.code.toLowerCase()===String(student.program_code||"").toLowerCase());
-   return [student.student_number,student.full_name,studentDepartment?.name_en||studentDepartment?.code||student.program_code,student.cohort,average===null?"":average.toFixed(2),scores.length,enrolledCourseIds.length];
+   return [student.student_number,student.full_name,(locale==="my"?studentDepartment?.name_my||studentDepartment?.name_en:studentDepartment?.name_en)||studentDepartment?.code||student.program_code,student.cohort,average===null?"":average.toFixed(2),scores.length,enrolledCourseIds.length];
   })];
   const blob=new Blob(["\uFEFF"+rows.map(row=>row.map(csvCell).join(",")).join("\r\n")],{type:"text/csv;charset=utf-8"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="MRPST_"+(terms.find(x=>x.id===termId)?.term_code||"grades")+"_grades.csv";document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);

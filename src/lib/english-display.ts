@@ -538,4 +538,13 @@ Object.assign(phrases,{
   "보호자 연락처": "Guardian contact",
   "선택하세요": "Select an option"
 });
+Object.assign(phrases,{
+  "승용차": "Passenger car",
+  "번호판 및 차량 세부정보는 추후 등록 예정. 기존 운행일지 기준 마지막 확인 주행거리 27,427km.": "The license plate and vehicle details will be registered later. Last verified mileage in the existing trip log: 27,427 km.",
+  "물품 구매": "Purchase of supplies",
+  "원본 일지의 날짜 순서 및 주행거리 흐름과 다르게 기록되어 원본값 유지": "The entry differs from the original log's date sequence and mileage progression; original values retained.",
+  "원본 주행거리 시작값 유지": "Original starting odometer reading retained.",
+  "원본 기간: 2026-10-26~2026-10-27 / 95 Gasoline (180,000) - self": "Original period: 2026-10-26 to 2026-10-27 / 95 Gasoline (180,000) - self",
+  "수리 내용 미기록": "Repair details not recorded"
+});
 export function englishDisplay(value:string):string {return phrases[value.trim().replace(/\\n/g,"\n")]??value;}

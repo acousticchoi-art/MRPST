@@ -122,7 +122,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
  return <div className="website-workspace website-workspace-v2">{!canManage&&<div className="website-alert">{(englishUI?"Read-only permission. You may view website content and announcements.":"읽기 전용 권한입니다. 홈페이지 콘텐츠와 공지사항을 조회할 수 있습니다.")}</div>}
   <div className="website-heading website-heading-v2">
    <div><AdminModuleHeading moduleKey="website"/></div>
-   <a className="website-preview-link" href="/ko" target="_blank" rel="noreferrer">홈페이지 미리보기 ↗</a>
+   <a className="website-preview-link" href="/ko" target="_blank" rel="noreferrer">{(englishUI?"Preview website ↗":"홈페이지 미리보기 ↗")}</a>
   </div>
   <div className="website-overview">
    <article><span>{(englishUI?"Page content":"페이지 콘텐츠")}</span><strong>{pageFields.length}</strong><small>{(englishUI?"Management items":"관리 항목")}</small></article>
@@ -134,9 +134,9 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
   {error&&<div className="website-alert error" role="alert">{error}</div>}
   {notice&&<div className="website-alert success" role="status">{notice}</div>}
   <nav className="website-tabs website-tabs-v2" aria-label={(englishUI?"Website content types":"홈페이지 콘텐츠 종류")}>
-   <button className={tab==="notices"?"active":""} onClick={()=>setTab("notices")}><span>01</span> 공지사항</button>
-   <button className={tab==="translation"?"active":""} onClick={()=>setTab("translation")}><span>02</span> 홈페이지 문구</button>
-   <button className={tab==="admin"?"active":""} onClick={()=>setTab("admin")}><span>03</span> 관리자 화면 번역</button>
+   <button className={tab==="notices"?"active":""} onClick={()=>setTab("notices")}><span>01</span>{(englishUI?" Announcements":" 공지사항")}</button>
+   <button className={tab==="translation"?"active":""} onClick={()=>setTab("translation")}><span>02</span>{(englishUI?" Website copy":" 홈페이지 문구")}</button>
+   <button className={tab==="admin"?"active":""} onClick={()=>setTab("admin")}><span>03</span>{(englishUI?" Administration interface translations":" 관리자 화면 번역")}</button>
   </nav>
   {tab==="translation"&&<section className="website-panel website-panel-v2 website-translation-panel">
    <div className="website-section-intro"><div><span className="website-kicker">BILINGUAL PAGE EDITOR</span><h3>{(englishUI?"Website copy":"홈페이지 문구")}</h3><p>{(englishUI?"Review and edit Korean and Myanmar copy on one screen. Saving updates both language pages.":"한국어와 미얀마어를 한 화면에서 확인하고 수정합니다. 저장하면 두 언어 페이지에 각각 반영됩니다.")}</p></div></div>
@@ -154,22 +154,22 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
      <FormField label={(englishUI?"Announcement title":"공지사항 제목")}><input disabled={!canManage||saving} value={noticeTitle} onChange={e=>setNoticeTitle(e.target.value)} placeholder={(englishUI?"e.g. 2026 academic year, Semester 2 opening":"예: 2026학년도 2학기 개강 안내")}/></FormField>
      <FormField label={(englishUI?"Announcement body":"공지사항 내용")}><textarea disabled={!canManage||saving} rows={9} value={noticeBody} onChange={e=>setNoticeBody(e.target.value)} placeholder={(englishUI?"Enter the announcement text.":"공지할 내용을 입력하세요.")}/></FormField>
      <label className="website-publish-check website-publish-check-v2"><input type="checkbox" disabled={!canManage||saving} checked={noticePublished} onChange={e=>setNoticePublished(e.target.checked)}/><span><strong>{(englishUI?"Publish after saving":"저장 후 홈페이지에 게시")}</strong><small>{(englishUI?"Clear the checkbox to save as unpublished.":"체크를 해제하면 비공개 상태로 저장됩니다.")}</small></span></label>
-     <div className="website-actions website-actions-v2"><button className="website-primary" disabled={!canManage||saving||!noticeTitle.trim()||!noticeBody.trim()} onClick={()=>void saveNotice()}>{saving?"저장 중…":editingId?"수정 내용 저장":"공지사항 등록"}</button>{editingId&&<button className="website-secondary" disabled={!canManage} onClick={resetNotice}>수정 취소</button>}</div>
+     <div className="website-actions website-actions-v2"><button className="website-primary" disabled={!canManage||saving||!noticeTitle.trim()||!noticeBody.trim()} onClick={()=>void saveNotice()}>{saving?"저장 중…":editingId?"수정 내용 저장":"공지사항 등록"}</button>{editingId&&<button className="website-secondary" disabled={!canManage} onClick={resetNotice}>{(englishUI?"Cancel editing":"수정 취소")}</button>}</div>
     </div>
    </section>
    <section className="website-panel website-panel-v2 website-notice-list-panel">
-    <div className="website-section-intro website-list-intro"><div><span className="website-kicker">PUBLISHED CONTENT</span><h3>{(englishUI?"Announcements":"등록된 공지사항")}</h3><p>{(englishUI?"Review publication status and manage content.":"게시·비공개 상태를 확인하고 내용을 관리합니다.")}</p></div><strong className="website-count">{notices.length}건</strong></div>
+    <div className="website-section-intro website-list-intro"><div><span className="website-kicker">PUBLISHED CONTENT</span><h3>{(englishUI?"Announcements":"등록된 공지사항")}</h3><p>{(englishUI?"Review publication status and manage content.":"게시·비공개 상태를 확인하고 내용을 관리합니다.")}</p></div><strong className="website-count">{notices.length}{(englishUI?"":"건")}</strong></div>
     <div className="website-notice-list website-notice-list-v2">{notices.map(item=><article className="website-notice-item website-notice-item-v2" key={item.id}>
      <div className="website-notice-meta"><span className="website-locale-tag">{item.locale==="all"?"전체 홈페이지":locales.find(x=>x.value===item.locale)?.label||item.locale}</span><span className={item.is_published?"published":"draft"}>{item.is_published?"게시 중":"비공개"}</span></div>
      <h4>{item.title}</h4><p>{item.body}</p><small className="website-updated">{new Date(item.updated_at).toLocaleDateString(locale==="en"?"en-GB":locale==="my"?"my-MM":"ko-KR",{year:"numeric",month:"short",day:"numeric"})}</small>
-     <div className="website-notice-actions"><button disabled={!canManage||saving} onClick={()=>editNotice(item)}>수정</button><button onClick={()=>void toggleNotice(item)} disabled={!canManage||saving}>{item.is_published?"게시 중단":"게시하기"}</button><button className="danger" onClick={()=>void deleteNotice(item)} disabled={!canManage||saving}>삭제</button></div>
+     <div className="website-notice-actions"><button disabled={!canManage||saving} onClick={()=>editNotice(item)}>{(englishUI?"Edit":"수정")}</button><button onClick={()=>void toggleNotice(item)} disabled={!canManage||saving}>{item.is_published?"게시 중단":"게시하기"}</button><button className="danger" onClick={()=>void deleteNotice(item)} disabled={!canManage||saving}>{(englishUI?"Delete":"삭제")}</button></div>
     </article>)}{!notices.length&&!loading&&<div className="website-empty website-empty-v2"><strong>{(englishUI?"No announcements registered yet.":"아직 등록된 공지사항이 없습니다.")}</strong><span>{(englishUI?"Use the editor to register your first announcement.":"왼쪽 작성 영역에서 첫 공지사항을 등록해 보세요.")}</span></div>}</div>
    </section>
   </div>}
   {tab==="admin"&&<section className="website-panel website-panel-v2 website-translation-panel">
    <div className="website-section-intro"><div><span className="website-kicker">ADMINISTRATOR UI</span><h3>{(englishUI?"Review Myanmar administration translations":"관리자 화면 미얀마어 교정")}</h3><p>{(englishUI?"Search the original Korean phrase to edit its Myanmar translation. Saved phrases take precedence on the Myanmar administration pages.":"한국어 원문을 검색해 미얀마어 표현을 직접 교정합니다. 저장한 문구는 미얀마어 관리자 화면에 우선 적용됩니다.")}</p></div></div>
    <div className="website-form website-form-v2"><FormField label={(englishUI?"Search original Korean":"한국어 원문 검색")}><input value={adminQuery} onChange={e=>setAdminQuery(e.target.value)} placeholder={(englishUI?"e.g. Save, Student Management":"예: 저장, 학생 관리")}/></FormField>
-    <FormField label={(englishUI?"Text to edit":"수정할 문구")}><select value={adminKey} onChange={e=>setAdminKey(e.target.value)} disabled={!canManage||saving}><option value="">문구를 선택하세요</option>{Object.keys(MY).filter(key=>key.toLowerCase().includes(adminQuery.toLowerCase())||MY[key].toLowerCase().includes(adminQuery.toLowerCase())).sort((a,b)=>a.localeCompare(b,"ko")).slice(0,200).map(key=><option key={key} value={key}>{key}</option>)}</select></FormField>
+    <FormField label={(englishUI?"Text to edit":"수정할 문구")}><select value={adminKey} onChange={e=>setAdminKey(e.target.value)} disabled={!canManage||saving}><option value="">{(englishUI?"Select text":"문구를 선택하세요")}</option>{Object.keys(MY).filter(key=>key.toLowerCase().includes(adminQuery.toLowerCase())||MY[key].toLowerCase().includes(adminQuery.toLowerCase())).sort((a,b)=>a.localeCompare(b,"ko")).slice(0,200).map(key=><option key={key} value={key}>{key}</option>)}</select></FormField>
     {adminKey&&<><FormField label={(englishUI?"Original Korean":"한국어 원문")}><textarea rows={3} value={adminKey} readOnly/></FormField><FormField label={(englishUI?"Myanmar translation":"미얀마어 번역")}><textarea rows={4} disabled={!canManage||saving} value={adminTranslations[adminKey]??MY[adminKey]??""} onChange={e=>setAdminTranslations(values=>({...values,[adminKey]:e.target.value}))}/></FormField><div className="website-actions website-actions-v2"><button className="website-primary" disabled={!canManage||saving} onClick={()=>void saveAdminTranslation()}>{saving?"저장 중…":"미얀마어 번역 저장"}</button></div></>}
    </div>
   </section>}

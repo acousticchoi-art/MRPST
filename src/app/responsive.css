@@ -339,3 +339,9 @@
  html body .header>.mobile-menu>.mobile-nav>a[href$="/admin"]{background:#173c55!important;color:#fff!important;}
  html body .header>.mobile-menu>.mobile-nav>a[href$="/admin"]:is(:hover,:focus-visible,:active){background:#102d42!important;color:#fff!important;}
 }
+
+/* CSS-generated mobile menu hints must follow the current language. */
+@media(max-width:900px){
+ html body [lang="en"] .admin > .sidebar > .admin-menu-details > summary::after{content:"Open menu  ▾"!important;}
+ html body [lang="en"] .admin > .sidebar > .admin-menu-details[open] > summary::after{content:"Close menu  ▴"!important;}
+}

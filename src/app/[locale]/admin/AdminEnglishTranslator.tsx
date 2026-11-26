@@ -3213,8 +3213,23 @@ const EN:Record<string,string>={
   "CSV 파일 선택": "Select CSV file",
   "Excel에서 양식을 작성한 뒤 CSV UTF-8 형식으로 저장해 올리세요. 저장 전 중복과 필수 항목을 확인하며, 학생·졸업이력·학적이력을 함께 등록합니다.": "Complete the template in Excel, save it as CSV UTF-8 and upload it. Duplicate and required fields are checked before student, graduation and enrollment records are saved together."
 };
+Object.assign(EN,{
+  "재학생 명부": "Current student directory",
+  "졸업생 명부": "Graduate directory",
+  "미등록": "Not registered",
+  "미지정": "Not specified",
+  "현재 재학 상태인 학생입니다. 학생을 선택하면 수강 이력을 바로 볼 수 있습니다.": "These students are currently enrolled. Select a student to view their course history.",
+  "졸업 확정 기록과 졸업 학적을 기준으로 표시합니다.": "Based on confirmed graduation records and graduation status.",
+  "등록 기준": "Based on enrollments",
+  "점수 입력하기": "Enter grades",
+  "학생정보에서 학년 변경": "Change year in Student Information",
+  "입학년도": "Admission year",
+  "증명서 출력": "Print certificate",
+  "학생 번호 ·": "Student number ·",
+  "미상": "Unknown"
+});
 function translated(raw:string){const key=raw.trim();const v=EN[key]??EN[key.replace(/\s+/g," ")];return v?raw.replace(key,v):raw;}
-const controls="button,label,legend,th,h1,h2,h3,h4,h5,summary,[role=tab],[role=alert],[role=status],.academics-empty,.student-empty,.dashboard-empty,.module-placeholder,.notice,.schedule-weekday,.academics-panel-head p,.student-status,.admin-heading,.admin-subtitle,.admin-search-select-empty,.admin-search-select-trigger .placeholder,.website-section-intro p,.website-footer-actions>span,.website-notice-audience,.website-publish-check small,.finance-panel-head p,.student-panel-head p,.facility-panel-head p,.library-panel-head p,.meeting-panel-head p,.settings-panel-head p,.admin-form-actions,.academics-grade-simple-guide p,.dashboard-stat small,.website-stat-grid span,.website-stat-grid small,.finance-note,.empty-state,.settings-form-hint,.finance-alert,.student-alert,.settings-alert,.website-alert,.facility-alert,.library-alert,.meeting-alert,.academics-notice,.academics-alert,.academics-readonly-note,.academics-form-hint,.student-readonly,.student-manual-year-hint,.facility-empty,.library-empty,.meetings-alert,.meetings-empty,.graduate-import-message,.graduate-import-preview,.website-loading,.finance-donation-convert,.timetable-heading p,[class*='GradeManagementModule_alert'],[class*='GradeManagementModule_notice'],[class*='GradeManagementModule_warning']";
+const controls=".student-directory-tools,.student-directory-tools + .student-directory-table thead,.student-number,.student-profile-actions,.student-directory-head,.academics-assignment-flow,.academics-workload-hours,.academics-grade-simple-guide a,.student-certificate-link,.academics-syllabus-actions,[class*='GradeManagementModule_footnote'],[class*='GradeManagementModule_loading'],button,label,legend,th,h1,h2,h3,h4,h5,summary,[role=tab],[role=alert],[role=status],.academics-empty,.student-empty,.dashboard-empty,.module-placeholder,.notice,.schedule-weekday,.academics-panel-head p,.student-status,.admin-heading,.admin-subtitle,.admin-search-select-empty,.admin-search-select-trigger .placeholder,.website-section-intro p,.website-footer-actions>span,.website-notice-audience,.website-publish-check small,.finance-panel-head p,.student-panel-head p,.facility-panel-head p,.library-panel-head p,.meeting-panel-head p,.settings-panel-head p,.admin-form-actions,.academics-grade-simple-guide p,.dashboard-stat small,.website-stat-grid span,.website-stat-grid small,.finance-note,.empty-state,.settings-form-hint,.finance-alert,.student-alert,.settings-alert,.website-alert,.facility-alert,.library-alert,.meeting-alert,.academics-notice,.academics-alert,.academics-readonly-note,.academics-form-hint,.student-readonly,.student-manual-year-hint,.facility-empty,.library-empty,.meetings-alert,.meetings-empty,.graduate-import-message,.graduate-import-preview,.website-loading,.finance-donation-convert,.timetable-heading p,[class*='GradeManagementModule_alert'],[class*='GradeManagementModule_notice'],[class*='GradeManagementModule_warning']";
 const excluded="script,style,textarea,[contenteditable=true],.notranslate,[data-no-translate],.website-translation-language h5";
 function visit(root:Node){
  if(root.nodeType===Node.TEXT_NODE){const p=root.parentElement;if(!p||p.closest(excluded)||p.closest(".admin-search-select-results,.admin-search-select-trigger .selected")||!p.closest(controls+",option[value]"))return;const next=translated(root.nodeValue||"");if(next!==root.nodeValue)root.nodeValue=next;return;}

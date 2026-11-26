@@ -45,4 +45,11 @@ printf 'project=MRPST\ncreated_utc=%s\nstorage_objects=0\nrestore_test=not_yet_v
 tar -C "$work" -czf - roles.sql schema.sql data.sql history_schema.sql history_data.sql auth_trigger.sql manifest.txt | age -r "$MRPST_AGE_RECIPIENT" -o "$partial"
 [[ -s "$partial" ]] || { echo "Encryption failed" >&2; exit 1; }
 mv -- "$partial" "$final"
-printf 'Encrypted backup created: %s\nUpload only this .age file to the restricted school Drive folder. Verify recovery separately.\n' "$final"
+printf 'Encrypted local backup created: %s\n' "$final"
+if [[ -n "${MRPST_DRIVE_REMOTE:-}" || -n "${MRPST_DRIVE_FOLDER_ID:-}" ]]; then
+  : "${MRPST_DRIVE_REMOTE:?Set the authorized rclone Google Drive remote name}"
+  : "${MRPST_DRIVE_FOLDER_ID:?Set the approved Drive folder ID locally}"
+  bash "$repo_dir/scripts/mrpst-backup-upload.sh" "$final"
+else
+  printf 'Drive upload not configured; encrypted backup retained locally.\n'
+fi

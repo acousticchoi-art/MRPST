@@ -29,6 +29,14 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
 
   try{
     let data:any={};
+    if(moduleKey==="website"&&search.get("scope")==="editor-permission"){
+      return NextResponse.json({canManage:access.canManage},{headers:{"Cache-Control":"no-store, max-age=0"}});
+    }
+    if(moduleKey==="website"&&search.get("scope")==="admin-translations"){
+      const translations=await result(supabase.from("website_contents").select("body").eq("content_type","page").eq("content_key","admin-translations").eq("locale","my").maybeSingle());
+      if(translations.error)return NextResponse.json({error:translations.error},{status:500,headers:{"Cache-Control":"no-store, max-age=0"}});
+      return NextResponse.json({canManage:access.canManage,body:translations.data?.body??null},{headers:{"Cache-Control":"no-store, max-age=0"}});
+    }
     if(moduleKey==="finance"&&search.get("scope")==="award-purpose"){
       const awardId=search.get("id");
       if(!awardId)return NextResponse.json({error:"장학금 ID가 필요합니다."},{status:400});

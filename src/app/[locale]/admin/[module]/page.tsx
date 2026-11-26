@@ -69,20 +69,20 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
   const adminShell=(content:ReactNode)=>locale==="en"?content:locale==="my"?<InlineAdminEditor locale={locale}>{content}</InlineAdminEditor>:<InlinePageEditor pageKey={`admin-${module}`} locale={locale} initialValues={inlineValues}>{content}</InlinePageEditor>;
   return <>{locale==="en"&&<AdminEnglishTranslator/>}{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>} {adminShell(<div className="admin">
     <aside className="sidebar">
-      <Link href={`/${locale}/admin`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
+      <Link prefetch={false} href={`/${locale}/admin`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
       <AdminMenuDetails>
         <summary>{lang==="ko"?"관리 메뉴":lang==="my"?"စီမံခန့်ခွဲမှု မီနူး":"Menu"}</summary>
         <nav className="sidebar-nav">
           
           <div className="side-label">{t.workspace}</div>
-          <Link className="side-link" href={`/${locale}/admin`}>{t.dashboard}</Link>
-          {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([moduleKey,entry])=><Link className={moduleKey===key?"side-link active":"side-link"} href={`/${locale}/admin/${moduleKey}`} key={moduleKey}>{moduleNames[moduleKey]??entry.title}</Link>)}</div>:null;})}
+          <Link prefetch={false} className="side-link" href={`/${locale}/admin`}>{t.dashboard}</Link>
+          {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([moduleKey,entry])=><Link prefetch={false} className={moduleKey===key?"side-link active":"side-link"} href={`/${locale}/admin/${moduleKey}`} key={moduleKey}>{moduleNames[moduleKey]??entry.title}</Link>)}</div>:null;})}
         </nav>
       </AdminMenuDetails>
       <div className="sidebar-mobile-tools"><div data-no-inline-edit data-no-translate><LanguageSwitcher locale={lang}/></div><Link href={`/${locale}`}>{t.view}</Link>{supabase&&<AdminActions locale={locale}/>}</div>
       </aside>
     <main className="admin-main">
-      <header className="topbar admin-desktop-topbar"><Link href={`/${locale}/admin`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">
+      <header className="topbar admin-desktop-topbar"><Link prefetch={false} href={`/${locale}/admin`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">
         <div data-no-inline-edit data-no-translate><LanguageSwitcher locale={lang}/></div>
         
         <Link href={`/${locale}`}>{t.view}</Link>

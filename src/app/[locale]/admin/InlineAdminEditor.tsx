@@ -3,6 +3,7 @@
 import {useEffect,useRef,useState,type PointerEvent as ReactPointerEvent,type ReactNode} from "react";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 import {MY} from "./AdminMyanmarTranslator";
+import {loadAdminTranslations} from "@/lib/admin-translations-request";
 
 type Overrides=Record<string,string>;
 const selector="h1,h2,h3,h4,p,span,strong,small,blockquote,li,a,button,label,summary";
@@ -15,11 +16,13 @@ export default function InlineAdminEditor({locale,children}:{locale:string;child
  const [overrides,setOverrides]=useState<Overrides>({});
  useEffect(()=>{
   if(locale!=="my")return;
-  void fetch("/api/admin/data/website",{cache:"no-store",credentials:"same-origin"}).then(async response=>({response,data:await response.json().catch(()=>null)})).then(({response,data})=>{
-   setCanManage(response.ok&&data?.canManage===true);
-   const row=data?.items?.data?.find((item:{content_type?:string;content_key?:string;locale?:string})=>item.content_type==="page"&&item.content_key==="admin-translations"&&item.locale==="my");
-   try{setOverrides(row?.body?JSON.parse(row.body):{});}catch{setOverrides({});}
-  }).catch(()=>setCanManage(false));
+  let disposed=false;
+  void loadAdminTranslations().then(({canManage,body})=>{
+   if(disposed)return;
+   setCanManage(canManage);
+   try{setOverrides(body?JSON.parse(body):{});}catch{setOverrides({});}
+  }).catch(()=>{if(!disposed)setCanManage(false);});
+  return ()=>{disposed=true;};
  },[locale]);
  useEffect(()=>{try{const saved=localStorage.getItem("mrpst-inline-editor-position");if(saved)setPosition(JSON.parse(saved));}catch{}},[]);
  const startDrag=(event:ReactPointerEvent<HTMLSpanElement>)=>{event.preventDefault();const offsetX=event.clientX-(position?.x??window.innerWidth-190);const offsetY=event.clientY-(position?.y??18);const move=(moveEvent:globalThis.PointerEvent)=>{const next={x:Math.max(6,Math.min(window.innerWidth-190,moveEvent.clientX-offsetX)),y:Math.max(6,Math.min(window.innerHeight-50,moveEvent.clientY-offsetY))};setPosition(next);try{localStorage.setItem("mrpst-inline-editor-position",JSON.stringify(next));}catch{}};const end=()=>{window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",end);};window.addEventListener("pointermove",move);window.addEventListener("pointerup",end);};

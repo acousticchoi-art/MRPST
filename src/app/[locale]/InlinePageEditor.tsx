@@ -70,7 +70,7 @@ export default function InlinePageEditor({pageKey,locale,initialValues,children}
       const db=createSupabaseBrowserClient();if(!db)return;
       return db.auth.getSession().then(({data:{session}})=>{
         if(!session)return;
-        void fetch("/api/admin/data/website",{cache:"no-store",credentials:"same-origin"})
+        void fetch("/api/admin/data/website?scope=editor-permission",{cache:"no-store",credentials:"same-origin"})
           .then(async response=>({response,data:await response.json().catch(()=>null)}))
           .then(({response,data})=>setCanManage(response.ok&&data?.canManage===true))
           .catch(()=>setCanManage(false));

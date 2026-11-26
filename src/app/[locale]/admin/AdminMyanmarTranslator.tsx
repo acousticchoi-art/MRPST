@@ -1,6 +1,7 @@
 "use client";
 
 import {useEffect} from "react";
+import {loadAdminTranslations} from "@/lib/admin-translations-request";
 
 /**
  * Shared UI phrase localization for legacy admin modules.
@@ -2223,13 +2224,10 @@ export default function AdminMyanmarTranslator({locale}:{locale:string}){
     const translatePortals=()=>document.querySelectorAll(portalSelector).forEach(translateElement);
     translateElement(root);
     translatePortals();
-    void fetch("/api/admin/data/website",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}})
-      .then(async response=>({response,data:await response.json().catch(()=>null)}))
-      .then(({response,data})=>{
-        if(!response.ok)return;
-        const row=data?.items?.data?.find((item:{content_type?:string;content_key?:string;locale?:string})=>item.content_type==="page"&&item.content_key==="admin-translations"&&item.locale==="my");
-        if(!row?.body)return;
-        const overrides=JSON.parse(row.body);
+    let disposed=false;
+    void loadAdminTranslations().then(({body})=>{
+        if(disposed||!body)return;
+        const overrides=JSON.parse(body);
         if(!overrides||typeof overrides!=="object")return;
         for(const [source,target] of Object.entries(overrides))if(typeof target==="string"&&target.trim())MY[source]=target;
         translateElement(root);
@@ -2265,6 +2263,7 @@ export default function AdminMyanmarTranslator({locale}:{locale:string}){
     });
     portalObserver.observe(document.body,{childList:true});
     return ()=>{
+      disposed=true;
       portalObserver.disconnect();
       observer.disconnect();
       if(frame) cancelAnimationFrame(frame);

@@ -36,8 +36,10 @@ export default function StudentModule(){
  const load=useCallback(async()=>{setLoading(true);setError("");try{
   // 브라우저에서 Supabase로 직접 요청하지 않고 동일 출처의 Vercel API를 통해 조회합니다.
   const response=await fetch("/api/admin/students",{method:"GET",cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
-  const payload=await response.json().catch(()=>({error:locale==="en"?"Unable to read the server response.":locale==="my"?"ဆာဗာမှ တုံ့ပြန်ချက်ကို ဖတ်၍မရပါ။":"서버 응답을 읽을 수 없습니다."}));
-  if(!response.ok)throw new Error(payload.error||(englishUI?`Unable to load student data (HTTP ${response.status})`:locale==="my"?`ကျောင်းသားဒေတာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`학생 데이터 조회 실패 (HTTP ${response.status})`));
+  const invalidResponse=locale==="en"?"Invalid server response. Please try again.":locale==="my"?"ဆာဗာမှ အချက်အလက် မှန်ကန်စွာ မရရှိပါ။ ထပ်မံကြိုးစားပါ။":"서버 응답이 올바르지 않습니다. 다시 시도해 주세요.";
+  const payload=await response.json().catch(()=>{throw new Error(invalidResponse);});
+  if(!response.ok)throw new Error(payload?.error||(englishUI?`Unable to load student data (HTTP ${response.status})`:locale==="my"?`ကျောင်းသားဒေတာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`학생 데이터 조회 실패 (HTTP ${response.status})`));
+  if(typeof payload?.canManage!=="boolean"||!["students","grades","scholarships","graduations","statusHistory"].every(key=>payload[key]?.error||Array.isArray(payload[key]?.data)))throw new Error(invalidResponse);
   setCanManage(payload.canManage===true);
   const errors:string[]=[];
   const s=payload.students,r=payload.grades,a=payload.scholarships,g=payload.graduations,h=payload.statusHistory;
@@ -45,7 +47,7 @@ export default function StudentModule(){
   else{
    const rows=(s?.data??[]) as Student[];
    setStudents(rows);
-   if(selectedId&&!rows.some(x=>x.id===selectedId))setSelectedId("");
+   setSelectedId(current=>current&&!rows.some(x=>x.id===current)?"":current);
   }
   if(r?.error)errors.push((locale==="en"?"Grade records: ":locale==="my"?"အမှတ်စာရင်း: ":"성적 조회: ")+r.error);
   else setRecords(((r?.data??[]) as any[]).map(x=>({id:x.id,student_id:x.student_id,academic_year:x.academic_year??x.academic_terms?.academic_year??0,term:x.term??x.academic_terms?.name??x.academic_terms?.term_code??"",course_code:x.course_code??x.academic_courses?.course_code??null,course_name:x.course_name??x.academic_courses?.title??"",credits:x.credits??x.academic_courses?.credits??null,enrollment_status:x.enrollment_status??"",score:x.score,grade:x.grade,remarks:x.remarks})));
@@ -56,7 +58,7 @@ export default function StudentModule(){
   if(h?.error)errors.push((locale==="en"?"Enrollment status history: ":locale==="my"?"ကျောင်းသားအခြေအနေ ပြောင်းလဲမှုမှတ်တမ်း: ":"학적 변동 이력 조회: ")+h.error);
   else setStatusHistory((h?.data??[]) as StatusHistory[]);
   setError(errors.join(" · "));
- }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다. 다시 시도해 주세요.");}finally{setLoading(false);}},[selectedId,locale,englishUI]);
+ }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다. 다시 시도해 주세요.");}finally{setLoading(false);}},[locale,englishUI]);
  useEffect(()=>{void load();},[load]);
  const selected=students.find(s=>s.id===selectedId)??null;
  const currentStudents=students.filter(s=>s.student_status==="active");

@@ -1,3 +1,4 @@
+import {englishDisplay} from "@/lib/english-display";
 import LanguageSwitcher from "../../LanguageSwitcher";
 import Link from "next/link";
 import type {ReactNode} from "react";
@@ -46,7 +47,7 @@ export default async function ModulePage({params}:{params:Promise<{locale:string
   const access=await getServerModuleAccess(key);
   if(!access.ok){
     if(access.status===401)redirect(`/${locale}/login`);
-    return <main className="login-wrap"><section className="login-card"><span className="eyebrow">PERMISSION REQUIRED</span><h1>Access restricted</h1><p className="login-intro">{access.error}</p></section></main>;
+    return <main className="login-wrap"><section className="login-card"><span className="eyebrow">PERMISSION REQUIRED</span><h1>Access restricted</h1><p className="login-intro">{locale==="en"?englishDisplay(access.error):access.error}</p></section></main>;
   }
   const {supabase,roles,permissions:overrides,user}=access;
   const visible=Object.entries(MODULES).filter(([moduleKey])=>canAccessModule(roles,moduleKey as keyof typeof MODULES,overrides));

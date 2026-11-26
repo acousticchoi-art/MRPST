@@ -1,3 +1,4 @@
+import {englishDisplay} from "@/lib/english-display";
 import LanguageSwitcher from "../LanguageSwitcher";
 import Link from "next/link";
 import type {ReactNode} from "react";
@@ -109,11 +110,11 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
     supabase?supabase.from("website_contents").select("content_key,title,body,is_published,updated_at").eq("content_type","announcement").in("locale",["all",locale]).order("updated_at",{ascending:false}).limit(3):Promise.resolve({data:[],error:null})
   ]);
   const dashboardQueryErrors=[
-    activeStudentCount.error&&"재학생 통계",
-    graduateCount.error&&"졸업생 통계",
-    upcomingResult.error&&"학사 일정",
-    upcomingCountResult.error&&"일정 집계",
-    announcementResult.error&&"공지사항"
+    activeStudentCount.error&&(lang==="en"?"Current student statistics":"재학생 통계"),
+    graduateCount.error&&(lang==="en"?"Graduate statistics":"졸업생 통계"),
+    upcomingResult.error&&(lang==="en"?"Academic calendar":"학사 일정"),
+    upcomingCountResult.error&&(lang==="en"?"Event count":"일정 집계"),
+    announcementResult.error&&(lang==="en"?"Announcements":"공지사항")
   ].filter(Boolean);
   const hasStudentStats=activeStudentCount.count!==null&&graduateCount.count!==null;
   const upcomingEvents=upcomingResult.data??[];
@@ -153,7 +154,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
         <Link href={`/${locale}`}>{t.view}</Link>
         {supabase&&<AdminActions locale={locale}/>}
       </div></header>
-      <div className="content">{dashboardQueryErrors.length>0&&<div className="notice" role="alert">{lang==="ko"?"일부 대시보드 데이터를 불러오지 못했습니다: "+dashboardQueryErrors.join(", "):"ဒက်ရှ်ဘုတ်ဒေတာအချို့ကို မရယူနိုင်ပါ: "+dashboardQueryErrors.join(", ")}</div>}<span className="eyebrow" data-no-inline-edit="" data-no-translate="">INTEGRATED SCHOOL MANAGEMENT</span><h1 className="admin-heading" data-no-inline-edit="" data-no-translate="">{t.title}</h1><p className="admin-subtitle" data-no-inline-edit="" data-no-translate="">{t.subtitle}</p>
+      <div className="content">{dashboardQueryErrors.length>0&&<div className="notice" role="alert">{lang==="en"?"Some dashboard data could not be loaded: "+dashboardQueryErrors.join(", "):lang==="ko"?"일부 대시보드 데이터를 불러오지 못했습니다: "+dashboardQueryErrors.join(", "):"ဒက်ရှ်ဘုတ်ဒေတာအချို့ကို မရယူနိုင်ပါ: "+dashboardQueryErrors.join(", ")}</div>}<span className="eyebrow" data-no-inline-edit="" data-no-translate="">INTEGRATED SCHOOL MANAGEMENT</span><h1 className="admin-heading" data-no-inline-edit="" data-no-translate="">{t.title}</h1><p className="admin-subtitle" data-no-inline-edit="" data-no-translate="">{t.subtitle}</p>
         {!isSupabaseConfigured&&<div className="notice">{t.preview}</div>}
         <section className="dashboard-stats">
           <article className="dashboard-stat"><span>{t.currentStudents}</span><strong>{hasStudentStats?activeStudentCount.count?.toLocaleString("en-US"):"—"}</strong><small>{lang==="en"?"Currently enrolled":lang==="ko"?"현재 재학 상태":"လက်ရှိတက်ရောက်နေသော ကျောင်းသား"}</small></article>
@@ -163,11 +164,11 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
         <div className="dashboard-columns">
           <section className="dashboard-panel dashboard-schedule">
             <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="en"?"Academic calendar":lang==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</span><h2>{lang==="en"?"Upcoming events":lang==="ko"?"다가오는 일정":"လာမည့် အစီအစဉ်များ"}</h2></div>{canAccessAcademics&&<Link href={`/${locale}/admin/academics`}>{lang==="en"?"Manage calendar →":lang==="ko"?"일정 관리 →":"စီမံခန့်ခွဲရန် →"}</Link>}</div>
-            {upcomingEvents.length? <div className="dashboard-event-list">{upcomingEvents.map((event:any)=><article key={event.id}><time>{event.start_date}{event.start_time?" · "+String(event.start_time).slice(0,5):""}</time><div><strong>{event.title}</strong>{event.location&&<small>{event.location}</small>}</div></article>)}</div>:<p className="dashboard-empty">{lang==="en"?"No upcoming events.":lang==="ko"?"예정된 일정이 없습니다.":"မှတ်ပုံတင်ထားသော အစီအစဉ် မရှိသေးပါ။"}</p>}
+            {upcomingEvents.length? <div className="dashboard-event-list">{upcomingEvents.map((event:any)=><article key={event.id}><time>{event.start_date}{event.start_time?" · "+String(event.start_time).slice(0,5):""}</time><div><strong>{lang==="en"?englishDisplay(event.title):event.title}</strong>{event.location&&<small>{event.location}</small>}</div></article>)}</div>:<p className="dashboard-empty">{lang==="en"?"No upcoming events.":lang==="ko"?"예정된 일정이 없습니다.":"မှတ်ပုံတင်ထားသော အစီအစဉ် မရှိသေးပါ။"}</p>}
           </section>
           <section className="dashboard-panel dashboard-announcements">
             <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="en"?"MRPST NEWS":lang==="ko"?"MRPST NEWS":"MRPST NEWS"}</span><h2>{lang==="en"?"Recent announcements":lang==="ko"?"최근 공지사항":"နောက်ဆုံး ကြေညာချက်များ"}</h2></div>{canAccessWebsite&&<Link href={`/${locale}/admin/website`}>{lang==="en"?"Manage announcements →":lang==="ko"?"공지사항 관리 →":"စီမံခန့်ခွဲရန် →"}</Link>}</div>
-            {recentAnnouncements.length?<div className="dashboard-announcement-list">{recentAnnouncements.map((item:any)=><article key={item.content_key}><div><strong>{item.title}</strong><p>{item.body}</p></div><span className={item.is_published?"published":"draft"}>{item.is_published?(lang==="en"?"Published":lang==="ko"?"게시":"Published"):(lang==="en"?"Draft":lang==="ko"?"임시저장":"Draft")}</span></article>)}</div>:<p className="dashboard-empty">{lang==="en"?"No announcements yet.":lang==="ko"?"등록된 공지사항이 없습니다.":"ကြေညာချက် မရှိသေးပါ။"}</p>}
+            {recentAnnouncements.length?<div className="dashboard-announcement-list">{recentAnnouncements.map((item:any)=><article key={item.content_key}><div><strong>{lang==="en"?englishDisplay(item.title):item.title}</strong><p>{lang==="en"?englishDisplay(item.body??""):item.body}</p></div><span className={item.is_published?"published":"draft"}>{item.is_published?(lang==="en"?"Published":lang==="ko"?"게시":"Published"):(lang==="en"?"Draft":lang==="ko"?"임시저장":"Draft")}</span></article>)}</div>:<p className="dashboard-empty">{lang==="en"?"No announcements yet.":lang==="ko"?"등록된 공지사항이 없습니다.":"ကြေညာချက် မရှိသေးပါ။"}</p>}
           </section>
         </div>
       </div>

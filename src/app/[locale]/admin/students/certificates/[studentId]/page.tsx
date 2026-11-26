@@ -1,3 +1,4 @@
+import {englishDisplay} from "@/lib/english-display";
 import "./certificate.css";
 import Link from "next/link";
 import {notFound,redirect} from "next/navigation";
@@ -24,7 +25,7 @@ export default async function CertificatePage({params,searchParams}:{params:Prom
  const query=await searchParams;
  const kind:Kind=query.type==="graduation"?"graduation":query.type==="record"?"record":query.type==="transcript"?"transcript":"enrollment";
  const access=await getServerModuleAccess("students");
- if(!access.ok){if(access.status===401)redirect(`/${locale}/login`);return <main className="student-cert-error">{access.error}</main>;}
+ if(!access.ok){if(access.status===401)redirect(`/${locale}/login`);return <main className="student-cert-error">{lang==="en"?englishDisplay(access.error):access.error}</main>;}
  if(!/^[0-9a-f-]{36}$/i.test(studentId))notFound();
  const {data:student,error}=await access.supabase.from("students").select("id,student_number,full_name,full_name_my,full_name_en,program,cohort,admission_year,student_status,graduation_year,graduation_date,graduation_number").eq("id",studentId).maybeSingle();
  if(error||!student)notFound();

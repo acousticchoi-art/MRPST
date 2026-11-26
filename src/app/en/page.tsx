@@ -2,6 +2,7 @@ import SiteHeader from "../[locale]/SiteHeader";
 import Link from "next/link";
 import {createSupabaseServerClient} from "@/lib/supabase/server";
 import InlinePageEditor from "../[locale]/InlinePageEditor";
+import {englishDisplay} from "@/lib/english-display";
 import PublicAnnouncements from "./PublicAnnouncements";
 
 const copy = {
@@ -59,8 +60,7 @@ export default async function Home(){
   };
   // Translate the two existing public notices only when their original text still matches.
   // New or edited notice content remains original until an English translation is supplied.
-  const noticeTranslations:Record<string,string>={"MRPST 홈페이지에 오신 여러분을 환영합니다.":"Welcome to the MRPST website.","2026 개강 안내":"2026 Opening of Classes","밍글라바\nMRPST 홈페이지에 오신 여러분을 환영합니다!":"Mingalaba!\nWelcome to the MRPST website!","2026 개강 안내 입니다.":"Announcement of the opening of classes in 2026."};
-  const announcements=cmsRows.filter(x=>x.content_type==="announcement").map(x=>({...x,title:noticeTranslations[x.title.trim()]??x.title,body:noticeTranslations[x.body.trim()]??x.body})).sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
+  const announcements=cmsRows.filter(x=>x.content_type==="announcement").map(x=>({...x,title:englishDisplay(x.title??""),body:englishDisplay(x.body??"")})).sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
   return <InlinePageEditor pageKey="home" locale={locale} initialValues={inlineValues}>
     <SiteHeader locale={locale} active="home" />
     <main className="homepage">

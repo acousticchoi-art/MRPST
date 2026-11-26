@@ -54,7 +54,7 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
   const response=await fetch("/api/admin/data/website",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
   const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
   if(!response.ok)throw new Error(data.error||(englishUI?`Unable to load website content (HTTP ${response.status})`:locale==="my"?`ဝဘ်ဆိုက်အကြောင်းအရာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`홈페이지 콘텐츠 조회 실패 (HTTP ${response.status})`));
-  if(data.items?.error)throw new Error("홈페이지 콘텐츠를 불러오지 못했습니다: "+data.items.error);
+  if(data.items?.error)throw new Error((englishUI?"Unable to load website content: ":"홈페이지 콘텐츠를 불러오지 못했습니다: ")+data.items.error);
   const rows=(data.items?.data||[]) as Entry[];setItems(rows);
   const adminRow=rows.find(row=>row.content_type==="page"&&row.content_key==="admin-translations"&&row.locale==="my");
   try{setAdminTranslations(adminRow?.body?JSON.parse(adminRow.body):{});}catch{setAdminTranslations({});}
@@ -67,8 +67,8 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
  const translationFields=useMemo(()=>{
   const known=new Map<string,{key:string;label:string;hint:string}>(pageFields.map(field=>[field.key,{...field}]));
   const keys=Array.from(new Set([...pageFields.map(field=>field.key),...items.filter(item=>item.content_type==="page"&&item.content_key!=="admin-translations"&&!item.content_key.startsWith("inline-page-")).map(item=>item.content_key)]));
-  return keys.map(key=>known.get(key)||{key,label:key.replace(/[-_]/g," "),hint:"홈페이지에 등록된 추가 문구"});
- },[items]);
+  return keys.map(key=>known.get(key)||{key,label:key.replace(/[-_]/g," "),hint:englishUI?"Additional website content":"홈페이지에 등록된 추가 문구"});
+ },[items,englishUI]);
  async function saveTranslations(){
   if(!canManage){setError((englishUI?"You do not have permission to edit the website.":"홈페이지 변경 권한이 없습니다."));return;}
   if(!mutationsEnabled){setError((englishUI?"Website content changes are locked by the development safety setting.":"홈페이지 콘텐츠 변경은 개발 안전 잠금이 활성화되어 있습니다."));return;}

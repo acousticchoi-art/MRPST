@@ -20,7 +20,7 @@ export default function AdminActions({locale}:{locale:string}){
       router.replace(`/${locale}/login`);
       router.refresh();
     }catch(err){
-      setError(err instanceof Error?err.message:(locale==="en"?"Sign-out failed. Try again.":locale==="my"?"အကောင့်ထွက်ခြင်း မအောင်မြင်ပါ။ ထပ်မံကြိုးစားပါ။":"로그아웃에 실패했습니다. 다시 시도해 주세요."));
+      setError(locale!=="en"&&err instanceof Error?err.message:(locale==="en"?"Sign-out failed. Try again.":locale==="my"?"အကောင့်ထွက်ခြင်း မအောင်မြင်ပါ။ ထပ်မံကြိုးစားပါ။":"로그아웃에 실패했습니다. 다시 시도해 주세요."));
       setBusy(false);
     }
   }

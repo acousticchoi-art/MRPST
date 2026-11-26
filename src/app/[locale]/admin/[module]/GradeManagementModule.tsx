@@ -1,5 +1,6 @@
 "use client";
 import {englishDisplay} from "@/lib/english-display";
+import {allRows} from "@/lib/complete-rows";
 
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
@@ -53,21 +54,22 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
     db.from("academic_terms").select("id,term_code,name,academic_year,status").order("academic_year",{ascending:false}).order("term_code",{ascending:false}),
     db.from("students").select("id,student_number,full_name,program_code,cohort,student_status").order("full_name"),
     db.from("academic_courses").select("id,course_code,title,title_my,department_id,level,is_active").order("course_code"),
-    db.from("academic_grades").select("id,student_id,course_id,term_id,score,grade,remarks,updated_at,entered_by").order("updated_at",{ascending:false}),
-    db.from("academic_enrollments").select("student_id,course_id,term_id,enrollment_status")
+    allRows((start,end)=>db.from("academic_grades").select("id,student_id,course_id,term_id,score,grade,remarks,updated_at,entered_by",{count:"exact"}).order("updated_at",{ascending:false}).order("id").range(start,end)),
+    allRows((start,end)=>db.from("academic_enrollments").select("id,student_id,course_id,term_id,enrollment_status",{count:"exact"}).order("id").range(start,end))
    ]);
-   const errors=[d.error,t.error,s.error,c.error,g.error,e.error].filter(Boolean).map((x:any)=>x.message);
+   const errors=[d.error,t.error,s.error,c.error,g.error,e.error].filter(Boolean).map((x:any)=>typeof x==="string"?x:x.message);
    if(errors.length)throw new Error(errors.join(" · "));
    const nextTerms=(t.data??[]) as Term[];
    const nextDepartments=(d.data??[]) as Department[];
    setDepartments(nextDepartments);setTerms(nextTerms);setStudents((s.data??[]) as Student[]);setCourses((c.data??[]) as Course[]);setGrades((g.data??[]) as Grade[]);setEnrollments((e.data??[]) as Enrollment[]);
-   if(!termId&&nextTerms.length){const nextId=(nextTerms.find(x=>x.status==="active")??nextTerms[0]).id;setTermId(nextId);onTermChange?.(nextId);}
+
    
   }catch(err:any){setError(err?.message||"성적 데이터를 불러오지 못했습니다.");}
   finally{setLoading(false);}
- },[db,termId,departmentId,onTermChange]);
+ },[db,englishUI]);
 
  useEffect(()=>{void load();},[load]);
+ useEffect(()=>{if(!termId&&terms.length){const nextId=(terms.find(x=>x.status==="active")??terms[0]).id;setTermId(nextId);onTermChange?.(nextId);}},[termId,terms,onTermChange]);
 
  const displayCourse=(c:Course)=>locale==="my"?(c.title_my||c.title):c.title;
  const department=departments.find(x=>x.id===departmentId);

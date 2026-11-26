@@ -1,6 +1,7 @@
 import {NextRequest,NextResponse} from "next/server";
 import {getServerModuleAccess} from "@/lib/auth/server-access";
 import type {ModuleKey} from "@/lib/auth/permissions";
+import {allRows} from "@/lib/complete-rows";
 
 export const dynamic="force-dynamic";
 export const revalidate=0;
@@ -9,27 +10,6 @@ type QueryResult={data:any;error:string|null};
 async function result(query:PromiseLike<{data:any;error:any}>):Promise<QueryResult>{
   const {data,error}=await query;
   return {data:data??null,error:error?.message??null};
-}
-
-// Do not silently truncate totals or approvals at the PostgREST row limit.
-// Stable unique ordering and exact counts catch incomplete/changing reads.
-async function allRows(fetchPage:(start:number,end:number)=>PromiseLike<{data:any;error:any;count:number|null}>):Promise<QueryResult>{
-  const rows:any[]=[];
-  const ids=new Set<string>();
-  let expected:number|null=null;
-  const pageSize=250;
-  for(let start=0;;start+=pageSize){
-    const {data,error,count}=await fetchPage(start,start+pageSize-1);
-    if(error)return {data:null,error:error.message||"Data query failed."};
-    if(!Array.isArray(data)||count===null||count>10000||count<0|| (expected!==null&&count!==expected))return {data:null,error:"Incomplete or changed data. Please refresh."};
-    expected=count;
-    for(const row of data){
-      if(typeof row.id!=="string"||ids.has(row.id))return {data:null,error:"Duplicate or invalid record. Please refresh."};
-      ids.add(row.id);rows.push(row);
-    }
-    if(rows.length===expected)return {data:rows,error:null};
-    if(data.length!==pageSize||rows.length>expected)return {data:null,error:"Incomplete data. Please refresh."};
-  }
 }
 
 export async function GET(request:NextRequest,{params}:{params:Promise<{module:string}>}){
@@ -96,9 +76,9 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
         supabase.from("academic_terms").select("*").order("academic_year",{ascending:false}),
         supabase.from("academic_courses").select("*").order("course_code"),
         supabase.from("departments").select("id,code,name_en,name_my,name_ko,is_active").eq("is_active",true).order("code"),
-        supabase.from("students").select("id,student_number,full_name,student_status").order("full_name"),
-        supabase.from("academic_enrollments").select("*").order("created_at",{ascending:false}),
-        supabase.from("academic_grades").select("*").order("updated_at",{ascending:false}),
+        supabase.from("students").select("id,student_number,full_name,student_status,program,cohort").order("full_name"),
+        allRows((start,end)=>supabase.from("academic_enrollments").select("id,student_id,course_id,term_id,enrollment_status",{count:"exact"}).order("created_at",{ascending:false}).order("id").range(start,end)),
+        allRows((start,end)=>supabase.from("academic_grades").select("id,student_id,course_id,term_id,score,entered_by",{count:"exact"}).order("updated_at",{ascending:false}).order("id").range(start,end)),
         supabase.from("academic_course_syllabi").select("*").order("updated_at",{ascending:false}),
         supabase.from("academic_instructors").select("*").order("full_name"),
         supabase.from("academic_teaching_assignments").select("*").order("created_at",{ascending:false}),

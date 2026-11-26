@@ -2,7 +2,23 @@
 
 상태: 최초 구성 단계. 실제 데이터 백업 및 별도 프로젝트 복구 검증 전에는 복구 가능성을 보장하지 않는다.
 
-## 최초 설정 (학교 관리자의 신뢰할 수 있는 컴퓨터)
+## 기본 운영: GitHub Actions 클라우드 자동 백업
+
+Windows에 WSL이나 Docker를 설치하거나 PC를 켜 둘 필요가 없다. GitHub의 Ubuntu 실행 환경에서 백업을 실행한다. 수동 로컬 백업은 별도 사본이 필요한 경우에만 사용한다.
+
+1. GitHub 저장소 Settings > Secrets and variables > Actions > Secrets에 아래 값을 관리자가 직접 등록한다. 채팅, 이슈, 커밋, 로그에 값 자체를 적지 않는다.
+   - MRPST_DB_URL: 운영 DB의 Session pooler (5432) 접속 URL, 비밀번호 포함. URL에 특수문자가 있으면 비밀번호를 URL 인코딩한다. 기존 비밀번호는 재설정하지 않는다.
+   - MRPST_AGE_RECIPIENT: 복구 키의 공개 recipient (age1...). 비밀 복구 키는 관리자의 오프라인 안전한 장소에 별도 보관한다. 복구 키가 없으면 실행하지 않는다.
+   - MRPST_DRIVE_FOLDER_ID: 관리자가 승인한 Drive 폴더 ID.
+   - MRPST_RCLONE_CONFIG: rclone의 [mrpst-drive] 설정 전체. Google OAuth로 승인하고 토큰을 비공개로 관리한다. 계정 인증에는 관리자 브라우저의 동의가 필요하다. 접근 범위가 넓을 수 있으므로 가능하면 전용 Google 계정을 이용한다. 인증 실패 시 자동으로 권한을 확장하지 않는다.
+2. Settings > Secrets and variables > Actions > Variables에 MRPST_BACKUP_ENABLED=true를 등록하면 실행 가능해진다. 초기값은 미등록(비활성)으로 유지한다.
+3. Actions > MRPST encrypted cloud backup > Run workflow (main)에서 최초 수동 실행한다. 결과가 성공이고 Drive에 암호화 파일이 생성되어 원격 바이트 검증까지 성공했는지 확인한다.
+4. 매일 미얀마 시간 20:17(UTC 13:47)에 예정된 스케줄이 실행된다. GitHub 스케줄은 지연/누락될 수 있고 공개 저장소는 60일간 활동이 없으면 자동 중단될 수 있으므로 실행 기록과 최근 Drive 파일을 주기적으로 확인한다. 실제 실행 시각은 보장되지 않는다.
+5. 복구 검증은 아래 격리된 환경에서 별도로 수행한다. 공개 저장소에 백업, 아티팩트, 평문 로그 또는 비밀번호를 공개하지 않는다. GitHub 임시 실행 환경의 사본은 작업 종료 시 삭제된다. Drive의 외부 편집자가 파일을 삭제할 수 있으므로 관리자가 승인한 별도의 비공개 저장소 또는 오프라인 사본을 유지해야 한다. 현재 독립 자동 사본은 구성하지 않았다.
+
+자동 백업에 대한 공식 자료: https://supabase.com/docs/guides/deployment/ci/backups 및 https://docs.github.com/en/actions/how-tos/manage-workflow-runs/disable-and-enable-workflows
+
+## 선택 사항: 수동 로컬 백업 최초 설정 (학교 관리자의 신뢰할 수 있는 컴퓨터)
 
 - Supabase CLI, Docker, PostgreSQL 17 이상 클라이언트, age 설치.
 - 학교 관리자가 `age-keygen -o mrpst-recovery.key`로 복구 키 생성. 키는 암호화된 오프라인 저장소에 보관하고 별도 보관본 확보. 비밀 키를 GitHub, Drive 백업 폴더, 채팅, 환경변수에 올리지 않는다. 생성된 공개 recipient만 백업에 사용한다.
@@ -22,7 +38,7 @@ bash scripts/mrpst-backup.sh
 
 연결 URL은 숨김 입력으로 입력한다. 스크립트는 공식 CLI의 역할, 스키마, 데이터 덤프와 마이그레이션 이력 및 별도 인증 트리거를 묶어 age로 암호화한다. 출력은 .tar.gz.age 하나뿐이다. 평문 임시 파일은 종료 시 제거한다(강제 종료 시 숨김 작업 폴더를 확인하고 삭제). 암호화 파일만 승인된 학교 Drive 폴더에 업로드한다. Drive 업로드 후 파일 크기와 SHA-256을 비교한다. 원본 데이터나 키를 GitHub에 커밋하지 않는다.
 
-권장 운영: 매일 업무 종료 후 백업, 주 1회 복구 가능성 확인, 최근 7일 및 월말 백업 3개월 유지. 보존 기간은 학교 내부 정책 확정 후 적용한다. 자동 삭제는 구현하지 않는다. 스케줄 자동 실행은 아직 구성하지 않았다. 아래 선택적 업로드 설정이 없으면 로컬 백업만 수행한다.
+권장 운영: 매일 업무 종료 후 백업, 주 1회 복구 가능성 확인, 최근 7일 및 월말 백업 3개월 유지. 보존 기간은 학교 내부 정책 확정 후 적용한다. 자동 삭제는 구현하지 않는다. 클라우드 스케줄은 위의 변수와 Secrets 등록 후에만 활성화된다. 수동 로컬 실행은 아래 선택적 업로드 설정이 없으면 로컬 백업만 수행한다.
 
 ## 선택적 Google Drive 업로드
 

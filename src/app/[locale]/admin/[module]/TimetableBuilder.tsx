@@ -133,7 +133,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
  };
  const copySchedule=async()=>{
   if(!db||!mutationsEnabled){setNotice((englishUI?"Academic data changes are available only after the development database is separated and the feature enabled.":"학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다."));return;}if(!copyFrom||copyFrom===termId)return;
-  if(!window.confirm(englishUI?"Copy the selected semester's timetable to the current semester? Existing entries will be retained, and copies with identical times to existing entries will be skipped.":locale==="my"?"ရွေးထားသော စာသင်ကာလ၏ အချိန်ဇယားကို လက်ရှိစာသင်ကာလသို့ ကူးယူမလား။ ရှိပြီးသား အချက်အလက်များကို ထိန်းသိမ်းထားပါမည်။":"선택한 학기의 시간표를 현재 학기로 복사할까요? 현재 학기에 이미 등록된 항목은 유지되고, 기존 항목과 시간이 완전히 같은 복사 항목은 건너뜁니다."))return;
+  if(!window.confirm(englishUI?"Copy the selected semester's timetable to the current semester? Existing entries will be retained, and copies with identical times to existing entries will be skipped.":locale==="my"?"ရွေးထားသော စာသင်ကာလ၏ အချိန်ဇယားကို လက်ရှိစာသင်ကာလသို့ ကူးယူမလား။ ရှိပြီးသား အချက်အလက်များကို ထိန်းသိမ်းထားပြီး ရှိပြီးသား အချက်အလက်နှင့် အချိန်အတိအကျ တူညီသော ကူးယူမည့် အချက်အလက်များကို ကျော်သွားပါမည်။":"선택한 학기의 시간표를 현재 학기로 복사할까요? 현재 학기에 이미 등록된 항목은 유지되고, 기존 항목과 시간이 완전히 같은 복사 항목은 건너뜁니다."))return;
   setSaving(true);setError("");
   try{
    const {data:{user},error:userError}=await db.auth.getUser();

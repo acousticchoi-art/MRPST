@@ -547,4 +547,10 @@ Object.assign(phrases,{
   "원본 기간: 2026-10-26~2026-10-27 / 95 Gasoline (180,000) - self": "Original period: 2026-10-26 to 2026-10-27 / 95 Gasoline (180,000) - self",
   "수리 내용 미기록": "Repair details not recorded"
 });
+Object.assign(phrases,{
+  "데이터 조회에 실패했습니다.": "Data query failed.",
+  "데이터가 일부 누락되었거나 변경되었습니다. 새로고침해 주세요.": "Incomplete or changed data. Please refresh.",
+  "중복되거나 올바르지 않은 기록이 있습니다. 새로고침해 주세요.": "Duplicate or invalid record. Please refresh.",
+  "데이터가 모두 조회되지 않았습니다. 새로고침해 주세요.": "Incomplete data. Please refresh."
+});
 export function englishDisplay(value:string):string {return phrases[value.trim().replace(/\\n/g,"\n")]??value;}

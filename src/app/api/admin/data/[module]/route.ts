@@ -41,6 +41,7 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
       return NextResponse.json({latest},{headers:{"Cache-Control":"no-store, max-age=0"}});
     }
     if(moduleKey==="finance"){
+      if(search.get("scope")!=="reports-only"){
       const keys=["funds","accounts","entries","donors","budgets","actuals","donations","students","awards","disbursements"] as const;
       const queries=[
         supabase.from("finance_funds").select("id,code,name_ko,name_en").eq("is_active",true).order("code"),
@@ -56,8 +57,9 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
       ];
       const values=await Promise.all(queries.map(result));
       keys.forEach((key,index)=>data[key]=values[index]);
+      }
       data.canApprove=roles.some(role=>["super_admin","administrator"].includes(role));
-      if(search.get("scope")==="reports"){
+      if(search.get("scope")==="reports"||search.get("scope")==="reports-only"){
         const reports=await Promise.all([
           result(supabase.from("finance_monthly_income_expense").select("*").gte("month",from).lte("month",to).order("month")),
           result(supabase.from("finance_fund_account_balances").select("*").order("fund_code").order("account_code")),

@@ -25,10 +25,11 @@ export default function AcademicsModule(){
  const [term,setTerm]=useState<any>(blankTerm),[course,setCourse]=useState<any>(blankCourse),[grade,setGrade]=useState<any>({student_id:"",course_id:"",term_id:"",score:"",grade:"",remarks:""}),[syllabus,setSyllabus]=useState<any>({course_id:"",term_id:"",instructor:"",objectives:"",learning_outcomes:"",teaching_methods:"",textbooks:"",assessment_methods:"",weekly_text:""});
  const load=useCallback(async()=>{setLoading(true);setError("");try{
  const response=await fetch("/api/admin/data/academics",{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
- const data=await response.json().catch(()=>({error:"서버 응답을 읽을 수 없습니다."}));
- if(!response.ok)throw new Error(data.error||(englishUI?`Unable to load academic data (HTTP ${response.status})`:locale==="my"?`ပညာရေးဒေတာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`학사 데이터 조회 실패 (HTTP ${response.status})`));
+ const invalidResponse=englishUI?"Invalid server response. Please try again.":locale==="my"?"ဆာဗာမှ အချက်အလက် မှန်ကန်စွာ မရရှိပါ။ ထပ်မံကြိုးစားပါ။":"서버 응답이 올바르지 않습니다. 다시 시도해 주세요.";
+ const data=await response.json().catch(()=>{throw new Error(invalidResponse);});
+ if(!response.ok)throw new Error(data?.error||(englishUI?`Unable to load academic data (HTTP ${response.status})`:locale==="my"?`ပညာရေးဒေတာကို မရယူနိုင်ပါ (HTTP ${response.status})`:`학사 데이터 조회 실패 (HTTP ${response.status})`));
  const keys=["terms","courses","departments","students","enrol","grades","syllabi","instructors","teachingAssignments","timetableEntries","timetableEvents"];
- const errors=keys.map(key=>data[key]?.error).filter(Boolean);if(errors.length)throw new Error(errors.join(" · "));
+ const errors=keys.map(key=>data?.[key]?.error).filter(Boolean);if(errors.length)throw new Error(errors.join(" · "));if(!keys.every(key=>Array.isArray(data?.[key]?.data)))throw new Error(invalidResponse);
  const values=keys.map(key=>data[key]?.data??[]);
  setCanManage(!!data.canManage);setTerms(values[0]);setCourses(values[1]);setDepartments(values[2]);setStudents(values[3]);setEnrol(values[4]);setGrades(values[5]);setSyllabi(values[6]);setInstructors(values[7]);setTeachingAssignments(values[8]);setTimetableEntries(values[9]);setTimetableEvents(values[10]);setSelectedTerm(current=>current||(values[0]?.[0]?.id??""));
  }catch(e:any){setError(e?.message||String(e)||"데이터를 불러오지 못했습니다.");}finally{setLoading(false);}},[]);

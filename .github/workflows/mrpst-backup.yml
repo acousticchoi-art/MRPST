@@ -1,0 +1,70 @@
+name: MRPST encrypted cloud backup
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/mrpst-backup.yml'
+      - 'scripts/mrpst-backup*.sh'
+  schedule:
+    # 20:17 Myanmar time (UTC+06:30).
+    - cron: '47 13 * * *'
+permissions:
+  contents: read
+concurrency:
+  group: mrpst-production-backup
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check backup script syntax
+        run: |
+          bash -n scripts/mrpst-backup.sh
+          bash -n scripts/mrpst-backup-upload.sh
+  backup:
+    needs: validate
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && vars.MRPST_BACKUP_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install backup tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y age rclone postgresql-client
+          npm install --prefix "$RUNNER_TEMP/mrpst-cli" --no-audit --no-fund supabase@2.122.1
+          "$RUNNER_TEMP/mrpst-cli/node_modules/.bin/supabase" --version
+          echo "$RUNNER_TEMP/mrpst-cli/node_modules/.bin" >> "$GITHUB_PATH"
+      - name: Backup and verify encrypted Drive copy
+        env:
+          MRPST_DB_URL: ${{ secrets.MRPST_DB_URL }}
+          MRPST_AGE_RECIPIENT: ${{ secrets.MRPST_AGE_RECIPIENT }}
+          MRPST_DRIVE_FOLDER_ID: ${{ secrets.MRPST_DRIVE_FOLDER_ID }}
+          MRPST_RCLONE_CONFIG: ${{ secrets.MRPST_RCLONE_CONFIG }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          : "${MRPST_DB_URL:?Configure MRPST_DB_URL}"
+          : "${MRPST_AGE_RECIPIENT:?Configure MRPST_AGE_RECIPIENT}"
+          : "${MRPST_DRIVE_FOLDER_ID:?Configure MRPST_DRIVE_FOLDER_ID}"
+          : "${MRPST_RCLONE_CONFIG:?Configure MRPST_RCLONE_CONFIG}"
+          export MRPST_BACKUP_DIR="$(mktemp -d "$RUNNER_TEMP/mrpst-backup.XXXXXXXX")"
+          export RCLONE_CONFIG="$MRPST_BACKUP_DIR/rclone.conf"
+          export MRPST_DRIVE_REMOTE=mrpst-drive
+          trap 'rm -rf -- "$MRPST_BACKUP_DIR"' EXIT
+          printf '%s\n' "$MRPST_RCLONE_CONFIG" > "$RCLONE_CONFIG"
+          unset MRPST_RCLONE_CONFIG
+          # Never print CLI output or secrets in this public repository's workflow logs.
+          if ! bash scripts/mrpst-backup.sh > "$MRPST_BACKUP_DIR/run.log" 2>&1; then
+            echo "::error::Backup or Drive verification failed. No plaintext or credentials are published. Check configuration privately."
+            exit 1
+          fi
+          echo "Encrypted backup uploaded and read-back verified."
+          echo "Encrypted Drive backup verified. Separate recovery test remains required." >> "$GITHUB_STEP_SUMMARY"

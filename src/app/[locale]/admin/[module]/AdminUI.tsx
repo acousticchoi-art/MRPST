@@ -9,7 +9,8 @@ export function AdminButton({ className = "", type = "button", ...props }: Admin
 }
 
 export function FormField({ label, children, full = false, className = "" }: {label:string;children:ReactNode;full?:boolean;className?:string}) {
-  return <label className={[full ? "full" : "", className].filter(Boolean).join(" ")}>{label}{children}</label>;
+  const englishUI=usePathname().startsWith("/en/");
+  return <label className={[full ? "full" : "", className].filter(Boolean).join(" ")}>{englishUI?englishDisplay(label):label}{children}</label>;
 }
 
 export type SearchSelectOption = { value:string; label:string; keywords?:string };

@@ -135,20 +135,20 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   const adminShell=(content:ReactNode)=>locale==="en"?content:locale==="my"?<InlineAdminEditor locale={locale}>{content}</InlineAdminEditor>:<InlinePageEditor pageKey="admin-dashboard" locale={locale} initialValues={dashboardInlineValues}>{content}</InlinePageEditor>;
   return <>{locale==="my"&&<AdminMyanmarTranslator locale={locale}/>} {adminShell(<div className="admin">
     <aside className="sidebar">
-      <Link href={`/${locale}/admin`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
+      <Link prefetch={false} href={`/${locale}/admin`} className="brand mobile-sidebar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link>
       <AdminMenuDetails>
         <summary>{lang==="ko"?"관리 메뉴":lang==="my"?"စီမံခန့်ခွဲမှု မီနူး":"Menu"}</summary>
         <nav className="sidebar-nav">
           
           <div className="side-label">WORKSPACE</div>
-          <Link className="side-link active" href={`/${locale}/admin`}>{t.dashboard}</Link>
-          {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([key,item])=><Link className="side-link" href={`/${locale}/admin/${key}`} key={key}>{(t as any)[key]?.[0]??item.title}</Link>)}</div>:null;})}
+          <Link prefetch={false} className="side-link active" href={`/${locale}/admin`}>{t.dashboard}</Link>
+          {moduleGroups.map(([group,keys])=>{const items=visibleInGroup(keys);return items.length>0?<div className="sidebar-group" key={group}><div className="side-label">{t.groups[group]}</div>{items.map(([key,item])=><Link prefetch={false} className="side-link" href={`/${locale}/admin/${key}`} key={key}>{(t as any)[key]?.[0]??item.title}</Link>)}</div>:null;})}
         </nav>
       </AdminMenuDetails>
       <div className="sidebar-mobile-tools"><div data-no-inline-edit data-no-translate><LanguageSwitcher locale={lang}/></div><Link href={`/${locale}`}>{t.view}</Link>{supabase&&<AdminActions locale={locale}/>}</div>
     </aside>
     <main className="admin-main">
-      <header className="topbar admin-desktop-topbar"><Link href={`/${locale}/admin`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">
+      <header className="topbar admin-desktop-topbar"><Link prefetch={false} href={`/${locale}/admin`} className="brand admin-topbar-brand"><span className="brand-logo"><img src="/mrpst-logo.png" alt="MRPST 공식 로고"/></span><span>MRPST<small>{t.admin}</small></span></Link><div className="admin-user">
         <div data-no-inline-edit data-no-translate><LanguageSwitcher locale={lang}/></div>
         
         <Link href={`/${locale}`}>{t.view}</Link>
@@ -163,11 +163,11 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
         </section>
         <div className="dashboard-columns">
           <section className="dashboard-panel dashboard-schedule">
-            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="en"?"Academic calendar":lang==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</span><h2>{lang==="en"?"Upcoming events":lang==="ko"?"다가오는 일정":"လာမည့် အစီအစဉ်များ"}</h2></div>{canAccessAcademics&&<Link href={`/${locale}/admin/academics`}>{lang==="en"?"Manage calendar →":lang==="ko"?"일정 관리 →":"စီမံခန့်ခွဲရန် →"}</Link>}</div>
+            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="en"?"Academic calendar":lang==="ko"?"학사 일정":"ပညာရေးပြက္ခဒိန်"}</span><h2>{lang==="en"?"Upcoming events":lang==="ko"?"다가오는 일정":"လာမည့် အစီအစဉ်များ"}</h2></div>{canAccessAcademics&&<Link prefetch={false} href={`/${locale}/admin/academics`}>{lang==="en"?"Manage calendar →":lang==="ko"?"일정 관리 →":"စီမံခန့်ခွဲရန် →"}</Link>}</div>
             {upcomingEvents.length? <div className="dashboard-event-list">{upcomingEvents.map((event:any)=><article key={event.id}><time>{event.start_date}{event.start_time?" · "+String(event.start_time).slice(0,5):""}</time><div><strong>{lang==="en"?englishDisplay(event.title):event.title}</strong>{event.location&&<small>{event.location}</small>}</div></article>)}</div>:<p className="dashboard-empty">{lang==="en"?"No upcoming events.":lang==="ko"?"예정된 일정이 없습니다.":"မှတ်ပုံတင်ထားသော အစီအစဉ် မရှိသေးပါ။"}</p>}
           </section>
           <section className="dashboard-panel dashboard-announcements">
-            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="en"?"MRPST NEWS":lang==="ko"?"MRPST NEWS":"MRPST NEWS"}</span><h2>{lang==="en"?"Recent announcements":lang==="ko"?"최근 공지사항":"နောက်ဆုံး ကြေညာချက်များ"}</h2></div>{canAccessWebsite&&<Link href={`/${locale}/admin/website`}>{lang==="en"?"Manage announcements →":lang==="ko"?"공지사항 관리 →":"စီမံခန့်ခွဲရန် →"}</Link>}</div>
+            <div className="dashboard-panel-head"><div><span className="eyebrow">{lang==="en"?"MRPST NEWS":lang==="ko"?"MRPST NEWS":"MRPST NEWS"}</span><h2>{lang==="en"?"Recent announcements":lang==="ko"?"최근 공지사항":"နောက်ဆုံး ကြေညာချက်များ"}</h2></div>{canAccessWebsite&&<Link prefetch={false} href={`/${locale}/admin/website`}>{lang==="en"?"Manage announcements →":lang==="ko"?"공지사항 관리 →":"စီမံခန့်ခွဲရန် →"}</Link>}</div>
             {recentAnnouncements.length?<div className="dashboard-announcement-list">{recentAnnouncements.map((item:any)=><article key={item.content_key}><div><strong>{lang==="en"?englishDisplay(item.title):item.title}</strong><p>{lang==="en"?englishDisplay(item.body??""):item.body}</p></div><span className={item.is_published?"published":"draft"}>{item.is_published?(lang==="en"?"Published":lang==="ko"?"게시":"Published"):(lang==="en"?"Draft":lang==="ko"?"임시저장":"Draft")}</span></article>)}</div>:<p className="dashboard-empty">{lang==="en"?"No announcements yet.":lang==="ko"?"등록된 공지사항이 없습니다.":"ကြေညာချက် မရှိသေးပါ။"}</p>}
           </section>
         </div>

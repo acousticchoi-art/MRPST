@@ -1,6 +1,10 @@
 name: MRPST encrypted cloud backup
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/mrpst-backup.yml'
+      - 'scripts/mrpst-backup*.sh'
   schedule:
     # 20:17 Myanmar time (UTC+06:30).
     - cron: '47 13 * * *'
@@ -10,8 +14,20 @@ concurrency:
   group: mrpst-production-backup
   cancel-in-progress: false
 jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check backup script syntax
+        run: |
+          bash -n scripts/mrpst-backup.sh
+          bash -n scripts/mrpst-backup-upload.sh
   backup:
-    if: github.ref == 'refs/heads/main' && vars.MRPST_BACKUP_ENABLED == 'true'
+    needs: validate
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && vars.MRPST_BACKUP_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -22,9 +38,9 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y age rclone postgresql-client
-          npm install --global supabase@2.122.1
-          supabase --version
-          bash -n scripts/mrpst-backup.sh scripts/mrpst-backup-upload.sh
+          npm install --prefix "$RUNNER_TEMP/mrpst-cli" --no-audit --no-fund supabase@2.122.1
+          "$RUNNER_TEMP/mrpst-cli/node_modules/.bin/supabase" --version
+          echo "$RUNNER_TEMP/mrpst-cli/node_modules/.bin" >> "$GITHUB_PATH"
       - name: Backup and verify encrypted Drive copy
         env:
           MRPST_DB_URL: ${{ secrets.MRPST_DB_URL }}

@@ -1,4 +1,6 @@
 "use client";
+import {englishDisplay} from "@/lib/english-display";
+
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 import {SearchSelect} from "./AdminUI";
@@ -137,7 +139,7 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
       if(registrationError)throw registrationError;
       if(!registered||registered.length!==missingRegistrations.length)throw new Error("성적에 필요한 수강 기록을 확인할 수 없습니다.");
     }
-    const {data:saved,error}=await db.from("academic_grades").upsert(changed,{onConflict:"student_id,course_id,term_id"}).select("student_id,course_id,term_id,score");if(error)throw error;if(!saved||saved.length!==changed.length||saved.some(row=>!changed.some(expected=>expected.student_id===row.student_id&&expected.course_id===row.course_id&&expected.term_id===row.term_id&&expected.score===row.score)))throw new Error("일부 성적 저장 결과를 확인할 수 없습니다.");setNotice(changed.length+"명의 성적을 저장했습니다.");await load();}
+    const {data:saved,error}=await db.from("academic_grades").upsert(changed,{onConflict:"student_id,course_id,term_id"}).select("student_id,course_id,term_id,score");if(error)throw error;if(!saved||saved.length!==changed.length||saved.some(row=>!changed.some(expected=>expected.student_id===row.student_id&&expected.course_id===row.course_id&&expected.term_id===row.term_id&&expected.score===row.score)))throw new Error("일부 성적 저장 결과를 확인할 수 없습니다.");setNotice(englishUI?`Saved grades for ${changed.length} students.`:changed.length+"명의 성적을 저장했습니다.");await load();}
   catch(err:any){setError(err?.message||"성적 저장에 실패했습니다.");}
   finally{setSaving(false);}
  };
@@ -177,7 +179,7 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
    <article><span>{(englishUI?"Scores entered":"점수 입력 완료")}</span><strong>{stats.entered}</strong></article>
    <article><span>{(englishUI?"Scores missing":"점수 미입력")}</span><strong>{stats.missing}</strong></article>
   </div>
-  {error&&<div className={styles.alertError}>{error}</div>}{notice&&<div className={styles.alertSuccess}>{notice}</div>}{!academicMutationsEnabled&&<div className={styles.alert}>{(englishUI?"Grade changes are locked in safety mode. Viewing and printing remain available.":"성적 변경 기능이 안전 모드로 잠겨 있습니다. 조회와 출력은 사용할 수 있습니다.")}</div>}
+  {error&&<div className={styles.alertError}>{englishUI?englishDisplay(error):error}</div>}{notice&&<div className={styles.alertSuccess}>{englishUI?englishDisplay(notice):notice}</div>}{!academicMutationsEnabled&&<div className={styles.alert}>{(englishUI?"Grade changes are locked in safety mode. Viewing and printing remain available.":"성적 변경 기능이 안전 모드로 잠겨 있습니다. 조회와 출력은 사용할 수 있습니다.")}</div>}
   {!db&&<div className={styles.alert}>{(englishUI?"Supabase connection configuration is required.":"Supabase 연결 설정이 필요합니다.")}</div>}
   {!canManage&&db&&<div className={styles.alert}>{(englishUI?"Grade management permission could not be verified. Sign in as a Super Administrator or administrative officer.":"성적관리 권한이 확인되지 않았습니다. Super Admin 또는 행정 담당자 계정으로 로그인해 주세요.")}</div>}
   <div className={styles.tabs} aria-label={(englishUI?"Select grading task":"성적 업무 선택")}><button type="button" className={tab==="entry"?styles.activeTab:""} onClick={()=>setTab("entry")}>{(englishUI?"Enter scores by course":"과목별 점수 입력")}</button><button type="button" className={tab==="lookup"?styles.activeTab:""} onClick={()=>setTab("lookup")}>{(englishUI?"View grades by student":"학생별 성적 확인")}</button></div>

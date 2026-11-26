@@ -1,3 +1,4 @@
+import {englishDisplay} from "@/lib/english-display";
 import Link from "next/link";
 import {redirect} from "next/navigation";
 import {getServerModuleAccess} from "@/lib/auth/server-access";
@@ -28,7 +29,7 @@ export default async function TimetablePrintPage({params,searchParams}:{params:P
   time:"TIME / DAY",event:"공통 일정",self:"자율학습",term:"학기",dept:"학과"
  };
  const access=await getServerModuleAccess("academics");
- if(!access.ok){if(access.status===401)redirect(`/${locale}/login`);return <main className="lecture-print-error">{access.error}</main>;}
+ if(!access.ok){if(access.status===401)redirect(`/${locale}/login`);return <main className="lecture-print-error">{lang==="en"?englishDisplay(access.error):access.error}</main>;}
  const validId=(value:unknown)=>typeof value==="string"&&/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(value);
  if(!validId(termId)||!validId(departmentId))return <main className="lecture-print-error"><Link href={back}>{copy.back}</Link><p>{copy.invalid}</p></main>;
  const db=access.supabase;

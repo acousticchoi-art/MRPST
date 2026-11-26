@@ -1,4 +1,6 @@
 "use client";
+import {englishDisplay} from "@/lib/english-display";
+
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 import {SearchSelect} from "./AdminUI";
@@ -180,7 +182,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
   <div className="timetable-filters"><label>{(englishUI?"Semester":"학기")}<select value={termId} onChange={e=>setTermId(e.target.value)}>{terms.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><label>{(englishUI?"Department":"학과")}<SearchSelect value={departmentId} placeholder={(englishUI?"Search departments":"학과 검색")} searchPlaceholder={(englishUI?"Search by department name or code":"학과명 또는 코드 검색")} options={departments.map(x=>({value:x.id,label:englishUI?(x.name_en||x.name_ko||x.code):locale==="my"?(x.name_my||x.name_en||x.name_ko||x.code):(x.name_ko||x.name_en||x.code),keywords:`${x.code} ${x.name_ko||""} ${x.name_en||""} ${x.name_my||""}`}))} onChange={setDepartmentId}/></label></div>
   {canManage&&mutationsEnabled&&<div className="timetable-copy-row"><label>{(englishUI?"Previous semester to copy":"복사할 이전 학기")}<select value={copyFrom} onChange={e=>setCopyFrom(e.target.value)}><option value="">{(englishUI?"Select semester":"학기 선택")}</option>{terms.filter(x=>x.id!==termId).map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><button className="timetable-secondary" disabled={!copyFrom||saving} onClick={()=>void copySchedule()}>{(englishUI?"Copy selected semester's timetable":"선택 학기 시간표 복사")}</button></div>}
   {!mutationsEnabled&&<div className="academics-alert">{(englishUI?"Academic data changes are locked until the development database is separated and safety verified. Currently read-only.":"학사 데이터 변경 기능은 개발 DB 분리 및 안전성 검증 전까지 잠겨 있습니다. 현재는 조회만 가능합니다.")}</div>}
-{error&&<div className="academics-alert error">{error}</div>}{notice&&<div className="academics-alert">{notice}</div>}
+{error&&<div className="academics-alert error">{englishUI?englishDisplay(error):error}</div>}{notice&&<div className="academics-alert">{englishUI?englishDisplay(notice):notice}</div>}
   <div className="timetable-paper">
    <header className="timetable-paper-title"><h1>MRPST LECTURE SCHEDULE ({selectedDepartment?.code==="ECE"?"E.C.E":"Theology"})</h1><strong>{selectedTerm?.name||(englishUI?"Select a semester":"학기를 선택해 주세요")}</strong><span>{selectedDepartment?.name_en||""}</span></header>
    {loading?<p className="academics-empty">{(englishUI?"Loading timetable.":"시간표를 불러오는 중입니다.")}</p>:<div className="timetable-scroll"><table className="timetable-grid"><thead><tr><th>TIME / DAY</th>{days.map(d=><th key={d.value}>{d.label}</th>)}</tr></thead><tbody>
@@ -207,6 +209,6 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
     <label>{(englishUI?"Classroom":"강의실")}<input value={form.room} onChange={e=>setForm({...form,room:e.target.value})}/></label>
    </>}
    <label className="full">{(englishUI?"Notes":"비고")}<input value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}/></label>
-  </div>{error&&<div className="academics-alert error">{error}</div>}<div className="academics-modal-actions"><button onClick={()=>setModal(false)}>{(englishUI?"Cancel":"취소")}</button><button className="academics-primary" disabled={saving||!form.start_time||!form.end_time||form.end_time<=form.start_time||(editingType==="course"&&(!form.course_id||!form.class_group.trim()))||(editingType==="event"&&!form.title.trim())} onClick={()=>void save()}>{saving?"저장 중…":"저장"}</button></div></section></div>}
+  </div>{error&&<div className="academics-alert error">{englishUI?englishDisplay(error):error}</div>}<div className="academics-modal-actions"><button onClick={()=>setModal(false)}>{(englishUI?"Cancel":"취소")}</button><button className="academics-primary" disabled={saving||!form.start_time||!form.end_time||form.end_time<=form.start_time||(editingType==="course"&&(!form.course_id||!form.class_group.trim()))||(editingType==="event"&&!form.title.trim())} onClick={()=>void save()}>{saving?"저장 중…":"저장"}</button></div></section></div>}
  </div>;
 }

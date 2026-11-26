@@ -133,8 +133,8 @@ export default function WebsiteModule({canManage}:{canManage:boolean}){
    <article><span>{(englishUI?"Unpublished":"비공개")}</span><strong>{notices.filter(x=>!x.is_published).length}</strong><small>{(englishUI?"Draft":"임시 보관")}</small></article>
   </div>
   <div className="website-workflow"><article><b>1</b><div><strong>{(englishUI?"Write announcement":"공지 작성")}</strong><span>{(englishUI?"Register announcements or change their publication status first.":"먼저 공지사항을 등록하거나 게시 상태를 바꿉니다.")}</span></div></article><article><b>2</b><div><strong>{(englishUI?"Manage website copy":"문구 관리")}</strong><span>{(englishUI?"Edit Korean and Myanmar copy on one screen.":"한국어와 미얀마어 문구를 한 화면에서 수정합니다.")}</span></div></article><article><b>3</b><div><strong>{(englishUI?"View website":"홈페이지 확인")}</strong><span>{(englishUI?"Check the public website in the preview.":"미리보기에서 실제 공개 화면을 확인합니다.")}</span></div></article></div>
-  {error&&<div className="website-alert error" role="alert">{error}</div>}
-  {notice&&<div className="website-alert success" role="status">{notice}</div>}
+  {error&&<div className="website-alert error" role="alert">{englishUI?englishDisplay(error):error}</div>}
+  {notice&&<div className="website-alert success" role="status">{englishUI?englishDisplay(notice):notice}</div>}
   <nav className="website-tabs website-tabs-v2" aria-label={(englishUI?"Website content types":"홈페이지 콘텐츠 종류")}>
    <button className={tab==="notices"?"active":""} onClick={()=>setTab("notices")}><span>01</span>{(englishUI?" Announcements":" 공지사항")}</button>
    <button className={tab==="translation"?"active":""} onClick={()=>setTab("translation")}><span>02</span>{(englishUI?" Website copy":" 홈페이지 문구")}</button>

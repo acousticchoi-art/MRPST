@@ -3026,7 +3026,7 @@ const EN:Record<string,string>={
   "학생 관리 메뉴": "Student management menu",
   "미상": "Unknown",
   "명 ·": "students ·",
-  "원": "MMK",
+  "원": "KRW",
   "수정 후 결재 요청": "Edit and request approval",
   "수정 후 승인 요청": "Edit and request approval",
   "임시 전표 수정": "Edit draft voucher",

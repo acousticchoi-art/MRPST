@@ -350,3 +350,30 @@
  html body [lang="my"] .admin > .sidebar > .admin-menu-details > summary::after{content:"မီနူးဖွင့်ရန်  ▾"!important;}
  html body [lang="my"] .admin > .sidebar > .admin-menu-details[open] > summary::after{content:"မီနူးပိတ်ရန်  ▴"!important;}
 }
+
+
+/* Student portal: contain long translated labels and keep grades readable. */
+.student-portal .module-page-content,
+.student-portal .student-section,
+.student-portal .student-summary>div,
+.student-portal .student-schedule>article{min-width:0;max-width:100%;box-sizing:border-box}
+.student-portal .module-page-content h1,
+.student-portal .module-page-content>p,
+.student-portal .student-summary>div,
+.student-portal .student-schedule>article{overflow-wrap:anywhere}
+.student-portal .module-page-tools{min-width:0;flex-wrap:wrap}
+.student-portal .module-page-tools>span{min-width:0;white-space:normal;overflow-wrap:anywhere}
+.student-portal .student-table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.student-portal .student-table td:nth-child(3){white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;min-width:150px}
+.student-portal .signout-error{display:block;max-width:240px;white-space:normal;overflow-wrap:anywhere;color:#a33b2d;font-size:12px}
+@media screen and (max-width:600px){
+  .student-portal .module-page-tools{flex:1 1 auto;width:auto;max-width:100%;justify-content:flex-end}
+  .student-portal .student-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .student-portal .student-summary>div,.student-portal .student-schedule>article{padding:12px}
+  .student-portal .student-summary strong{font-size:15px}
+  .student-portal .student-table{min-width:540px}
+  .student-portal .top-action,.student-portal .language-trigger{min-height:40px}
+  .login-wrap{padding:16px}
+  .login-card{box-sizing:border-box;min-width:0;max-width:100%}
+  .login-card .login-form input{font-size:16px;min-width:0;max-width:100%;box-sizing:border-box}
+}

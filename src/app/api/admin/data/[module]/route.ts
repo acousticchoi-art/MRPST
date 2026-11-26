@@ -9,7 +9,7 @@ export const revalidate=0;
 type QueryResult={data:any;error:string|null};
 async function result(query:PromiseLike<{data:any;error:any}>):Promise<QueryResult>{
   const {data,error}=await query;
-  return {data:data??null,error:error?.message??null};
+  return {data:data??null,error:typeof error==="string"?error:error?.message??null};
 }
 
 export async function GET(request:NextRequest,{params}:{params:Promise<{module:string}>}){

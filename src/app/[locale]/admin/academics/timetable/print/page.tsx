@@ -21,7 +21,7 @@ export default async function TimetablePrintPage({params,searchParams}:{params:P
   back:"ပညာရေးစီမံခန့်ခွဲမှုသို့ ပြန်သွားရန်",print:"ပုံနှိပ်ရန် / PDF သိမ်းရန်",title:"သင်တန်းအချိန်ဇယား",
   empty:"ရွေးချယ်ထားသော စာသင်ကာလနှင့် ဌာနအတွက် အချိန်ဇယား မရှိပါ။",
   invalid:"စာသင်ကာလနှင့် ဌာနကို ဦးစွာ ရွေးချယ်ပါ။",fail:"အချိန်ဇယားကို ဖတ်၍မရပါ။",
-  time:"TIME / DAY",event:"အစီအစဉ်",self:"သီးသန့်လေ့လာချိန်",term:"စာသင်ကာလ",dept:"ဌာန"
+  time:"အချိန် / နေ့ရက်",event:"အစီအစဉ်",self:"သီးသန့်လေ့လာချိန်",term:"စာသင်ကာလ",dept:"ဌာန"
  }:{
   back:"학사 관리로 돌아가기",print:"인쇄 / PDF 저장",title:"강의 시간표",
   empty:"선택한 학기와 학과에 등록된 시간표가 없습니다.",
@@ -59,9 +59,9 @@ export default async function TimetablePrintPage({params,searchParams}:{params:P
   <nav className="lecture-print-toolbar"><Link href={back}>{copy.back}</Link><strong>{copy.title}</strong>{!error&&term.data&&department.data&&<PrintActions label={copy.print}/>}</nav>
   {error||!term.data||!department.data?<section className="lecture-print-error">{copy.fail}</section>:
   <article className="lecture-print-sheet" data-print-lang={lang}>
-   <header><span>MRPST · ACADEMIC TIMETABLE</span><h1>{copy.title}</h1><div><strong>{copy.term}: {term.data.name}</strong><strong>{copy.dept}: {departmentName}</strong></div></header>
+   <header><span>MRPST · {lang==="my"?"သင်တန်းအချိန်ဇယား":"ACADEMIC TIMETABLE"}</span><h1>{copy.title}</h1><div><strong>{copy.term}: {term.data.name}</strong><strong>{copy.dept}: {departmentName}</strong></div></header>
    {slots.length===0?<p className="lecture-print-empty">{copy.empty}</p>:
-   <table className="lecture-print-grid"><thead><tr><th scope="col">{copy.time}</th>{weekdays.map(day=><th key={day.day} scope="col">{day.label}</th>)}</tr></thead>
+   <table className="lecture-print-grid"><thead><tr><th scope="col">{copy.time}</th>{weekdays.map(day=><th key={day.day} scope="col">{lang==="my"?["တနင်္လာ","အင်္ဂါ","ဗုဒ္ဓဟူး","ကြာသပတေး","သောကြာ","စနေ"][day.day-1]:day.label}</th>)}</tr></thead>
     <tbody>{slots.map(slot=>{
       const [start,end]=slot.split("|");
       return <tr key={slot}><th scope="row">{start}<span>–</span>{end}</th>{weekdays.map(day=>{

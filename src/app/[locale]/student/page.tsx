@@ -3,9 +3,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import StudentSignOut from "./StudentSignOut";
-import StudentRecords, {type Grade,type Timetable} from "./StudentRecords";
+import StudentRecords, {type Grade,type Timetable,type Loan} from "./StudentRecords";
 
-type PortalData = { student: { student_number: string; full_name: string; program: string | null; current_semester: number | null; admission_year: number | null; student_status: string }; grades: Grade[]; timetable: Timetable[] };
+type PortalData = { student: { student_number: string; full_name: string; program: string | null; current_semester: number | null; admission_year: number | null; student_status: string }; grades: Grade[]; timetable: Timetable[]; loans?: Loan[]; library_linked?: boolean };
 
 export default async function StudentPortal({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -24,6 +24,10 @@ export default async function StudentPortal({ params }: { params: Promise<{ loca
   const { data, error } = await supabase.rpc("mrpst_student_portal_data");
   if (error || !data?.student) redirect(`/${locale}/student-login`);
   const portal = data as PortalData;
+  const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
+  const datePart=(type:string)=>parts.find(part=>part.type===type)?.value??"";
+  const today=datePart("year")+"-"+datePart("month")+"-"+datePart("day");
+  const weekday=new Date(today+"T00:00:00Z").getUTCDay()||7;
 
   return <main className="module-page student-portal">
     <header className="module-page-top"><Link href={`/${locale}`}>MRPST</Link><div className="module-page-tools"><span>{portal.student.full_name} · {t.title}</span><LanguageSwitcher locale={locale==="en"?"en":my?"my":"ko"}/><StudentSignOut locale={locale} /></div></header>
@@ -35,7 +39,7 @@ export default async function StudentPortal({ params }: { params: Promise<{ loca
         <div><span>{t.admission}</span><strong>{portal.student.admission_year ?? "—"}</strong></div>
         <div><span>{t.status}</span><strong>{statusLabels[portal.student.student_status]??portal.student.student_status}</strong></div>
       </div>
-      <StudentRecords locale={locale} labels={t} days={days} grades={portal.grades} timetable={portal.timetable}/>
+      <StudentRecords locale={locale} labels={t} days={days} grades={portal.grades} timetable={portal.timetable} loans={portal.loans} libraryLinked={portal.library_linked} today={today} weekday={weekday}/>
     </section>
   </main>;
 }

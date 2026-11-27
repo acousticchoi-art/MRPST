@@ -155,6 +155,23 @@ Deno.serve(async (req: Request) => {
       if (requestedRole === "administrator" && !isSuperAdmin) {
         return json({ error: "관리자 역할은 최고 관리자만 부여할 수 있습니다." }, 403);
       }
+      const rolePages: Record<string,string[]> = {
+        administrator:["finance","students","academics","facilities","library","meetings","website","administration"],
+        finance_officer:["finance"],academic_officer:["students","academics","meetings"],student_officer:["students"],
+        librarian:["library"],facility_manager:["facilities"],faculty:["academics","meetings"],staff:["meetings"]
+      };
+      const defaultPages = rolePages[requestedRole] || [];
+      const pageOptions = rolePages.administrator.filter(key=>key!=="administration"||requestedRole==="administrator");
+      const requestedPages:unknown=body.page_keys;
+      if(requestedPages!==undefined&&(!Array.isArray(requestedPages)||requestedPages.some(key=>typeof key!=="string"||!pageOptions.includes(key))))return json({error:"관리 페이지 선택이 올바르지 않습니다."},400);
+      const delegable = isSuperAdmin ? pageOptions : (await Promise.all(pageOptions.map(async key=>{
+        const {data,error}=await admin.rpc("mrpst_can_manage_module",{target_user:caller.id,target_module:key});
+        if(error)throw new Error("페이지 권한을 확인하지 못했습니다.");
+        return data===true?key:null;
+      }))).filter((key):key is string=>key!==null);
+      const selectedPages = new Set<string>(Array.isArray(requestedPages)?requestedPages:defaultPages.filter(key=>delegable.includes(key)));
+      if([...selectedPages].some(key=>!delegable.includes(key)))return json({error:"본인에게 허용되지 않은 페이지 권한은 부여할 수 없습니다."},403);
+      const pageOverrides=pageOptions.filter(key=>selectedPages.has(key)!==defaultPages.includes(key));
       if (departmentId) {
         const { data: department } = await admin.from("departments").select("id").eq("id", departmentId).eq("is_active", true).maybeSingle();
         if (!department) return json({ error: "선택한 부서가 없거나 비활성 상태입니다." }, 400);
@@ -173,7 +190,20 @@ Deno.serve(async (req: Request) => {
         await admin.auth.admin.deleteUser(userId);
         return json({ error: roleError.message }, 400);
       }
-      const { error: auditError } = await admin.from("admin_audit_log").insert({ actor_id: caller.id, entity_type: "user_role", entity_id: userId, action: "insert", details: { event: "account_created", email, full_name: fullName, role: requestedRole, department_id: departmentId } });
+      if(pageOverrides.length){
+        const {error:permissionWriteError}=await admin.from("user_module_permissions").upsert(pageOverrides.map(module_key=>({
+          user_id:userId,module_key,can_view:selectedPages.has(module_key),
+          can_manage:selectedPages.has(module_key)&&requestedRole==="administrator"&&module_key!=="administration",
+          assigned_by:caller.id,updated_at:new Date().toISOString()
+        })),{onConflict:"user_id,module_key"});
+        if(permissionWriteError){
+          await admin.from("user_roles").delete().eq("user_id",userId);
+          await admin.from("user_profiles").delete().eq("user_id",userId);
+          const {error:cleanupError}=await admin.auth.admin.deleteUser(userId);
+          return json({error:cleanupError?"페이지 권한 저장에 실패했습니다. 계정 정리 상태를 확인해 주세요.":"페이지 권한을 저장하지 못해 계정 생성을 취소했습니다."},500);
+        }
+      }
+      const { error: auditError } = await admin.from("admin_audit_log").insert({ actor_id: caller.id, entity_type: "user_role", entity_id: userId, action: "insert", details: { event: "account_created", email, full_name: fullName, role: requestedRole, department_id: departmentId, page_keys:[...selectedPages] } });
       return json({ user_id: userId, audit_logged: !auditError, audit_warning: auditError ? "계정은 생성되었지만 변경 이력 기록에 실패했습니다." : undefined });
     }
     if (body.action === "update_password") {

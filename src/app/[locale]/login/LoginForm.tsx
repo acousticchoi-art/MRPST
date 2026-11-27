@@ -3,6 +3,7 @@ import LanguageSwitcher from "../LanguageSwitcher";
 import {useState,type FormEvent} from "react";
 import {useRouter} from "next/navigation";
 import Link from "next/link";
+import {MODULES,canAccessModule,type ModuleKey,type MrpstRole} from "@/lib/auth/permissions";
 import { authFailure, loginFeedback } from "@/lib/auth/login-feedback";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 export default function LoginForm({locale}:{locale:string}){
@@ -25,16 +26,17 @@ export default function LoginForm({locale}:{locale:string}){
         return;
       }
 
-      const [{ data: roles, error: roleError }, { data: profile, error: profileError }] = await Promise.all([
+      const [{ data: roles, error: roleError }, { data: profile, error: profileError }, { data: permissions, error: permissionError }] = await Promise.all([
         supabase.from("user_roles").select("role").eq("user_id", data.user.id),
         supabase.from("user_profiles").select("is_active").eq("user_id", data.user.id).maybeSingle(),
+        supabase.from("user_module_permissions").select("module_key,can_view").eq("user_id",data.user.id),
       ]);
       let reason = "";
-      if (roleError || profileError) reason = loginFeedback("access", locale);
+      if (roleError || profileError || permissionError) reason = loginFeedback("access", locale);
       else if (!profile) reason = loginFeedback("noProfile", locale);
       else if (profile.is_active !== true) reason = loginFeedback("inactive", locale);
       else if (!roles?.length) reason = loginFeedback("noRole", locale);
-      else if (!roles.some((row) => row.role !== "student")) reason = t.studentOnly;
+      else if (!roles.some(row=>row.role!=="student")&&!Object.keys(MODULES).some(key=>canAccessModule(roles.map(row=>row.role as MrpstRole),key as ModuleKey,permissions??[]))) reason = t.studentOnly;
       if (reason) {
         setError(reason);
         await supabase.auth.signOut({ scope: "local" });

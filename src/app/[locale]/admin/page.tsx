@@ -96,10 +96,10 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   const canAccessAcademics=visible.some(([key])=>key==="academics");
   const canAccessWebsite=visible.some(([key])=>key==="website");
   const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
-  const weekStartDate=new Date(today+"T12:00:00");
-  weekStartDate.setDate(weekStartDate.getDate()-(weekStartDate.getDay()+6)%7);
+  const weekStartDate=new Date(today+"T12:00:00Z");
+  weekStartDate.setUTCDate(weekStartDate.getUTCDate()-weekStartDate.getUTCDay());
   const weekEndDate=new Date(weekStartDate);
-  weekEndDate.setDate(weekEndDate.getDate()+6);
+  weekEndDate.setUTCDate(weekEndDate.getUTCDate()+6);
   const dateFormat=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"});
   const weekStart=dateFormat.format(weekStartDate);
   const weekEnd=dateFormat.format(weekEndDate);

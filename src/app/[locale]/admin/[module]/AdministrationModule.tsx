@@ -22,7 +22,8 @@ const pageOptions=[
  {key:"facilities",title:"시설 관리",description:"건물, 비품, 차량 및 유지보수"},
  {key:"library",title:"도서관 관리",description:"도서 목록, 대출 및 반납"},
  {key:"meetings",title:"회의 자료",description:"교수회 및 각종 회의 자료"},
- {key:"website",title:"홈페이지 관리",description:"학교 소개, 공지 및 홈페이지 콘텐츠"}
+ {key:"website",title:"홈페이지 관리",description:"학교 소개, 공지 및 홈페이지 콘텐츠"},
+ {key:"administration",title:"계정·권한 관리",description:"일반 계정 관리"}
 ] as const;
 const manageRolesByPage:Record<string,string[]>={
  finance:["finance_officer"],students:["student_officer","academic_officer"],academics:["academic_officer"],
@@ -104,7 +105,7 @@ export default function AdministrationModule({isSuperAdmin,callerId}:{isSuperAdm
   setSelectedId(p.user_id);setFullName(p.full_name||"");setPreferredLocale(p.preferred_locale==="en"?"en":p.preferred_locale==="my"?"my":"ko");setRole("staff");setDepId("");setNewPassword("");setNotice("");setError("");
   const isSuperAdmin=p.roles.some(userRole=>userRole.role==="super_admin");
   const isAdministrator=p.roles.some(userRole=>userRole.role==="administrator");
-  setSelectedPageKeys(isSuperAdmin||isAdministrator?pageOptions.map(option=>option.key):pageOptions.filter(option=>{const override=p.permissions.find(permission=>permission.module_key===option.key);return override?override.can_view:p.roles.some(userRole=>MODULES[option.key].roles.includes(userRole.role as MrpstRole));}).map(option=>option.key));
+  setSelectedPageKeys(pageOptions.filter(option=>{if(isSuperAdmin)return true;if(option.key==="administration"&&!isAdministrator)return false;const override=p.permissions.find(permission=>permission.module_key===option.key);return override?override.can_view:p.roles.some(userRole=>MODULES[option.key].roles.includes(userRole.role as MrpstRole));}).map(option=>option.key));
  }
  const actorName=(id:string|null)=>id?users.find(u=>u.user_id===id)?.full_name||(englishUI?"Unknown user":"알 수 없는 사용자"):(englishUI?"System operation · actor unknown":"시스템 작업 · 실행자 미확인");
  const auditLabel=(x:any)=>{const b=x.details?.before||{},a=x.details?.after||{};if(x.entity_type==="user_profile")return users.find(u=>u.user_id===x.entity_id)?.full_name||a.full_name||b.full_name||x.details?.full_name||(englishUI?"Member":"회원");if(x.entity_type==="user_role"){const uid=a.user_id||b.user_id||x.details?.user_id||((x.details?.event==="account_created")?x.entity_id:null);return users.find(u=>u.user_id===uid)?.full_name||x.details?.full_name||(englishUI?"Permission subject":"권한 대상");}if(x.entity_type==="department")return depName(deps.find(d=>d.id===x.entity_id))||(locale==="en"?(a.name_en||a.name_ko):locale==="my"?(a.name_my||a.name_en||a.name_ko):(a.name_ko||a.name_en))||(englishUI?"Department":"부서");return x.entity_id||"—";};
@@ -148,11 +149,12 @@ export default function AdministrationModule({isSuperAdmin,callerId}:{isSuperAdm
  };
  const toggle=(p:P)=>{const desired=!p.is_active;if(!window.confirm(locale==="my"?(desired?"ဤအကောင့်ကို ပြန်လည်အသုံးပြုခွင့်ပေးမလား။":"ဤအကောင့်ကို ပိတ်ထားမလား။ အသုံးပြုသူ၏ ဝင်ရောက်ခွင့်ကို ရပ်ဆိုင်းပါမည်။"):(desired?(window.location.pathname.startsWith("/en/")?"Reactivate this account?":"이 계정을 다시 활성화할까요?"):(window.location.pathname.startsWith("/en/")?"Deactivate this account? The user will no longer be able to sign in or use the service.":"이 계정을 비활성화할까요? 사용자의 로그인과 서비스 이용이 중지됩니다."))))return;void run(async()=>{const {error}=await db!.rpc("mrpst_set_user_active",{target_user:p.user_id,make_active:desired});if(error)throw error;const {data:verify,error:verifyError}=await db!.from("user_profiles").select("is_active").eq("user_id",p.user_id).maybeSingle();if(verifyError)throw verifyError;if(!verify||verify.is_active!==desired)throw new Error("계정 상태 변경 결과를 확인할 수 없습니다.");return verify;},p.is_active?"계정을 비활성화했습니다.":"계정을 활성화했습니다.");};
  async function savePagePermissions(){
-  if(!selected||!db)return;
+  if(!selected||!db||!isSuperAdmin||selected.roles.some(r=>r.role==="super_admin"))return;
   const {data:{user}}=await db.auth.getUser();
-  const rows=pageOptions.map(option=>{
+  const administrator=selected.roles.some(r=>r.role==="administrator");
+  const rows=pageOptions.filter(option=>option.key!=="administration"||administrator).map(option=>{
    const existing=selected.permissions.find(permission=>permission.module_key===option.key);
-   const canView=selectedPageKeys.includes(option.key);return {user_id:selected.user_id,module_key:option.key,can_view:canView,can_manage:canView?(existing?.can_manage??hasRoleManageAccess(selected.roles,option.key)):false,assigned_by:user?.id??null,updated_at:new Date().toISOString()};
+   const canView=selectedPageKeys.includes(option.key);return {user_id:selected.user_id,module_key:option.key,can_view:canView,can_manage:canView&&option.key!=="administration"?(administrator?true:(existing?.can_manage??hasRoleManageAccess(selected.roles,option.key))):false,assigned_by:user?.id??null,updated_at:new Date().toISOString()};
   });
   await run(async()=>{const {data,error}=await db.from("user_module_permissions").upsert(rows,{onConflict:"user_id,module_key"}).select("module_key,can_view");if(error)throw error;if(!data||data.length!==rows.length||data.some(saved=>{const expected=rows.find(row=>row.module_key===saved.module_key);return !expected||saved.can_view!==expected.can_view;}))throw new Error("일부 페이지 권한 저장 결과가 입력한 설정과 일치하지 않습니다.");return data;},"페이지 표시 설정을 저장했습니다.");
  }
@@ -188,18 +190,18 @@ export default function AdministrationModule({isSuperAdmin,callerId}:{isSuperAdm
       </div>
       {canEditSelected&&<div className="settings-detail-section"><h4>{(englishUI?"2. Add roles":"2. 역할 추가")}</h4><div className="settings-role-form"><select value={role} onChange={e=>setRole(e.target.value)}>{assignableRoles.map(r=><option key={r} value={r}>{(englishUI?({super_admin:"Super Administrator",administrator:"Administrator",finance_officer:"Finance officer",academic_officer:"Academic officer",student_officer:"Student affairs officer",librarian:"Library officer",facility_manager:"Facilities officer",faculty:"Faculty",staff:"Staff",student:"Student"} as Record<string,string>):names)[r]}</option>)}</select><SearchSelect value={depId} placeholder={(englishUI?"All departments":"전체 부서")} searchPlaceholder={(englishUI?"Search department name":"부서명 검색")} options={deps.filter(d=>d.is_active).map(d=>({value:d.id,label:depName(d),keywords:`${d.code} ${d.name_ko||""} ${d.name_en||""}`}))} onChange={setDepId} clearLabel={(englishUI?"Clear department selection":"부서 선택 해제")}/><button className="settings-primary" disabled={saving||selected.roles.some(r=>r.role===role&&r.department_id===(depId||null))} onClick={assign}>{(englishUI?"Add permission":"권한 추가")}</button></div></div>}
       {isSuperAdmin&&<div className="settings-detail-section">
-       <h4>{(englishUI?"3. Admin page visibility ":"3. 관리 페이지 표시 ")}<small>{selectedPageKeys.length}/{pageOptions.length}</small></h4>
+       <h4>{(englishUI?"3. Admin page visibility ":"3. 관리 페이지 표시 ")}<small>{selectedPageKeys.length}/{pageOptions.filter(option=>option.key!=="administration"||selected.roles.some(r=>r.role==="administrator"||r.role==="super_admin")).length}</small></h4>
        <p className="settings-form-hint">{(englishUI?"After adding roles, select only the administration pages actually needed.":"역할을 추가한 뒤 실제로 사용할 관리 페이지만 선택하세요.")}</p>
        <div className="settings-page-permissions">
-        {pageOptions.map(option=><label className="settings-page-permission" key={option.key}>
-         <input type="checkbox" checked={selectedPageKeys.includes(option.key)} disabled={selected.roles.some(r=>r.role==="super_admin"||r.role==="administrator")} onChange={e=>setSelectedPageKeys(current=>e.target.checked?[...current,option.key]:current.filter(key=>key!==option.key))}/>
+        {pageOptions.filter(option=>option.key!=="administration"||selected.roles.some(r=>r.role==="administrator"||r.role==="super_admin")).map(option=><label className="settings-page-permission" key={option.key}>
+         <input type="checkbox" checked={selectedPageKeys.includes(option.key)} disabled={saving||selected.roles.some(r=>r.role==="super_admin")} onChange={e=>setSelectedPageKeys(current=>e.target.checked?[...current,option.key]:current.filter(key=>key!==option.key))}/>
          <span><strong>{englishUI?englishDisplay(option.title):option.title}</strong></span>
         </label>)}
        </div>
        <div className="settings-page-permission-actions">
-        <button type="button" className="settings-primary" disabled={saving||selected.roles.some(r=>r.role==="super_admin"||r.role==="administrator")} onClick={()=>void savePagePermissions()}>{saving?"저장 중…":"저장"}</button>
+        <button type="button" className="settings-primary" disabled={saving||selected.roles.some(r=>r.role==="super_admin")} onClick={()=>void savePagePermissions()}>{saving?"저장 중…":"저장"}</button>
        </div>
-       {selected.roles.some(r=>r.role==="super_admin")&&<p className="settings-form-hint">{(englishUI?"Super Administrators can access all pages.":"최고 관리자는 모든 페이지에 접근할 수 있습니다.")}</p>}{!selected.roles.some(r=>r.role==="super_admin")&&selected.roles.some(r=>r.role==="administrator")&&<p className="settings-form-hint">{(englishUI?"The Administrator role can access all administration pages, so individual page visibility settings cannot be changed.":"관리자 역할은 모든 관리 페이지에 접근할 수 있어 개별 페이지 표시 설정을 변경할 수 없습니다.")}</p>}
+       {selected.roles.some(r=>r.role==="super_admin")&&<p className="settings-form-hint">{(englishUI?"Super Administrators can access all pages.":"최고 관리자는 모든 페이지에 접근할 수 있습니다.")}</p>}{!selected.roles.some(r=>r.role==="super_admin")&&selected.roles.some(r=>r.role==="administrator")&&<p className="settings-form-hint">{(englishUI?"Administrators can access only the pages selected here.":"관리자는 여기서 선택한 페이지만 접근할 수 있습니다.")}</p>}
       </div>}
       {isSuperAdmin&&<div className="settings-danger-zone"><div><strong>{(englishUI?"Account status":"계정 상태")}</strong><small>{selected.is_active?(englishUI?"This account can sign in and use the service.":"현재 로그인 및 서비스 이용이 가능한 상태입니다."):(englishUI?"This account is inactive.":"현재 비활성화된 계정입니다.")}</small></div><button disabled={saving||selected.roles.some(r=>r.role==="super_admin")} onClick={()=>toggle(selected)}>{selected.is_active?"회원 비활성화":"회원 다시 활성화"}</button></div>}
      </div>:<div className="settings-member-empty"><strong>{(englishUI?"Select a member.":"회원을 선택해 주세요")}</strong><p>{(englishUI?"Select a member from the list to manage details and permissions.":"왼쪽 목록에서 회원을 선택하면 상세 정보와 권한을 관리할 수 있습니다.")}</p></div>}

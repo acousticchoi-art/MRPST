@@ -92,6 +92,7 @@ export default async function Admin({params}:{params:Promise<{locale:string}>}) 
   }
   if(accessDenied) return <main className="login-wrap"><section className="login-card"><span className="eyebrow">MRPST</span><h1>{t.denied}</h1><p className="login-intro">{t.deniedText}</p><Link className="btn secondary" href={`/${locale}`}>{t.back}</Link></section></main>;
   const visible=Object.entries(MODULES).filter(([key])=>!supabase||canAccessModule(roles,key as keyof typeof MODULES,moduleOverrides));
+  if(supabase&&roles.length>0&&roles.every(role=>role==="student")&&!visible.length)redirect(`/${locale}/student`);
   const canAccessAcademics=visible.some(([key])=>key==="academics");
   const canAccessWebsite=visible.some(([key])=>key==="website");
   const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());

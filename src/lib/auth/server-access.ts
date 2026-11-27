@@ -42,9 +42,10 @@ export async function getServerModuleAccess(module: ModuleKey): Promise<AccessFa
     administration: ["super_admin"],
     website: ["super_admin", "administrator"]
   };
-  const canManage = roles.includes("super_admin") ||
+  const studentOnly=roles.length>0&&roles.every(role=>role==="student");
+  const canManage = !studentOnly && (roles.includes("super_admin") ||
     (module !== "administration" && roles.includes("administrator")) ||
-    (module !== "administration" && (override ? override.can_manage === true : roles.some((role) => manageRoles[module].includes(role))));
+    (module !== "administration" && (override ? override.can_manage === true : roles.some((role) => manageRoles[module].includes(role)))));
 
   return { ok: true, supabase, user, roles, permissions: allowedPermissions, canManage };
 }

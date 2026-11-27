@@ -44,7 +44,7 @@ export default function StudentLoginForm({ locale }: { locale: string }) {
       else if (!profile) reason = loginFeedback("noProfile", locale);
       else if (profile.is_active !== true) reason = loginFeedback("inactive", locale);
       else if (!roles?.length) reason = loginFeedback("noRole", locale);
-      else if (roles.some((row) => row.role !== "student")) reason = t.only;
+      else if (!roles.some((row) => row.role === "student")) reason = t.only;
       else if (studentError) reason = loginFeedback("studentLookup",locale);
       else if (!student?.id) reason = loginFeedback("noStudent",locale);
       if (reason) {

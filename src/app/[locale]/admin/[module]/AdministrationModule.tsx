@@ -203,7 +203,7 @@ export default function AdministrationModule({isSuperAdmin,callerId,delegableMod
        <div className="settings-page-permissions">
         {pageOptions.filter(option=>option.key!=="administration"||selected.roles.some(r=>r.role==="administrator"||r.role==="super_admin")).map(option=><label className="settings-page-permission" key={option.key}>
          <input type="checkbox" checked={selectedPageKeys.includes(option.key)} disabled={loading||saving||!canEditPagePermissions||!canDelegatePage(option.key)} onChange={e=>setSelectedPageKeys(current=>e.target.checked?[...current,option.key]:current.filter(key=>key!==option.key))}/>
-         <span><strong>{englishUI?englishDisplay(option.title):option.title}</strong><small style={{display:"block"}}>{selected.permissions.some(p=>p.module_key===option.key&&p.can_view!==defaultKeys.includes(option.key))?(locale==="my"?"သီးခြားသတ်မှတ်ချက်":englishUI?"Individual exception":"개별 설정"):(defaultKeys.includes(option.key)?(locale==="my"?"ရာထူးအလိုက် ခွင့်ပြုချက်":englishUI?"Role default":"역할 기본 권한"):(locale==="my"?"ပုံမှန်ဝင်ရောက်ခွင့်မရှိ":englishUI?"Not included in role":"역할 기본 권한 없음"))}</small></span>
+         <span><strong>{englishUI?englishDisplay(option.title):option.title}</strong><small style={{display:"block"}}>{!selected.roles.some(r=>r.role==="super_admin")&&selected.permissions.some(p=>p.module_key===option.key)?(locale==="my"?"သီးခြားသတ်မှတ်ချက်":englishUI?"Individual exception":"개별 설정"):(defaultKeys.includes(option.key)?(locale==="my"?"ရာထူးအလိုက် ခွင့်ပြုချက်":englishUI?"Role default":"역할 기본 권한"):(locale==="my"?"ပုံမှန်ဝင်ရောက်ခွင့်မရှိ":englishUI?"Not included in role":"역할 기본 권한 없음"))}</small></span>
         </label>)}
        </div>
        <div className="settings-page-permission-actions">

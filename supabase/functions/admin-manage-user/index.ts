@@ -60,11 +60,16 @@ Deno.serve(async (req: Request) => {
   const callerRoles = (roles ?? []).map((item: { role: string }) => item.role);
   const isSuperAdmin = callerRoles.includes("super_admin");
   const isAdministrator = callerRoles.includes("administrator");
-  const { data: canManageStudents, error: permissionError } = await admin.rpc("mrpst_can_manage_module", { target_user: caller.id, target_module: "students" });
-  if (profile?.is_active !== true || permissionError || canManageStudents !== true) return json({ error: "학생 계정 발급 권한이 필요합니다." }, 403);
-
+  if (profile?.is_active !== true) return json({ error: "활성 계정이 필요합니다." }, 403);
   try {
     const body = await req.json();
+    if (body.action === "create_student") {
+      const { data, error } = await admin.rpc("mrpst_can_manage_module", { target_user: caller.id, target_module: "students" });
+      if (error || data !== true) return json({ error: "학생 계정 발급 권한이 필요합니다." }, 403);
+    } else if (!isSuperAdmin && body.action === "create" && isAdministrator) {
+      const { data, error } = await admin.rpc("mrpst_can_access_module", { target_user: caller.id, target_module: "administration" });
+      if (error || data !== true) return json({ error: "계정 관리 권한이 필요합니다." }, 403);
+    }
     if (body.action !== "create_student" && !isSuperAdmin && !(body.action === "create" && isAdministrator)) {
       return json({ error: "이 작업에는 최고 관리자 권한이 필요합니다." }, 403);
     }

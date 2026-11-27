@@ -107,7 +107,7 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{module:s
       if(ids.length){
         [roleData,permissionData]=await Promise.all([
           result(supabase.from("user_roles").select("id,user_id,role,department_id").in("user_id",ids)),
-          access.canManage ? result(supabase.from("user_module_permissions").select("user_id,module_key,can_view,can_manage").in("user_id",ids)) : Promise.resolve({data:[],error:null})
+          result(supabase.from("user_module_permissions").select("user_id,module_key,can_view,can_manage").in("user_id",ids))
         ]);
       }
       data={profiles:p,departments:d,auditLogs:l,roles:roleData,permissions:permissionData};

@@ -63,14 +63,14 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
   [...entries,...events].forEach(x=>{const start=time(x.start_time),end=time(x.end_time);if(start&&end)keys.set(start+"|"+end,{start,end});});
   return [...keys.values()].sort((a,b)=>a.start.localeCompare(b.start)||a.end.localeCompare(b.end));
  },[entries,events]);
- const startEdit=(entry?:Partial<Row>,type:"course"|"event"="course")=>{
+ const startEdit=(entry?:Partial<Row>,type:"course"|"event"="course")=>{if(!canManage||!mutationsEnabled)return;
   setEditing(entry?.id||"");setEditingType(type);
   if(type==="event")setForm(entry?{day_of_week:String(entry.day_of_week),start_time:time(entry.start_time),end_time:time(entry.end_time),title:entry.title||"",notes:entry.notes||""}:{...blankEvent});
   else setForm(entry?{day_of_week:String(entry.day_of_week),start_time:time(entry.start_time),end_time:time(entry.end_time),course_id:entry.course_id,instructor_id:entry.instructor_id||"",class_group:entry.class_group||"",room:entry.room||"",notes:entry.notes||""}:{...blankCourse});
   setError("");setModal(true);
  };
  const save=async()=>{
-  if(!db||!mutationsEnabled){setNotice((englishUI?"Academic data changes are available only after the development database is separated and the feature enabled.":"학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다."));return;}setSaving(true);setError("");
+  if(!db||!canManage||!mutationsEnabled){setNotice((englishUI?"Academic data changes are available only after the development database is separated and the feature enabled.":"학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다."));return;}setSaving(true);setError("");
   try{
    const {data:{user},error:userError}=await db.auth.getUser();if(userError)throw userError;if(!user)throw new Error("로그인이 필요합니다.");
    const common={term_id:termId,department_id:departmentId,day_of_week:Number(form.day_of_week),start_time:form.start_time,end_time:form.end_time};
@@ -106,12 +106,12 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
   }catch(e:any){setError(e.message||"저장하지 못했습니다.");}finally{setSaving(false);}
  };
  const remove=async(id:string,type:"course"|"event")=>{
-  if(!db||!mutationsEnabled){setNotice((englishUI?"Academic data changes are available only after the development database is separated and the feature enabled.":"학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다."));return;}if(!window.confirm(englishUI?"Delete this item?":locale==="my"?"ဤအချက်အလက်ကို ဖျက်မလား။":"이 항목을 삭제할까요?"))return;
+  if(!db||!canManage||!mutationsEnabled){setNotice((englishUI?"Academic data changes are available only after the development database is separated and the feature enabled.":"학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다."));return;}if(!window.confirm(englishUI?"Delete this item?":locale==="my"?"ဤအချက်အလက်ကို ဖျက်မလား။":"이 항목을 삭제할까요?"))return;
   const {data:deleted,error:e}=await db.from(type==="event"?"academic_timetable_events":"academic_timetable_entries").delete().eq("id",id).select("id").maybeSingle();
   if(e)setError(e.message);else if(!deleted?.id||deleted.id!==id)setError((englishUI?"Unable to verify deleted timetable entry.":"삭제된 시간표 항목을 확인할 수 없습니다."));else{setNotice((englishUI?"Item deleted.":"항목을 삭제했습니다."));await load();}
  };
  const moveEntry=async(targetDay:number,targetStart:string,targetEnd:string)=>{
-  if(!db||!dragged||!mutationsEnabled)return;
+  if(!db||!canManage||!dragged||!mutationsEnabled)return;
   const original=dragged.entry;if(original.day_of_week===targetDay&&time(original.start_time)===targetStart&&time(original.end_time)===targetEnd){setDragged(null);return;}
   setSaving(true);setError("");
   try{
@@ -128,11 +128,11 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
   }catch(e:any){setError(e.message||"시간표를 옮기지 못했습니다.");}finally{setDragged(null);setSaving(false);}
  };
  const undoLastAction=async()=>{
-  if(!db||!undoAction||!mutationsEnabled)return;setSaving(true);setError("");
+  if(!db||!canManage||!undoAction||!mutationsEnabled)return;setSaving(true);setError("");
   try{const table=undoAction.type==="course"?"academic_timetable_entries":"academic_timetable_events";const original=undoAction.entry;const {data:restored,error:undoError}=await db.from(table).update({day_of_week:original.day_of_week,start_time:original.start_time,end_time:original.end_time}).eq("id",original.id).select("id").single();if(undoError)throw undoError;if(restored?.id!==original.id)throw new Error("되돌린 시간표 항목을 확인할 수 없습니다.");setUndoAction(null);setNotice((englishUI?"The last timetable move was undone.":"직전 시간표 이동을 되돌렸습니다."));await load();}catch(e:any){setError(e.message||"작업을 되돌리지 못했습니다.");}finally{setSaving(false);}
  };
  const copySchedule=async()=>{
-  if(!db||!mutationsEnabled){setNotice((englishUI?"Academic data changes are available only after the development database is separated and the feature enabled.":"학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다."));return;}if(!copyFrom||copyFrom===termId)return;
+  if(!db||!canManage||!mutationsEnabled){setNotice((englishUI?"Academic data changes are available only after the development database is separated and the feature enabled.":"학사 데이터 변경은 개발 DB 분리 및 기능 활성화 후 사용할 수 있습니다."));return;}if(!copyFrom||copyFrom===termId)return;
   if(!window.confirm(englishUI?"Copy the selected semester's timetable to the current semester? Existing entries will be retained, and copies with identical times to existing entries will be skipped.":locale==="my"?"ရွေးထားသော စာသင်ကာလ၏ အချိန်ဇယားကို လက်ရှိစာသင်ကာလသို့ ကူးယူမလား။ ရှိပြီးသား အချက်အလက်များကို ထိန်းသိမ်းထားပြီး ရှိပြီးသား အချက်အလက်နှင့် အချိန်အတိအကျ တူညီသော ကူးယူမည့် အချက်အလက်များကို ကျော်သွားပါမည်။":"선택한 학기의 시간표를 현재 학기로 복사할까요? 현재 학기에 이미 등록된 항목은 유지되고, 기존 항목과 시간이 완전히 같은 복사 항목은 건너뜁니다."))return;
   setSaving(true);setError("");
   try{
@@ -198,7 +198,7 @@ export default function TimetableBuilder({canManage,mutationsEnabled}:{canManage
    <footer className="timetable-paper-footer">{selectedTerm?.name||""} · {selectedDepartment?.name_en||""}</footer>
   </div>
   {canManage&&<section className="timetable-course-library"><div><h3>{(englishUI?"Registered courses and assigned instructors":"등록된 과목 및 담당 교수")}</h3><p>{(englishUI?"Manage course and instructor information in the Courses and Faculty & Teaching Assignments tabs.":"과목과 교수 정보는 과목 관리와 교수·강의 배정 탭에서 관리합니다.")}</p></div><div className="timetable-course-list">{deptCourses.map(c=><article key={c.id}><strong>{locale==="my"?(c.title_my||c.title):c.title}</strong><span>{c.course_code}</span></article>)}</div></section>}
-  {modal&&<div className="academics-modal-backdrop"><section className="academics-modal timetable-modal"><header><h3>{editing?(editingType==="event"?(englishUI?"Edit shared event":"공통 일정 수정"):(englishUI?"Edit class timetable":"강의 시간표 수정")):(editingType==="event"?(englishUI?"Add shared event":"공통 일정 등록"):(englishUI?"Add class timetable":"강의 시간표 등록"))}</h3><button onClick={()=>setModal(false)}>×</button></header><div className="academics-form-grid">
+  {canManage&&modal&&<div className="academics-modal-backdrop"><section className="academics-modal timetable-modal"><header><h3>{editing?(editingType==="event"?(englishUI?"Edit shared event":"공통 일정 수정"):(englishUI?"Edit class timetable":"강의 시간표 수정")):(editingType==="event"?(englishUI?"Add shared event":"공통 일정 등록"):(englishUI?"Add class timetable":"강의 시간표 등록"))}</h3><button onClick={()=>setModal(false)}>×</button></header><div className="academics-form-grid">
    <label>{(englishUI?"Day of week":"요일")}<select value={form.day_of_week} onChange={e=>setForm({...form,day_of_week:e.target.value})}>{days.map(d=><option key={d.value} value={d.value}>{englishUI?["","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][d.value]:dayName(d.value)}</option>)}</select></label>
    <label>{(englishUI?"Start time":"시작 시간")}<input type="time" value={form.start_time} onChange={e=>setForm({...form,start_time:e.target.value})}/></label>
    <label>{(englishUI?"End time":"종료 시간")}<input type="time" value={form.end_time} onChange={e=>setForm({...form,end_time:e.target.value})}/></label>

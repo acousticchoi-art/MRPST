@@ -32,7 +32,8 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
  const [departmentId,setDepartmentId]=useState("");
  const [level,setLevel]=useState("");
  const [courseId,setCourseId]=useState("");
- const [tab,setTab]=useState<"lookup"|"entry">("entry");
+ const [requestedTab,setTab]=useState<"lookup"|"entry">("entry");
+ const tab=canManage?requestedTab:"lookup";
  const [search,setSearch]=useState("");
  const [selectedStudentId,setSelectedStudentId]=useState("");
  const [inputValues,setInputValues]=useState<Record<string,string>>({});
@@ -183,8 +184,8 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
   </div>
   {error&&<div className={styles.alertError}>{englishUI?englishDisplay(error):error}</div>}{notice&&<div className={styles.alertSuccess}>{englishUI?englishDisplay(notice):notice}</div>}{!academicMutationsEnabled&&<div className={styles.alert}>{(englishUI?"Grade changes are locked in safety mode. Viewing and printing remain available.":"성적 변경 기능이 안전 모드로 잠겨 있습니다. 조회와 출력은 사용할 수 있습니다.")}</div>}
   {!db&&<div className={styles.alert}>{(englishUI?"Supabase connection configuration is required.":"Supabase 연결 설정이 필요합니다.")}</div>}
-  {!canManage&&db&&<div className={styles.alert}>{(englishUI?"Grade management permission could not be verified. Sign in as a Super Administrator or administrative officer.":"성적관리 권한이 확인되지 않았습니다. Super Admin 또는 행정 담당자 계정으로 로그인해 주세요.")}</div>}
-  <div className={styles.tabs} aria-label={(englishUI?"Select grading task":"성적 업무 선택")}><button type="button" className={tab==="entry"?styles.activeTab:""} onClick={()=>setTab("entry")}>{(englishUI?"Enter scores by course":"과목별 점수 입력")}</button><button type="button" className={tab==="lookup"?styles.activeTab:""} onClick={()=>setTab("lookup")}>{(englishUI?"View grades by student":"학생별 성적 확인")}</button></div>
+  {!canManage&&db&&<div className={styles.alert}>{(englishUI?"You have read-only access to grades.":"성적 조회 전용 권한입니다.")}</div>}
+  <div className={styles.tabs} aria-label={(englishUI?"Select grading task":"성적 업무 선택")}>{canManage&&<button type="button" className={tab==="entry"?styles.activeTab:""} onClick={()=>setTab("entry")}>{(englishUI?"Enter scores by course":"과목별 점수 입력")}</button>}<button type="button" className={tab==="lookup"?styles.activeTab:""} onClick={()=>setTab("lookup")}>{(englishUI?"View grades by student":"학생별 성적 확인")}</button></div>
   {tab==="lookup"&&<section className={styles.panel}>
    <div className={styles.panelHead}><div><h3>{(englishUI?"View grades by student":"학생별 성적 확인")}</h3><p>{(englishUI?"Select a student name to view course scores and courses with missing scores.":"학생 이름을 누르면 과목별 점수와 미입력 과목을 볼 수 있습니다.")}</p></div><div className={styles.actions}><button onClick={exportCsv} disabled={!visibleStudents.length}>{(englishUI?"CSV for Excel":"엑셀용 CSV")}</button><button onClick={()=>window.print()}>{(englishUI?"Print":"인쇄")}</button></div></div>
    <input className={styles.search} value={search} onChange={e=>setSearch(e.target.value)} placeholder={(englishUI?"Search student name or sequence number":"학생 이름 또는 순번 검색")}/>
@@ -200,7 +201,7 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
     </tbody></table></div>
    </div></div>}
   </section>}
-  {tab==="entry"&&<section className={styles.panel}>
+  {canManage&&tab==="entry"&&<section className={styles.panel}>
    <div className={styles.panelHead}><div><h3>{(englishUI?"Enter scores by course":"과목별 점수 입력")}</h3><p>{(englishUI?"Select a course to display students in the relevant department and year. Enter scores from 0 to 100 and save. Students without enrollment records are linked automatically when scores are saved.":"과목을 고르면 해당 학과·학년 학생이 표시됩니다. 0~100점을 적고 저장하세요. 아직 수강 기록이 없는 학생은 점수 저장 시 자동으로 연결됩니다.")}</p></div></div>
    <div className={styles.entryFilters}>
     <label>{(englishUI?"Course to enter scores for":"점수를 입력할 과목")}<SearchSelect value={courseId} placeholder={(englishUI?"Search courses":"과목 검색")} searchPlaceholder={(englishUI?"Search by course code or name":"과목 코드, 과목명 검색")} options={entryCourses.map(x=>({value:x.id,label:`${x.course_code} · ${displayCourse(x)}`,keywords:`${x.course_code} ${x.title}`}))} onChange={setCourseId}/></label>

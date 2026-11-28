@@ -39,6 +39,8 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
  const [inputValues,setInputValues]=useState<Record<string,string>>({});
  const [currentUserId,setCurrentUserId]=useState("");
  const [loading,setLoading]=useState(true);
+ const [termLoading,setTermLoading]=useState(true);
+ const [termRefreshKey,setTermRefreshKey]=useState(0);
  const [saving,setSaving]=useState(false);
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
@@ -50,19 +52,18 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
    const {data:{user}}=await db.auth.getUser();
    if(!user){setCurrentUserId("");setError((englishUI?"Login required.":"로그인이 필요합니다."));setLoading(false);return;}
    setCurrentUserId(user.id);
-   const [d,t,s,c,g,e]=await Promise.all([
+   const [d,t,s,c]=await Promise.all([
     db.from("departments").select("id,code,name_en,name_ko,name_my").eq("is_active",true).order("code"),
     db.from("academic_terms").select("id,term_code,name,academic_year,status").order("academic_year",{ascending:false}).order("term_code",{ascending:false}),
     db.from("students").select("id,student_number,full_name,program_code,cohort,student_status").order("full_name"),
-    db.from("academic_courses").select("id,course_code,title,title_my,department_id,level,is_active").order("course_code"),
-    allRows((start,end)=>db.from("academic_grades").select("id,student_id,course_id,term_id,score,grade,remarks,updated_at,entered_by",{count:"exact"}).order("updated_at",{ascending:false}).order("id").range(start,end)),
-    allRows((start,end)=>db.from("academic_enrollments").select("id,student_id,course_id,term_id,enrollment_status",{count:"exact"}).order("id").range(start,end))
+    db.from("academic_courses").select("id,course_code,title,title_my,department_id,level,is_active").order("course_code")
    ]);
-   const errors=[d.error,t.error,s.error,c.error,g.error,e.error].filter(Boolean).map((x:any)=>typeof x==="string"?x:x.message);
+   const errors=[d.error,t.error,s.error,c.error].filter(Boolean).map((x:any)=>typeof x==="string"?x:x.message);
    if(errors.length)throw new Error(errors.join(" · "));
    const nextTerms=(t.data??[]) as Term[];
    const nextDepartments=(d.data??[]) as Department[];
-   setDepartments(nextDepartments);setTerms(nextTerms);setStudents((s.data??[]) as Student[]);setCourses((c.data??[]) as Course[]);setGrades((g.data??[]) as Grade[]);setEnrollments((e.data??[]) as Enrollment[]);
+   setDepartments(nextDepartments);setTerms(nextTerms);setStudents((s.data??[]) as Student[]);setCourses((c.data??[]) as Course[]);
+   if(!nextTerms.length)setTermLoading(false);
 
    
   }catch(err:any){setError(err?.message||"성적 데이터를 불러오지 못했습니다.");}
@@ -71,6 +72,25 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
 
  useEffect(()=>{void load();},[load]);
  useEffect(()=>{if(!termId&&terms.length){const nextId=(terms.find(x=>x.status==="active")??terms[0]).id;setTermId(nextId);onTermChange?.(nextId);}},[termId,terms,onTermChange]);
+ useEffect(()=>{
+  let active=true;
+  if(!db||!termId){setGrades([]);setEnrollments([]);setTermLoading(false);return;}
+  const loadSelectedTerm=async()=>{
+   setTermLoading(true);setError("");
+   try{
+    const [g,e]=await Promise.all([
+     allRows((start,end)=>db.from("academic_grades").select("id,student_id,course_id,term_id,score,grade,remarks,updated_at,entered_by",{count:"exact"}).eq("term_id",termId).order("updated_at",{ascending:false}).order("id").range(start,end),1000),
+     allRows((start,end)=>db.from("academic_enrollments").select("id,student_id,course_id,term_id,enrollment_status",{count:"exact"}).eq("term_id",termId).order("id").range(start,end),1000)
+    ]);
+    const errors=[g.error,e.error].filter(Boolean);
+    if(errors.length)throw new Error(errors.join(" · "));
+    if(active){setGrades((g.data??[]) as Grade[]);setEnrollments((e.data??[]) as Enrollment[]);}
+   }catch(err:any){if(active)setError(err?.message||"선택한 학기의 성적 데이터를 불러오지 못했습니다.");}
+   finally{if(active)setTermLoading(false);}
+  };
+  void loadSelectedTerm();
+  return ()=>{active=false;};
+ },[db,termId,termRefreshKey]);
 
  const displayCourse=(c:Course)=>locale==="my"?(c.title_my||c.title):c.title;
  const department=departments.find(x=>x.id===departmentId);
@@ -142,7 +162,7 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
       if(registrationError)throw registrationError;
       if(!registered||registered.length!==missingRegistrations.length)throw new Error("성적에 필요한 수강 기록을 확인할 수 없습니다.");
     }
-    const {data:saved,error}=await db.from("academic_grades").upsert(changed,{onConflict:"student_id,course_id,term_id"}).select("student_id,course_id,term_id,score");if(error)throw error;if(!saved||saved.length!==changed.length||saved.some(row=>!changed.some(expected=>expected.student_id===row.student_id&&expected.course_id===row.course_id&&expected.term_id===row.term_id&&expected.score===row.score)))throw new Error("일부 성적 저장 결과를 확인할 수 없습니다.");setNotice(englishUI?`Saved grades for ${changed.length} students.`:changed.length+"명의 성적을 저장했습니다.");await load();}
+    const {data:saved,error}=await db.from("academic_grades").upsert(changed,{onConflict:"student_id,course_id,term_id"}).select("student_id,course_id,term_id,score");if(error)throw error;if(!saved||saved.length!==changed.length||saved.some(row=>!changed.some(expected=>expected.student_id===row.student_id&&expected.course_id===row.course_id&&expected.term_id===row.term_id&&expected.score===row.score)))throw new Error("일부 성적 저장 결과를 확인할 수 없습니다.");setNotice(englishUI?`Saved grades for ${changed.length} students.`:changed.length+"명의 성적을 저장했습니다.");setTermRefreshKey(value=>value+1);}
   catch(err:any){setError(err?.message||"성적 저장에 실패했습니다.");}
   finally{setSaving(false);}
  };
@@ -153,7 +173,7 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
   if(enrollments.some(e=>e.student_id===student.id&&e.course_id===courseId&&e.term_id===termId&&e.enrollment_status==="completed")){setError((englishUI?"Grades for completed courses cannot be deleted. Change the course completion status first.":"이미 이수 완료된 과목의 성적은 삭제할 수 없습니다. 수강 이수 상태를 먼저 변경해야 합니다."));return;}
   if(!window.confirm(window.location.pathname.startsWith("/en/")?("Delete "+student.full_name+"'s grade for this course?"):student.full_name+(locale==="my"?" ၏ ဤဘာသာရပ်အမှတ်ကို ဖျက်မလား။":" 학생의 이 과목 성적을 삭제할까요?")))return;
   setSaving(true);setError("");setNotice("");
-  try{const {data:deleted,error}=await db.from("academic_grades").delete().eq("student_id",student.id).eq("course_id",courseId).eq("term_id",termId).select("id");if(error)throw error;if(!deleted?.length)throw new Error("성적 삭제 결과를 확인할 수 없습니다.");setNotice((englishUI?"Grade deleted.":"성적을 삭제했습니다."));await load();}
+  try{const {data:deleted,error}=await db.from("academic_grades").delete().eq("student_id",student.id).eq("course_id",courseId).eq("term_id",termId).select("id");if(error)throw error;if(!deleted?.length)throw new Error("성적 삭제 결과를 확인할 수 없습니다.");setNotice((englishUI?"Grade deleted.":"성적을 삭제했습니다."));setTermRefreshKey(value=>value+1);}
   catch(err:any){setError(err?.message||"성적 삭제에 실패했습니다.");}
   finally{setSaving(false);}
  };
@@ -204,7 +224,7 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
   {tab==="lookup"&&<section className={styles.panel}>
    <div className={styles.panelHead}><div><h3>{(englishUI?"View grades by student":"학생별 성적 확인")}</h3><p>{(englishUI?"Select a student name to view course scores and courses with missing scores.":"학생 이름을 누르면 과목별 점수와 미입력 과목을 볼 수 있습니다.")}</p></div><div className={styles.actions}><button onClick={exportCsv} disabled={!visibleStudents.length}>{(englishUI?"CSV for Excel":"엑셀용 CSV")}</button><button onClick={()=>window.print()}>{(englishUI?"Print":"인쇄")}</button></div></div>
    <input className={styles.search} value={search} onChange={e=>setSearch(e.target.value)} placeholder={(englishUI?"Search student name or sequence number":"학생 이름 또는 순번 검색")}/>
-   {loading?<p className={styles.empty}>{(englishUI?"Loading data…":"데이터를 불러오는 중입니다…")}</p>:<div className={styles.tableWrap}><table><thead><tr><th>{(englishUI?"No.":"순번")}</th><th>{(englishUI?"Student name":"학생 이름")}</th><th>{(englishUI?"Year":"학년")}</th><th>{(englishUI?"Courses with entries":"입력 과목")}</th><th>{(englishUI?"Average score":"평균 점수")}</th><th></th></tr></thead><tbody>
+    {loading||termLoading?<p className={styles.empty}>{(englishUI?"Loading data…":"데이터를 불러오는 중입니다…")}</p>:<div className={styles.tableWrap}><table><thead><tr><th>{(englishUI?"No.":"순번")}</th><th>{(englishUI?"Student name":"학생 이름")}</th><th>{(englishUI?"Year":"학년")}</th><th>{(englishUI?"Courses with entries":"입력 과목")}</th><th>{(englishUI?"Average score":"평균 점수")}</th><th></th></tr></thead><tbody>
     {visibleStudents.map(student=>{const enrolledCourses=visibleCourses.filter(course=>enrollments.some(e=>e.student_id===student.id&&e.course_id===course.id&&e.term_id===termId&&["enrolled","completed"].includes(e.enrollment_status)));const scores=enrolledCourses.map(course=>gradeByKey.get(student.id+"|"+course.id)?.score).filter((v):v is number=>v!==null&&v!==undefined);const average=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null;return <tr key={student.id} className={selectedStudentId===student.id?styles.selectedRow:""}><td>{student.student_number}</td><td><button className={styles.nameButton} onClick={()=>setSelectedStudentId(student.id)}>{student.full_name}</button></td><td>{student.cohort||"—"}</td><td>{scores.length} / {enrolledCourses.length}</td><td>{average===null?"—":average.toFixed(2)}</td><td><button className={styles.smallButton} onClick={()=>setSelectedStudentId(student.id)}>{(englishUI?"Details":"상세")}</button></td></tr>;})}
     {!visibleStudents.length&&<tr><td colSpan={6} className={styles.empty}>{(englishUI?"No students match your criteria.":"선택한 조건에 해당하는 학생이 없습니다.")}</td></tr>}
    </tbody></table></div>}
@@ -223,12 +243,12 @@ export default function GradeManagementModule({canManage,initialTermId,onTermCha
    </div>
    {currentCourse&&<div className={styles.entryTitle}><strong>{displayCourse(currentCourse)}</strong><span>{currentCourse.course_code} · {terms.find(x=>x.id===termId)?.name||"학기 미선택"}</span></div>}
    <div className={styles.tableWrap}><table><thead><tr><th>{(englishUI?"No.":"순번")}</th><th>{(englishUI?"Student name":"학생 이름")}</th><th>{(englishUI?"Score":"점수")}</th><th>{(englishUI?"Existing score":"기존 점수")}</th><th>{(englishUI?"Action":"작업")}</th></tr></thead><tbody>
-    {inputStudents.map(student=>{const old=gradeByKey.get(student.id+"|"+courseId);return <tr key={student.id}><td>{student.student_number}</td><td>{student.full_name}</td><td><input className={styles.scoreInput} type="number" min="0" max="100" step="0.01" disabled={!canManage||!academicMutationsEnabled||saving} value={inputValues[student.id]??""} onChange={e=>setInputValues(v=>({...v,[student.id]:e.target.value}))} aria-label={englishUI?"Score for "+student.full_name:student.full_name+" 점수"}/></td><td>{old?.score??"—"}</td><td>{old&&<button className={styles.deleteButton} disabled={!academicMutationsEnabled||saving} onClick={()=>void deleteScore(student)}>{(englishUI?"Delete":"삭제")}</button>}</td></tr>;})}
+     {inputStudents.map(student=>{const old=gradeByKey.get(student.id+"|"+courseId);return <tr key={student.id}><td>{student.student_number}</td><td>{student.full_name}</td><td><input className={styles.scoreInput} type="number" min="0" max="100" step="0.01" disabled={!canManage||!academicMutationsEnabled||saving||termLoading} value={inputValues[student.id]??""} onChange={e=>setInputValues(v=>({...v,[student.id]:e.target.value}))} aria-label={englishUI?"Score for "+student.full_name:student.full_name+" 점수"}/></td><td>{old?.score??"—"}</td><td>{old&&<button className={styles.deleteButton} disabled={!academicMutationsEnabled||saving||termLoading} onClick={()=>void deleteScore(student)}>{(englishUI?"Delete":"삭제")}</button>}</td></tr>;})}
     {!inputStudents.length&&<tr><td colSpan={5} className={styles.empty}>{!termId?(englishUI?"Select a semester first.":"먼저 학기를 선택하세요."):!courseId?(englishUI?"Select a course.":"과목을 선택하세요."):(englishUI?"No enrolled students in this course and year.":"해당 과목·학년에 재학 중인 학생이 없습니다.")}</td></tr>}
    </tbody></table></div>
-   <div className={styles.saveRow}><span>{inputStudents.length}{locale==="my"?" ဦး · အလွတ်ကွက်များကို သိမ်းဆည်းမည်မဟုတ်ပါ။":"명 · 빈 칸은 저장하지 않습니다."}</span><button className={styles.primary} disabled={!academicMutationsEnabled||!canManage||saving||!inputStudents.length||!courseId||!termId} onClick={()=>void saveScores()}>{saving?"저장 중…":"점수 저장"}</button></div>
+    <div className={styles.saveRow}><span>{inputStudents.length}{locale==="my"?" ဦး · အလွတ်ကွက်များကို သိမ်းဆည်းမည်မဟုတ်ပါ။":"명 · 빈 칸은 저장하지 않습니다."}</span><button className={styles.primary} disabled={!academicMutationsEnabled||!canManage||saving||termLoading||!inputStudents.length||!courseId||!termId} onClick={()=>void saveScores()}>{saving?"저장 중…":"점수 저장"}</button></div>
   </section>}
-  {loading&&<p className={styles.loading}>{(englishUI?"Loading grade data.":"성적 데이터를 불러오는 중입니다.")}</p>}
+   {(loading||termLoading)&&<p className={styles.loading}>{(englishUI?"Loading grade data.":"성적 데이터를 불러오는 중입니다.")}</p>}
   <p className={styles.footnote}>{(englishUI?"Change student year directly under Student Management → Edit Information. Grades and enrollment records are retained; missing scores are not counted as zero. Credits, letter grades and GPA are not calculated automatically.":"학년 변경은 학생 관리 → 정보 수정에서 직접 합니다. 성적과 수강 기록은 유지되며, 미입력 점수는 0점으로 계산하지 않습니다. 학점·등급·GPA는 자동 계산하지 않습니다.")}</p>
  </div>;
 }

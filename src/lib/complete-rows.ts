@@ -1,11 +1,11 @@
 type QueryResult={data:any;error:string|null};
 // Do not silently truncate totals or approvals at the PostgREST row limit.
 // Stable unique ordering and exact counts catch incomplete/changing reads.
-export async function allRows(fetchPage:(start:number,end:number)=>PromiseLike<{data:any;error:any;count:number|null}>):Promise<QueryResult>{
+export async function allRows(fetchPage:(start:number,end:number)=>PromiseLike<{data:any;error:any;count:number|null}>,pageSize=250):Promise<QueryResult>{
   const rows:any[]=[];
   const ids=new Set<string>();
   let expected:number|null=null;
-  const pageSize=250;
+  if(!Number.isInteger(pageSize)||pageSize<1||pageSize>1000)return {data:null,error:"올바르지 않은 페이지 크기입니다."};
   for(let start=0;;start+=pageSize){
     const {data,error,count}=await fetchPage(start,start+pageSize-1);
     if(error)return {data:null,error:error.message||"데이터 조회에 실패했습니다."};
